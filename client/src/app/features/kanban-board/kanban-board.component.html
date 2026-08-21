@@ -1,0 +1,66 @@
+<mat-toolbar color="primary" style="background-color: #003366 !important; color: #ffffff;">
+  <button mat-icon-button (click)="voltarDashboard()" title="Voltar ao Painel">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span style="margin-left: 16px;">Meu Quadro de Estudos (Kanban)</span>
+</mat-toolbar>
+
+@if (isLoading) {
+  <div class="kanban-loading">Carregando quadro de tarefas...</div>
+}
+
+@if (!isLoading) {
+  <!-- Conecta todas as listas do grupo para permitir mover itens entre elas -->
+  <div class="kanban-board" cdkDropListGroup>
+    
+    @for (coluna of colunas; track coluna.id) {
+      <div class="kanban-column">
+        <h3 class="column-title">{{ coluna.titulo }}</h3>
+
+        <!-- Zona onde os cartões podem cair -->
+        <div 
+          class="card-list"
+          cdkDropList
+          [cdkDropListData]="coluna.cards"
+          (cdkDropListDropped)="onCardDrop($event, coluna.id)">
+          
+          @for (card of coluna.cards; track card.id) {
+            <mat-card class="kanban-card" cdkDrag>
+              <mat-card-content>
+                <div class="card-header-area">
+                  <span class="card-title">{{ card.titulo }}</span>
+                </div>
+                @if (card.descricao) {
+                  <p class="card-desc">{{ card.descricao }}</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+
+          @if (coluna.cards.length === 0) {
+            <div class="empty-column-placeholder">Nenhuma tarefa</div>
+          }
+        </div>
+
+        <!-- Área de criação de cartões rápidos -->
+        <div class="column-footer">
+          @if (colunaIdSendoAdicionada === coluna.id) {
+            <mat-form-field appearance="outline" class="full-width compact-form">
+              <input matInput [(ngModel)]="novoCardTitulo" placeholder="Título da tarefa..." (keyup.enter)="adicionarCard(coluna.id)">
+            </mat-form-field>
+            <div class="action-buttons">
+              <button mat-flat-button color="primary" size="small" (click)="adicionarCard(coluna.id)">Salvar</button>
+              <button mat-button (click)="colunaIdSendoAdicionada = null">Cancelar</button>
+            </div>
+          } @else {
+            <button mat-button class="add-card-btn" (click)="mostrarInputNovoCard(coluna.id)">
+              <mat-icon>add</mat-icon> Adicionar Tarefa
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+
+  </div>
+}

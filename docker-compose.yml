@@ -1,0 +1,16 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: fuabc-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin_fuabc
+      POSTGRES_PASSWORD: SenhaForteSegura2026
+      POSTGRES_DB: ava_fuabc_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

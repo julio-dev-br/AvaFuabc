@@ -1,0 +1,104 @@
+/* Container ocupa 100% da tela visível */
+.sidenav-container {
+  height: 100vh;
+  width: 100%;
+}
+
+/* Estilo da barra lateral esquerda */
+.sidenav {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Área do Avatar */
+.user-avatar-profile {
+  padding: 32px 16px;
+  text-align: center;
+  background-color: #f8fafc; /* Fundo cinza azulado muito elegante */
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.profile-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #003366; /* Borda com o azul corporativo */
+  margin-bottom: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #1e293b;
+}
+
+.profile-role {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Estilo da Barra Superior */
+.main-toolbar {
+  background-color: #003366 !important; /* Azul FUABC */
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+/* Itens do Menu Lateral */
+mat-nav-list a {
+  margin: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Destaca o link da tela em que o usuário está navegando no momento */
+.active-link {
+  background-color: #e6f0fa !important;
+  color: #003366 !important;
+  font-weight: 600;
+}
+
+.active-link mat-icon {
+  color: #003366 !important;
+}
+
+.logout-item {
+  margin-top: 20px !important;
+}
+
+/* Área interna onde as telas se encaixam */
+.page-content-wrapper {
+  padding: 0;
+  height: calc(100vh - 64px);
+  overflow-y: auto; /* Rola o scroll vertical apenas aqui dentro se a tela for grande */
+  background-color: #f4f6f8;
+}
+
+/* Área de conteúdo base (usada na tela de login) */
+.main-content-area {
+  height: 100vh;
+  width: 100%;
+  overflow-y: auto; /* 🌟 LIBERA O SCROLL VERTICAL SE A TELA FOR MAIOR */
+  box-sizing: border-box;
+}
+
+/* Ativado quando a barra superior está visível */
+.main-content-area.com-menu {
+  margin-top: 64px; 
+  height: calc(100vh - 64px);
+  width: 100%;
+  overflow-y: auto; /* 🌟 LIBERA O SCROLL VERTICAL AQUI TAMBÉM */
+}
+

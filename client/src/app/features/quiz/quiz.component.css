@@ -1,0 +1,66 @@
+/* Garante que a página tenha um fundo limpo e use 100% da largura */
+.quiz-toolbar {
+  background-color: #003366 !important;
+  color: #ffffff;
+}
+
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  /* 🌟 Garante 100px de espaço em branco abaixo do botão para ele não colar no rodapé */
+  padding: 32px 16px 100px 16px !important; 
+  box-sizing: border-box;
+  display: block;
+}
+
+.quiz-footer-actions {
+  margin-top: 40px !important;
+  text-align: right;
+  display: block;
+}
+
+
+
+
+/* Espaçamento entre os cartões de perguntas */
+mat-card {
+  margin-bottom: 24px;
+  display: block;
+}
+
+/* Força o contêiner do botão a se posicionar de forma visível e limpa */
+.quiz-footer-actions {
+  margin-top: 40px !important;
+  margin-bottom: 60px !important;
+  text-align: right;
+  display: block;
+  clear: both;
+}
+
+/* Garante o tamanho correto do botão do Material */
+.submit-quiz-btn {
+  height: 52px !important;
+  padding: 0 40px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  background-color: #003366 !important; /* Força a cor azul corporativa */
+  color: #ffffff !important;
+  cursor: pointer;
+}
+
+/* 🌟 ESTILO DO BOTÃO QUANDO ESTIVER ATIVO (PRONTO PARA ENVIAR) */
+.submit-quiz-btn:not([disabled]) {
+  background-color: #003366 !important; /* Azul escuro corporativo */
+  color: #ffffff !important;
+  cursor: pointer;
+  opacity: 1;
+}
+
+/* 🌟 ESTILO DO BOTÃO QUANDO ESTIVER INATIVO (BLOQUEADO) */
+.submit-quiz-btn[disabled] {
+  background-color: #b3cce6 !important; /* Azul bem clarinho e suave */
+  color: #6688aa !important;            /* Texto em azul acinzentado discreto */
+  cursor: not-allowed !important;        /* Muda o cursor do mouse para indicar bloqueio */
+  opacity: 0.7;                          /* Dá um efeito leve de transparência */
+}
+

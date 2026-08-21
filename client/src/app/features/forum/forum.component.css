@@ -1,0 +1,45 @@
+/* Layout split de tela cheia estável */
+.forum-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  height: calc(100vh - 64px);
+  background-color: #f4f6f8;
+}
+
+/* Painel de tópicos da esquerda */
+.topics-sidebar {
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Destaca o tópico que está sendo lido */
+.topico-ativo-item {
+  background-color: #e6f0fa !important;
+  border-left: 4px solid #003366 !important;
+}
+
+/* 🌟 DESIGN EXCLUSIVO: Destaca respostas de Tutores/Gerentes */
+/* 🌟 ESTILO DO BOTÃO DO FÓRUM QUANDO ESTIVER ATIVO (COM TEXTO DIGITADO) */
+.submit-reply-btn:not([disabled]) {
+  background-color: #003366 !important; /* Azul escuro corporativo */
+  color: #ffffff !important;
+  cursor: pointer;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
+  opacity: 1;
+}
+
+/* 🌟 ESTILO DO BOTÃO DO FÓRUM QUANDO ESTIVER INATIVO (CAMPO VAZIO) */
+.submit-reply-btn[disabled] {
+  background-color: #b3cce6 !important; /* Azul bem clarinho e suave */
+  color: #6688aa !important;            /* Texto em azul acinzentado discreto */
+  cursor: not-allowed !important;        /* Cursor de bloqueio */
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
+  opacity: 0.7;                          /* Efeito leve de transparência */
+}
+

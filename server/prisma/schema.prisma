@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") 
+}
+
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  usuario_externo_id BigInt?
+  empresa_id         BigInt?
+  unidade_id         BigInt?
+  departamento_id    BigInt?
+  cargo_id           BigInt?
+  matricula          String?
+  name               String?
+  email              String    @unique
+  password           String
+  role               String    @default("user")
+  ativo              Boolean   @default(true)
+  avatar_url         String?
+  sincronizado_em    DateTime?
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  
+
+  // Relacionamentos
+  respostas_quiz  QuizResponse[]
+  matriculas      Matricula[]
+  notificacoes    Notification[]
+
+  topicos_forum   TopicoForum[]
+  respostas_forum RespostaForum[]
+  kanban_colunas  KanbanColuna[]
+}
+
+model Treinamento {
+  id            Int      @id @default(autoincrement())
+  titulo        String
+  descricao     String?
+  carga_horaria Int?
+  obrigatorio   Boolean  @default(false)
+  validade_dias Int?
+  certificado   Boolean  @default(true)
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relacionamentos
+  publicos   TreinamentoPublico[]
+  trilhas    TrilhaTreinamento[]
+  modulos    Modulo[]
+  matriculas Matricula[]
+}
+
+model TreinamentoPublico {
+  id             Int    @id @default(autoincrement())
+  treinamento_id Int
+  tipo           String
+  referencia_id  BigInt
+
+  treinamento Treinamento @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
+}
+
+model Trilha {
+  id        Int     @id @default(autoincrement())
+  titulo    String?
+  descricao String?
+  ativo     Boolean @default(true)
+
+  treinamentos TrilhaTreinamento[]
+}
+
+model TrilhaTreinamento {
+  id             Int  @id @default(autoincrement())
+  trilha_id      Int?
+  treinamento_id Int?
+  ordem          Int?
+
+  trilha      Trilha?      @relation(fields: [trilha_id], references: [id], onDelete: Cascade)
+  treinamento Treinamento? @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
+}
+
+model Modulo {
+  id             Int     @id @default(autoincrement())
+  treinamento_id Int?
+  titulo         String?
+  ordem          Int?
+
+  treinamento Treinamento? @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
+  aulas       Aula[]
+}
+
+model Aula {
+  id               Int     @id @default(autoincrement())
+  modulo_id        Int?
+  titulo           String?
+  descricao        String?
+  video_url        String?
+  duracao_segundos Int?
+  ordem            Int?
+
+  modulo          Modulo?         @relation(fields: [modulo_id], references: [id], onDelete: Cascade)
+  materiais       Material[]
+  quizzes         Quiz[]
+  progresso_aulas ProgressoAula[]
+  topico_forums    TopicoForum[]
+}
+
+model Material {
+  id      Int     @id @default(autoincrement())
+  aula_id Int?
+  nome    String?
+  url     String?
+  tipo    String?
+
+  aula Aula? @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id          Int     @id @default(autoincrement())
+  aula_id     Int?
+  titulo      String?
+  nota_minima Float?
+  tentativas  Int?    @default(3)
+
+  aula      Aula?      @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+  perguntas Pergunta[]
+}
+
+model Pergunta {
+  id       Int     @id @default(autoincrement())
+  quiz_id  Int?
+  pergunta String?
+  ordem    Int?
+
+  quiz         Quiz?          @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  alternativas Alternativa[]
+  respostas    QuizResponse[]
+}
+
+model Alternativa {
+  id          Int     @id @default(autoincrement())
+  pergunta_id Int?
+  descricao   String?
+  correta     Boolean @default(false)
+
+  pergunta  Pergunta?      @relation(fields: [pergunta_id], references: [id], onDelete: Cascade)
+  respostas QuizResponse[]
+}
+
+model QuizResponse {
+  id             Int      @id @default(autoincrement())
+  usuario_id     Int?
+  pergunta_id    Int?
+  alternativa_id Int?
+  created_at     DateTime @default(now())
+
+  user        User?        @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  pergunta    Pergunta?    @relation(fields: [pergunta_id], references: [id], onDelete: Cascade)
+  alternativa Alternativa? @relation(fields: [alternativa_id], references: [id], onDelete: Cascade)
+}
+
+model Matricula {
+  id             Int       @id @default(autoincrement())
+  usuario_id     Int?
+  treinamento_id Int?
+  progresso      Float?    @default(0)
+  status         String?
+  nota           Float?
+  iniciado_em    DateTime?
+  concluido_em   DateTime?
+  validade_ate   DateTime?
+
+  user            User?           @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  treinamento     Treinamento?    @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
+  progresso_aulas ProgressoAula[]
+  certificados    Certificado[]
+}
+
+model ProgressoAula {
+  id                  Int       @id @default(autoincrement())
+  matricula_id        Int?
+  aula_id             Int?
+  percentual          Float?
+  concluida           Boolean   @default(false)
+  tempo_assistido     Int?
+  ultima_visualizacao DateTime?
+
+  matricula Matricula? @relation(fields: [matricula_id], references: [id], onDelete: Cascade)
+  aula      Aula?      @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+}
+
+model Certificado {
+  id           Int       @id @default(autoincrement())
+  matricula_id Int?
+  codigo       String?
+  qr_code      String?
+  emitido_em   DateTime?
+  arquivo_pdf  String?
+
+  matricula Matricula? @relation(fields: [matricula_id], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  usuario_id Int?
+  titulo     String?
+  mensagem   String?
+  lida       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User? @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+}
+
+model TopicoForum {
+  id         Int      @id @default(autoincrement())
+  aula_id    Int? // Opcional, caso seja um tópico geral do curso
+  usuario_id Int
+  titulo     String
+  conteudo   String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relacionamentos
+  aula      Aula?           @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+  autor     User            @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  respostas RespostaForum[]
+}
+
+model RespostaForum {
+  id         Int      @id @default(autoincrement())
+  topico_id  Int
+  usuario_id Int
+  conteudo   String
+  is_tutor   Boolean  @default(false) // Destaca se a resposta veio de um tutor
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relacionamentos
+  topico TopicoForum @relation(fields: [topico_id], references: [id], onDelete: Cascade)
+  autor  User        @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+}
+
+model KanbanColuna {
+  id         Int    @id @default(autoincrement())
+  usuario_id Int
+  titulo     String // Ex: "A Fazer", "Estudando", "Revisar"
+  ordem      Int
+
+  // Relacionamentos
+  user  User         @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  cards KanbanCard[]
+}
+
+model KanbanCard {
+  id           Int       @id @default(autoincrement())
+  coluna_id    Int
+  titulo       String
+  descricao    String?
+  data_entrega DateTime?
+  ordem        Int
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // Relacionamentos
+  coluna KanbanColuna @relation(fields: [coluna_id], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,104 @@
+.header-toolbar {
+  background-color: #003366 !important; /* Azul escuro corporativo */
+  color: #ffffff;
+  padding: 0 24px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.dashboard-container {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-title {
+  color: #333333;
+  font-size: 28px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.welcome-subtitle {
+  color: #666666;
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+/* Sistema de Grid que se adapta a telas de PC, Tablet e Celular */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e0e0e0;
+}
+
+.course-icon-area {
+  background-color: #e6f0fa;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.course-icon {
+  color: #003366;
+}
+
+.course-title {
+  font-size: 18px !important;
+  font-weight: bold;
+  color: #003366;
+}
+
+.course-content {
+  padding: 16px;
+  color: #555555;
+  font-size: 14px;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.course-actions {
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+}
+
+.required-badge {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 64px;
+  color: #666666;
+  font-size: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #999999;
+  margin-bottom: 12px;
+}

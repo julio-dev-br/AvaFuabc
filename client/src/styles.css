@@ -1,0 +1,62 @@
+/* Configuração base da janela do navegador */
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  /* Trava o HTML externo contra barras duplas */
+  box-sizing: border-box;
+}
+
+/* Configuração do Corpo do Sistema */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f4f6f8;
+  /* Fundo cinza claro corporativo */
+
+  /* 🌟 O SEGREDO ESTÁ AQUI: Libera a rolagem vertical nativa no corpo da página */
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  /* Bloqueia permanentemente o scroll para os lados */
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+/* 🌟 RESOLUÇÃO ABSOLUTA: Remove a capa escura nativa do Google Material MDC em todo o ecossistema */
+body .snackbar-container-limpo .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #2e7d32 !important;
+  /* Força o verde oficial na casca externa */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 0 !important;
+  /* Zera os paddings nativos para o nosso HTML inline dominar */
+}
+
+/* 🌟 CORREÇÃO DO ALERTA DE ERRO: Garante o vermelho corporativo idêntico na tela de login */
+body .snackbar-erro-MDC .mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #c62828 !important;
+  /* Vermelho escuro de atenção */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+body .snackbar-erro-MDC .mat-mdc-snack-bar-label {
+  color: #ffffff !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
+  color: #ffffff !important;
+  font-weight: bold !important;
+}

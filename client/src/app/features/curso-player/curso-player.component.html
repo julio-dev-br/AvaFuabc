@@ -1,0 +1,134 @@
+<mat-toolbar color="primary" class="player-toolbar" style="background-color: #003366 !important; color: #ffffff;">
+  <button mat-icon-button (click)="voltarDashboard()" title="Voltar ao Painel">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  @if (curso) {
+  <span class="curso-titulo-topo">{{ curso.titulo }}</span>
+  }
+</mat-toolbar>
+
+@if (isLoading) {
+<div class="player-loading">Carregando estrutura do curso...</div>
+}
+
+@if (!isLoading && curso) {
+<div class="player-grid">
+
+  <!-- 1. COLUNA DA ESQUERDA: Player de Vídeo Real e Detalhes da Aula Ativa -->
+  <div class="video-section">
+    @if (aulaAtiva) {
+    <div class="video-wrapper"
+      style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+
+      @if (aulaAtiva?.video_url && (aulaAtiva.video_url.includes('youtube.com') ||
+      aulaAtiva.video_url.includes('youtu.be') || aulaAtiva.video_url.includes('embed'))) {
+      <iframe [id]="'player-' + aulaAtiva.id"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+        [src]="obterVideoUrlSegura(aulaAtiva.video_url)"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>
+      } @else if (aulaAtiva?.video_url) {
+      <!-- Se for um link de MP4 direto ou CDN -->
+      <video style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"
+        [src]="aulaAtiva.video_url" controls controlsList="nodownload" autoplay>
+      </video>
+      } @else {
+      <!-- Fallback caso a aula não possua link gravado -->
+      <div
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #888;">
+        <mat-icon style="margin-right: 8px;">error_outline</mat-icon> Link de vídeo indisponível para esta aula.
+      </div>
+      }
+
+    </div>
+
+    <div class="aula-detalhes" style="margin-top: 24px;">
+      <h2 class="aula-titulo" style="color: #003366; font-size: 24px; font-weight: bold; margin-bottom: 8px;">{{
+        aulaAtiva.titulo }}</h2>
+      <p class="aula-descricao" style="color: #555555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">{{
+        aulaAtiva.descricao || 'Sem descrição para esta aula.' }}</p>
+
+      <div
+        style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <!--  BOTÃO DE AVALIAÇÃO VACINADO CONTRA CHAVES UNDEFINED -->
+        <button mat-raised-button [routerLink]="['/quiz/aula', aulaAtiva?.id || aulaAtiva?.id]"
+          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px;">
+          <mat-icon style="margin-right: 8px; vertical-align: middle;">assignment</mat-icon>
+          Fazer Avaliação
+        </button>
+
+
+        <!-- Botão do Fórum -->
+        <button mat-raised-button [routerLink]="['/forum/aula', aulaAtiva?.id]"
+          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px;">
+          <mat-icon style="margin-right: 8px; vertical-align: middle;">chat</mat-icon>
+          Fórum de Dúvidas
+        </button>
+
+      </div>
+
+      <!-- SEÇÃO DE MATERIAIS DE APOIO DA AULA (VISÃO DO ALUNO) -->
+      @if (aulaAtiva?.materiais && aulaAtiva?.materiais.length > 0) {
+      <div style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <h3
+          style="margin: 0 0 12px 0; color: #003366; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+          <mat-icon style="color: #003366;">library_books</mat-icon> Materials de Apoio Disponíveis
+        </h3>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+          @for (material of aulaAtiva.materiais; track material.id) {
+          <!-- O botão resolve o link de forma inteligente: se for upload do PC, anexa o host do environment -->
+          <a mat-stroked-button [href]="configurarUrlMaterial(material.url)" target="_blank"
+            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 40px;">
+            <mat-icon style="margin-right: 4px; vertical-align: middle;">
+              {{ material.tipo === 'LINK' ? 'link' : 'file_download' }}
+            </mat-icon>
+            {{ material.nome }}
+          </a>
+          }
+        </div>
+      </div>
+      }
+    </div>
+    } @else {
+    <div class="no-lesson" style="text-align: center; padding: 64px; color: #888888; font-size: 16px;">
+      <mat-icon
+        style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; color: #b0bec5;">ondemand_video</mat-icon>
+      <p>Selecione uma aula na barra lateral para iniciar o treinamento.</p>
+    </div>
+    }
+  </div>
+
+  <!-- 2. COLUNA DA DIREITA: Barra Lateral com Módulos e Aulas (Accordion) -->
+  <div class="sidebar-section">
+    <h3 class="sidebar-title">Conteúdo Programático</h3>
+
+    <mat-accordion multi="true">
+      @for (modulo of curso.modulos; track modulo.id; let first = $first) {
+      <mat-expansion-panel [expanded]="first" class="modulo-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="modulo-titulo">
+            {{ modulo.titulo }}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <mat-action-list>
+          <!-- 🌟 AJUSTADO: Adicionado ?. no loop e na classe ativa -->
+          @for (aula of modulo?.aulas; track aula.id) {
+          <button mat-list-item (click)="selecionarAula(aula)" [class.aula-ativa-item]="aulaAtiva?.id === aula.id"
+            class="aula-list-button">
+            <mat-icon matListItemIcon class="aula-status-icon">
+              play_circle_outline
+            </mat-icon>
+            <span class="aula-item-titulo">{{ aula?.titulo }}</span>
+          </button>
+          }
+        </mat-action-list>
+      </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </div>
+
+</div>
+}

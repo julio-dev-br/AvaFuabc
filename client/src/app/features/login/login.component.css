@@ -1,0 +1,60 @@
+/* Centraliza a caixa de login vertical e horizontalmente na tela inteira */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f5f5f5; /* Fundo cinza claro suave */
+  box-sizing: border-box;
+}
+
+/* Define a largura máxima e o espaçamento da caixa de login */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important; /* Sombra elegante */
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+/* Alinhamento do cabeçalho da aplicação */
+mat-card-header {
+  margin-bottom: 24px;
+  text-align: center;
+  display: block;
+}
+
+/* Estilização do título principal com a cor da FUABC */
+mat-card-title {
+  color: #003366; /* Azul Escuro Corporativo */
+  font-weight: bold;
+  font-size: 24px !important;
+  margin-bottom: 4px;
+}
+
+mat-card-subtitle {
+  color: #666666;
+  font-size: 14px;
+}
+
+/* Garante que os campos de texto e botões ocupem toda a largura interna */
+.full-width {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Ajusta as margens internas do rodapé onde fica o botão */
+mat-card-actions {
+  padding: 8px 0 0 0;
+  display: block;
+}
+
+/* Deixa o botão mais alto e confortável para o clique do usuário */
+button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}

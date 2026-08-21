@@ -1,0 +1,162 @@
+.player-toolbar {
+  background-color: #003366 !important;
+  color: #ffffff;
+}
+
+.curso-titulo-topo {
+  margin-left: 16px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.player-loading {
+  text-align: center;
+  padding: 64px;
+  color: #666666;
+  font-size: 18px;
+}
+
+/* Divide a tela: 70% para o vídeo, 30% para a lista de módulos */
+.player-grid {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.video-section {
+  padding: 24px;
+  overflow-y: auto;
+  background-color: #fafafa;
+}
+
+.video-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #000000;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.mock-player {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #aaaaaa;
+}
+
+.play-placeholder-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #003366;
+  margin-bottom: 12px;
+}
+
+.video-url-label {
+  font-size: 12px;
+  color: #666666;
+  margin-top: 8px;
+}
+
+.aula-detalhes {
+  padding: 8px;
+}
+
+.aula-titulo {
+  color: #333333;
+  font-size: 24px;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.aula-descricao {
+  color: #666666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.materiais-section h3 {
+  font-size: 16px;
+  color: #333333;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.material-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 10px 16px;
+  border-radius: 6px;
+  color: #c62828; /* Cor vermelha para PDF */
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.material-link:hover {
+  background-color: #f5f5f5;
+}
+
+/* BARRA LATERAL */
+.sidebar-section {
+  border-left: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 16px;
+}
+
+.modulo-panel {
+  box-shadow: none !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.modulo-titulo {
+  color: #003366;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.aula-list-button {
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.aula-item-titulo {
+  font-size: 14px;
+  color: #555555;
+}
+
+.aula-status-icon {
+  color: #888888;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Destaca a linha da aula que está passando no player */
+.aula-ativa-item {
+  background-color: #e6f0fa !important;
+}
+
+.aula-ativa-item .sidebar-icon, 
+.aula-ativa-item .aula-item-titulo {
+  color: #003366 !important;
+  font-weight: bold;
+}

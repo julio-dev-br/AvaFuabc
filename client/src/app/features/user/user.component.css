@@ -1,0 +1,231 @@
+/* Toolbar Configs */
+.admin-toolbar {
+  background-color: #003366 !important;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0 24px;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.btn-novo {
+  background-color: #ffb300 !important;
+  color: #003366 !important;
+  font-weight: 700 !important;
+  border-radius: 6px;
+}
+
+/* Container Principal */
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+/* Card de Formulário */
+.form-card {
+  margin-bottom: 32px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden;
+}
+
+.form-header {
+  background-color: #f8fafc;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.form-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #003366;
+}
+
+.form-content {
+  padding: 24px !important;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancelar {
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+.btn-confirmar {
+  background-color: #003366 !important;
+  color: #ffffff !important;
+  padding: 0 24px !important;
+  height: 40px;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.btn-confirmar:disabled {
+  background-color: #e2e8f0 !important;
+  color: #94a3b8 !important;
+}
+
+/* Card de Listagem / Tabela */
+.table-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #ffffff;
+}
+
+.table-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.search-field {
+  width: 320px;
+  margin-bottom: -16px;
+}
+
+.table-content {
+  padding: 0 !important;
+}
+
+/* Loading Box */
+.loading-box {
+  text-align: center;
+  padding: 48px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.spin-icon {
+  animation: spin 2s linear infinite;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 12px;
+  color: #003366;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Configurações de Células da Tabela */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.table-header-row {
+  background-color: #f8fafc;
+  height: 52px;
+}
+
+.table-header-row th {
+  font-weight: 700 !important;
+  color: #003366 !important;
+  font-size: 13px !important;
+}
+
+.table-body-row {
+  height: 64px;
+  transition: background-color 0.2s;
+}
+
+.table-body-row:hover {
+  background-color: #f8fafc;
+}
+
+.cell-name {
+  font-weight: 600;
+  color: #1e293b;
+  padding-left: 24px !important;
+}
+
+.cell-email {
+  color: #4a5568;
+}
+
+.cell-lotacao {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.sub-cell {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.cell-cargo {
+  color: #475569;
+  font-size: 13px;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+/* Badges de Níveis de Acesso */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.badge.admin {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge.manager {
+  background-color: #ffedd5;
+  color: #9a3412;
+}
+
+.badge.user {
+  background-color: #f1f5f9;
+  color: #334155;
+}

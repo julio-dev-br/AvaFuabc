@@ -1,0 +1,203 @@
+<!-- Barra de topo institucional local do Dashboard -->
+<mat-toolbar color="primary" class="header-toolbar" style="background-color: #003366 !important; color: #ffffff;">
+  <span class="logo-text">AVA FUABC</span>
+  <span class="spacer" style="flex: 1 1 auto;"></span>
+
+  <button mat-icon-button [matMenuTriggerFor]="menuNoti" title="Notificações" style="margin-right: 8px;">
+    <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn" [matBadgeHidden]="notificacoes.length === 0">
+      notifications
+    </mat-icon>
+  </button>
+
+  <!-- LISTA SUSPENSA DE ALERTAS (MENU DROPDOWN) -->
+  <mat-menu #menuNoti="matMenu">
+    <div style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; color: #333; font-size: 14px;">
+      Notificações Recentes
+    </div>
+
+    @if (notificacoes.length === 0) {
+    <div style="padding: 16px; text-align: center; color: #888; font-size: 13px; min-width: 260px;">
+      Nenhuma notificação pendente.
+    </div>
+    }
+
+    @for (n of notificacoes; track n.id) {
+    <div
+      style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 280px; max-width: 320px; display: flex; flex-direction: column; gap: 4px;">
+      <span style="font-weight: 600; color: #003366; font-size: 14px;">{{ n.titulo }}</span>
+      <span style="color: #475569; font-size: 13px; line-height: 1.4;">{{ n.mensagem }}</span>
+      <button mat-button color="primary"
+        style="height: 28px; font-size: 11px; align-self: flex-end; margin-top: 4px; font-weight: bold;"
+        (click)="marcarLida(n.id); $event.stopPropagation();">
+        Marcar como lida
+      </button>
+    </div>
+    }
+  </mat-menu>
+
+  <!-- Botão para ir para o Kanban -->
+  <button mat-icon-button (click)="abrirKanban()" title="Ir para o Kanban" style="margin-right: 8px;">
+    <mat-icon>dashboard</mat-icon>
+  </button>
+
+  @if (isAdmin()) {
+  <button mat-icon-button routerLink="/admin" title="Painel Administrativo" style="margin-right: 8px; color: #ff9800;">
+    <mat-icon>admin_panel_settings</mat-icon>
+  </button>
+  }
+
+  <button mat-icon-button routerLink="/perfil" title="Meu Perfil e Certificados" style="margin-right: 8px;">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="logout()" title="Sair">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="dashboard-gamified-grid"
+  style="display: grid; grid-template-columns: 1fr 320px; gap: 24px; padding: 24px; max-width: 1300px; margin: 0 auto; box-sizing: border-box;">
+  
+  <div class="courses-section">
+    <h2 class="welcome-title">Meus Treinamentos Disponíveis</h2>
+    <p class="welcome-subtitle">Cursos liberados de acordo com sua empresa, unidade hospitalar ou cargo.</p>
+
+    <!-- 🔍 BARRA DE PESQUISA REATIVA POR TÍTULO -->
+    @if (!isLoading && treinamentos.length > 0) {
+      <div style="margin: 16px 0 24px 0; width: 100%; max-width: 460px;">
+        <mat-form-field appearance="outline" style="width: 100%;" subclass="compact-search-field">
+          <mat-label>Pesquisar treinamento pelo título...</mat-label>
+          <input matInput [(ngModel)]="filtroTexto" (input)="paginaAtual = 1" placeholder="Ex: Integração, NR-10, Prevenção...">
+          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">search</mat-icon>
+        </mat-form-field>
+      </div>
+    }
+
+    @if (isLoading) {
+    <p style="color: #666;">Carregando sua esteira acadêmica...</p>
+    }
+
+    <!-- 📦 GRID DE EXIBIÇÃO DE TREINAMENTOS -->
+    @if (!isLoading && treinamentos.length > 0) {
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+      <!-- 🌟 MUDANÇA DE ENGRENAGEM: O laço de repetição agora lê os cursos filtrados e paginados pelo TS -->
+      @for (curso of treinamentosExibidos; track curso.id) {
+      <mat-card
+        style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02) !important;">
+        <mat-card-header>
+          <div class="course-icon-area">
+            <mat-icon class="course-icon">school</mat-icon>
+          </div>
+          <mat-card-title style="color: #003366; font-size: 16px !important; font-weight: bold;">
+            {{ curso.titulo }}
+          </mat-card-title>
+
+          <mat-card-subtitle>Carga Horária: {{ curso.carga_horaria }}h</mat-card-subtitle>
+
+        </mat-card-header>
+        <mat-card-content style="padding-top: 12px !important; color: #555; font-size: 14px;">
+          <p>{{ curso.descricao || 'Treinamento de qualificação institucional.' }}</p>
+        </mat-card-content>
+
+        <mat-card-actions class="course-actions">
+          @if (curso.obrigatorio) {
+          <span class="required-badge">Obrigatório</span>
+          }
+          <span class="spacer"></span>
+          <button mat-flat-button color="primary" (click)="acessarCurso(curso.id)">
+            Acessar Curso
+          </button>
+          
+        </mat-card-actions>
+      </mat-card>
+      } @empty {
+        <!-- Fallback amigável exibido se a busca do aluno não bater com nenhum treinamento ativo -->
+        <div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #64748b; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+          <mat-icon style="font-size: 40px; width: 40px; height: 40px; color: #94a3b8;">search_off</mat-icon>
+          <p style="font-size: 15px; margin-top: 8px; font-weight: 500;">Nenhum treinamento localizado para "{{ filtroTexto }}".</p>
+        </div>
+      }
+    </div>
+
+    <!-- 📐 CONTROLES EXECUTIVOS DE PAGINAÇÃO MATEMÁTICA -->
+    @if (totalPaginas > 1) {
+      <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+        <button mat-stroked-button [disabled]="paginaAtual === 1" (click)="paginaAnterior()" style="border-color: #003366; color: #003366;">
+          <mat-icon style="vertical-align: middle; margin-right: 4px;">chevron_left</mat-icon>Anterior
+        </button>
+        
+        <span style="font-size: 13px; color: #475569; font-weight: 500;">
+          Página <strong style="color: #003366;">{{ paginaAtual }}</strong> de {{ totalPaginas }}
+        </span>
+
+        <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()" style="border-color: #003366; color: #003366;">
+          Próxima<mat-icon style="vertical-align: middle; margin-left: 4px;">chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+    }
+  </div>
+  
+  <!-- 🌟 COLUNA DA DIREITA: PAINEL DE ENGAJAMENTO (GAMIFICAÇÃO) -->
+  <div class="gamification-sidebar" style="display: flex; flex-direction: column; gap: 24px;">
+
+    <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS) -->
+    <mat-card style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 16px; background: #ffffff;">
+      <h3
+        style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+        <mat-icon style="color: #ff9800;">military_tech</mat-icon> Minhas Conquistas
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        @for (m of minhasMedalhas; track m.id) {
+        <div
+          style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 6px; border: 1px solid #f1f5f9;"
+          [style.opacity]="m.conquistada ? 1 : 0.4">
+          <mat-icon [style.color]="m.conquistada ? m.cor : '#94a3b8'"
+            style="font-size: 32px; width: 32px; height: 32px;">
+            {{ m.icone }}
+          </mat-icon>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-weight: 600; font-size: 13px;" [style.color]="m.conquistada ? '#1e293b' : '#64748b'">{{
+              m.titulo }}</span>
+            <span style="font-size: 11px; color: #64748b;">{{ m.desc }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+    <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS -->
+    <mat-card style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 16px; background: #ffffff;">
+      <h3
+        style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+        <mat-icon style="color: #ff9800;">emoji_events</mat-icon> Ranking de Acertos (Top 5)
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        @for (aluno of rankingAlunos; track aluno.nome; let idx = $index) {
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px;"
+          [style.background-color]="aluno.isMe ? '#e6f0fa' : '#f8fafc'"
+          [style.border-left]="aluno.isMe ? '4px solid #003366' : '1px solid #e2e8f0'">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+            <span style="font-weight: bold; width: 18px; color: #64748b;">{{ idx + 1 }}º</span>
+            <span [style.font-weight]="aluno.isMe ? 'bold' : 'normal'" style="color: #334155;">{{ aluno.nome }}</span>
+          </div>
+          <span style="font-weight: bold; font-size: 13px; color: #003366;">{{ aluno.pontuacao }} pts</span>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+  </div>
+
+  <!-- Cenário de nenhum curso disponível -->
+  @if (!isLoading && treinamentos.length === 0) {
+  <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #888888;">
+    <mat-icon class="empty-icon" style="font-size: 48px; width: 48px; height: 48px;">info</mat-icon>
+    <p>Nenhum treinamento localizado ou liberado para o seu perfil atual.</p>
+  </div>
+  }
+
+</div>

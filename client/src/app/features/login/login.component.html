@@ -1,0 +1,29 @@
+<div class="login-container">
+    <mat-card class="login-card">
+        <mat-card-header>
+            <mat-card-title>AVA FUABC</mat-card-title>
+            <mat-card-subtitle>Ambiente Virtual de Aprendizagem</mat-card-subtitle>
+        </mat-card-header>
+
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+            <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>E-mail Institucional</mat-label>
+                    <input matInput type="email" name="email" [(ngModel)]="email" placeholder="exemplo@fuabc.org.br"
+                        required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Senha</mat-label>
+                    <input matInput type="password" name="password" [(ngModel)]="password" required>
+                </mat-form-field>
+            </mat-card-content>
+
+            <mat-card-actions>
+                <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="isLoading">
+                    {{ isLoading ? 'Autenticando...' : 'Entrar' }}
+                </button>
+            </mat-card-actions>
+        </form>
+    </mat-card>
+</div>

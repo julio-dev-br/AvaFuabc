@@ -1,0 +1,184 @@
+.perfil-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+/* Estilo do crachá superior */
+.profile-badge-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+  background-color: #ffffff;
+  margin-bottom: 32px;
+}
+
+.badge-content {
+  display: flex;
+  gap: 24px;
+  padding: 24px !important;
+  align-items: center;
+}
+
+.badge-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #003366;
+}
+
+.user-name {
+  color: #003366;
+  font-size: 26px;
+  font-weight: bold;
+  margin: 0 0 4px 0;
+}
+
+.user-email {
+  color: #64748b;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px 0;
+}
+
+.user-email mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.corporate-details {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: #334155;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 16px;
+}
+
+/* Estilos da Tabela de Cursos */
+.table-card {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01) !important;
+  overflow: hidden;
+}
+
+.full-width-table {
+  width: 100%;
+  background: #ffffff;
+}
+
+th.mat-mdc-header-cell {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  font-weight: bold !important;
+}
+
+td.mat-mdc-cell {
+  padding: 16px !important;
+}
+
+/* Tags de situação do curso */
+.status-tag {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-concluido {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.status-andamento {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+/* Botões de Ação */
+.btn-download {
+  background-color: #2e7d32 !important;
+  /* Verde corporativo de aprovação */
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+.lock-label {
+  color: #94a3b8;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lock-label mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* 🌟 EFEITO PREMIUM DE HOVER NA FOTO DE PERFIL */
+.avatar-container {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* Mantém o círculo e a borda corporativa intocados */
+.avatar-container .badge-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 4px solid #003366;
+  border-radius: 50%;
+  box-sizing: border-box;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Máscara escura que surge ao passar o mouse */
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 31, 63, 0.65);
+  /* Tom escuro transparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  border-radius: 50%;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.avatar-overlay mat-icon {
+  color: #ffffff;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+/* Ativa o efeito visual ao passar o mouse por cima do bloco */
+.avatar-container:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-container:hover .badge-avatar {
+  transform: scale(1.05);
+  /* Leve aproximação na imagem */
+}

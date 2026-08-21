@@ -1,0 +1,601 @@
+<div class="admin-layout-grid">
+
+  <!-- 1. SIDEBAR FIXA (ESQUERDA) -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <mat-icon class="brand-icon">admin_panel_settings</mat-icon>
+      <div>
+        <h2 class="brand-title">AVA FUABC</h2>
+        <span class="brand-badge">Painel do Gestor</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'bi'" (click)="mudarAba('bi')">
+        <mat-icon>insights</mat-icon> Dashboard
+      </button>
+
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'cadastro'" (click)="mudarAba('cadastro')">
+        <mat-icon>add_to_photos</mat-icon> Treinamentos
+      </button>
+
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'usuarios'" (click)="mudarAba('usuarios')">
+        <mat-icon>group</mat-icon> Colaboradores
+      </button>
+
+      <hr class="nav-divider" style="border: 0; border-top: 1px solid #002d59; margin: auto 0 12px 0;">
+
+      <button mat-button class="nav-item btn-back-portal" routerLink="/dashboard">
+        <mat-icon>school</mat-icon> Visão do Aluno
+      </button>
+
+      <button mat-button class="nav-item btn-logout-admin" (click)="logoutAdmin()">
+        <mat-icon>logout</mat-icon> Sair do Sistema
+      </button>
+    </nav>
+  </aside>
+
+  <!-- 2. ÁREA DE CONTEÚDO DINÂMICA (DIREITA) -->
+  <main class="admin-main-content">
+
+    <!-- SUB-TELA A: DASHBOARD BI -->
+    @if (abaAtiva === 'bi') {
+    <div class="fade-in-animation">
+      <div class="content-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Acompanhe o engajamento e a conformidade regulatória em tempo real.</p>
+      </div>
+
+      @if (isLoadingMetrics) {
+      <div class="loading-box" style="padding: 32px; text-align: center; color: #64748b;">
+        Processando relatórios e consolidações do PostgreSQL...
+      </div>
+      }
+
+      @if (!isLoadingMetrics) {
+      <div class="metrics-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <mat-card class="metric-card border-blue">
+          <mat-card-content class="metric-card-body">
+            <div>
+              <span class="metric-label">Treinamentos Publicados</span>
+              <h2 class="metric-value">{{ cardsMetricas.totalTreinamentos || 0 }}</h2>
+            </div>
+            <mat-icon class="metric-icon color-blue">school</mat-icon>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card border-orange">
+          <mat-card-content class="metric-card-body">
+            <div>
+              <span class="metric-label">Colaboradores na Base</span>
+              <h2 class="metric-value">{{ cardsMetricas.totalUsuarios || 0 }}</h2>
+            </div>
+            <mat-icon class="metric-icon color-orange">groups</mat-icon>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card border-green">
+          <mat-card-content class="metric-card-body">
+            <div>
+              <span class="metric-label">Conformidade Geral</span>
+              <h2 class="metric-value color-green">{{ cardsMetricas.taxaConformidadeGeral || 0 }}%</h2>
+            </div>
+            <mat-icon class="metric-icon color-green">workspace_premium</mat-icon>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="charts-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        <mat-card class="chart-card">
+          <h3 class="chart-card-title">Status de Conclusão de Cursos</h3>
+          <div class="chart-canvas-wrapper-pie">
+            <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions"></canvas>
+          </div>
+        </mat-card>
+
+        <mat-card class="chart-card">
+          <h3 class="chart-card-title">Ranking de Treinamentos Mais Acessados</h3>
+          <div class="chart-canvas-wrapper-bar">
+            <canvas baseChart [data]="barChartData" [type]="barChartType" [options]="barChartOptions"></canvas>
+          </div>
+        </mat-card>
+      </div>
+      }
+    </div>
+    }
+    <!-- SUB-TELA B: GESTÃO DE CURSOS (CATÁLOGO + WIZARD) -->
+    @if (abaAtiva === 'cadastro') {
+    <div class="fade-in-animation">
+
+      <div class="content-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h1 class="page-title">Fábrica de Conteúdos & Catálogo</h1>
+          <p class="page-subtitle">Monitore os treinamentos publicados, anexe novos materiais ou utilize o assistente
+            para criar cursos.</p>
+        </div>
+
+        @if (passoAtual === 0) {
+        <button mat-raised-button
+          style="background-color: #ffb300; color: #003366; font-weight: 700; height: 44px; border-radius: 6px;"
+          (click)="passoAtual = 1; cursoSelecionadoParaGerenciar = null">
+          <mat-icon>add_to_photos</mat-icon> Criar Novo Treinamento
+        </button>
+        } @else {
+        <button mat-stroked-button
+          style="color: #003366; border-color: #003366; font-weight: 700; height: 44px; border-radius: 6px;"
+          (click)="passoAtual = 0; cursoSelecionadoParaGerenciar = null; idCursoCriado = null">
+          <mat-icon>arrow_back</mat-icon> Voltar ao Catálogo
+        </button>
+        }
+      </div>
+
+      <!-- 🔍 BARRA DE PESQUISA REATIVA DO ADMINISTRADOR -->
+      @if (!isLoadingCursos && listaCursosGerencial && listaCursosGerencial.length > 0 && passoAtual === 0) {
+      <div style="margin: -8px 0 24px 0; width: 100%; max-width: 460px;">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Pesquisar no catálogo pelo título...</mat-label>
+          <input matInput [(ngModel)]="filtroTextoAdmin" (input)="paginaAtualAdmin = 1"
+            placeholder="Ex: Integração, NR-10, Bloco Cirúrgico...">
+          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">search</mat-icon>
+        </mat-form-field>
+      </div>
+      }
+
+      @if (isLoadingCursos) {
+      <div style="text-align: center; padding: 48px; color: #64748b; font-weight: 500;">
+        Processando catálogo de cursos do PostgreSQL...
+      </div>
+      }
+
+      <!-- GRADE DE CARDS (SÓ MOSTRA NO PASSO 0) -->
+      @if (!isLoadingCursos && !cursoSelecionadoParaGerenciar && listaCursosGerencial && listaCursosGerencial.length > 0
+      && passoAtual === 0) {
+      <div>
+        <div
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+
+          @for (curso of cursosGerenciaisExibidos; track curso.id || $index) {
+          <mat-card
+            style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02) !important; display: flex; flex-direction: column; justify-content: space-between;">
+            <mat-card-header style="padding: 16px 16px 0 16px;">
+              <div style="display: flex; justify-content: space-between; width: 100%; align-items: flex-start;">
+                <mat-card-title style="font-size: 16px; font-weight: 700; color: #003366; line-height: 1.4;">
+                  {{ curso?.titulo || 'Curso Sem Título' }}
+                </mat-card-title>
+                <span [style.background-color]="curso?.obrigatorio ? '#fee2e2' : '#f1f5f9'"
+                  [style.color]="curso?.obrigatorio ? '#991b1b' : '#334155'"
+                  style="padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">
+                  {{ curso?.obrigatorio ? 'Obrigatório' : 'Eletivo' }}
+                </span>
+              </div>
+            </mat-card-header>
+
+            <mat-card-content style="padding: 12px 16px !important;">
+              <p
+                style="color: #64748b; font-size: 13px; line-height: 1.4; height: 38px; overflow: hidden; text-overflow: ellipsis; margin-bottom: 16px;">
+                {{ curso?.descricao || 'Nenhuma descrição detalhada inserida para este treinamento corporativo.' }}
+              </p>
+
+              <div
+                style="display: flex; justify-content: space-between; background: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #f1f5f9; font-size: 12px; color: #475569; font-weight: 500;">
+                <span>📂 Módulos: <strong>{{ curso?.totalModulos || 0 }}</strong></span>
+                <span>⏱️ Carga Horária: <strong>{{ curso?.carga_horaria || curso?.cargaHoraria || 0 }}h</strong></span>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions
+              style="padding: 0 16px 16px 16px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
+              <!-- 🌟 RETORNADO COM SEGURANÇA: Passa o objeto do curso completo para a modal colher as aulas -->
+              <button mat-stroked-button style="color: #003366; border-color: #003366;"
+                (click)="abrirModalMateriais(curso.id, curso.titulo)" title="Gerenciar Documentos / PDFs">
+                <mat-icon style="margin-right: 4px; vertical-align: middle;">attach_file</mat-icon> Materiais
+              </button>
+
+              <button mat-flat-button style="background-color: #003366; color: #ffffff;"
+                (click)="selecionarCursoParaGerenciar(curso)">
+                <mat-icon style="margin-right: 4px; vertical-align: middle;">settings</mat-icon> Gerenciar Esteira
+              </button>
+            </mat-card-actions>
+
+          </mat-card>
+          } @empty {
+          <div
+            style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #64748b; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+            <mat-icon style="font-size: 40px; width: 40px; height: 40px; color: #94a3b8;">search_off</mat-icon>
+            <p style="font-size: 15px; margin-top: 8px; font-weight: 500;">Nenhum curso localizado para "{{
+              filtroTextoAdmin }}".</p>
+          </div>
+          }
+        </div>
+
+        <!-- 📐 CONTROLES EXECUTIVOS DE PAGINAÇÃO MATEMÁTICA -->
+        @if (totalPaginasAdmin > 1) {
+        <div
+          style="display: flex; justify-content: center; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid #f1f5f9; margin-bottom: 32px;">
+          <button mat-stroked-button [disabled]="paginaAtualAdmin === 1" (click)="paginaAnteriorAdmin()"
+            style="border-color: #003366; color: #003366;">
+            <mat-icon style="vertical-align: middle; margin-right: 4px;">chevron_left</mat-icon>Anterior
+          </button>
+
+          <span style="font-size: 13px; color: #475569; font-weight: 500;">
+            Página <strong style="color: #003366;">{{ paginaAtualAdmin }}</strong> de {{ totalPaginasAdmin }}
+          </span>
+
+          <button mat-stroked-button [disabled]="paginaAtualAdmin === totalPaginasAdmin" (click)="proximaPaginaAdmin()"
+            style="border-color: #003366; color: #003366;">
+            Próxima<mat-icon style="vertical-align: middle; margin-left: 4px;">chevron_right</mat-icon>
+          </button>
+        </div>
+        }
+      </div>
+      }
+      <!-- 🧙‍♂️ ASSISTENTE DE CRIAÇÃO PASSO A PASSO (WIZARD) -->
+      @if (passoAtual > 0) {
+      <div class="wizard-container" style="width: 100%; max-width: 650px; margin: 12px auto 0 auto;">
+
+        <div class="steps-indicator"
+          style="display: flex; justify-content: space-between; background: #e2e8f0; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; color: #64748b;">
+          <span [class.step-active]="passoAtual === 1">1. Curso Base</span>
+          <span [class.step-active]="passoAtual === 2">2. Módulos</span>
+          <span [class.step-active]="passoAtual === 3">3. Aulas & Vídeos</span>
+          <span [class.step-active]="passoAtual === 4">4. Quiz Final</span>
+          <span [class.step-active]="passoAtual === 5">5. RH</span>
+        </div>
+
+        <!-- PASSO 1: CONFIGURAÇÕES DO CURSO BASE -->
+        @if (passoAtual === 1) {
+        <mat-card class="form-card" style="border: 1px solid #cbd5e1; border-radius: 8px;">
+          <mat-card-header style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+            <mat-card-title style="font-size: 16px; font-weight: bold; color: #003366; margin: 0;">Passo 1: Detalhes do
+              Treinamento</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 24px !important; display: flex; flex-direction: column; gap: 16px;">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Título do Treinamento</mat-label>
+              <input matInput [(ngModel)]="curso.titulo" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Descrição do Curso</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="curso.descricao"></textarea>
+            </mat-form-field>
+
+            <div style="display: flex; gap: 16px; align-items: center; width: 100%;">
+              <mat-form-field appearance="outline" style="flex: 1;">
+                <mat-label>Carga Horária (Horas)</mat-label>
+                <input matInput type="number" [(ngModel)]="curso.cargaHoraria">
+              </mat-form-field>
+
+              <div style="flex: 1; padding-left: 12px;">
+                <mat-checkbox [(ngModel)]="curso.obrigatorio" color="primary">
+                  <strong style="color: #c62828;">Obrigatório por Legislação</strong>
+                </mat-checkbox>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions
+            style="padding: 16px 24px; justify-content: space-between; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button mat-button style="color: #64748b;" (click)="passoAtual = 0">Voltar</button>
+            <button mat-raised-button color="primary"
+              style="background-color: #003366; color: #ffffff; height: 40px; padding: 0 24px; font-weight: 600;"
+              [disabled]="!curso.titulo || !curso.titulo.trim()" (click)="salvarCursoBase()">
+              Salvar e Avançar
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        }
+
+        <!-- PASSO 2: CADASTRO DO MÓDULO -->
+        @if (passoAtual === 2) {
+        <mat-card class="form-card" style="border: 1px solid #cbd5e1; border-radius: 8px;">
+          <mat-card-header style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+            <mat-card-title style="font-size: 16px; font-weight: bold; color: #003366; margin: 0;">Passo 2: Criar Módulo
+              de Ensino</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 24px !important; display: flex; flex-direction: column; gap: 16px;">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Título do Módulo</mat-label>
+              <input matInput [(ngModel)]="modulo.titulo" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Ordem de Exibição</mat-label>
+              <input matInput type="number" [(ngModel)]="modulo.ordem">
+            </mat-form-field>
+          </mat-card-content>
+
+          <mat-card-actions
+            style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button mat-raised-button color="primary"
+              style="background-color: #003366; color: #ffffff; height: 40px; padding: 0 24px; font-weight: 600;"
+              [disabled]="!modulo.titulo || !modulo.titulo.trim()" (click)="salvarModulo()">
+              Salvar e Registrar Módulo
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        }
+
+        <!-- PASSO 3: VINCULO DE VIDEOAULAS REATIVAS -->
+        @if (passoAtual === 3) {
+        <mat-card class="form-card" style="border: 1px solid #cbd5e1; border-radius: 8px;">
+          <mat-card-header style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+            <mat-card-title style="font-size: 16px; font-weight: bold; color: #003366; margin: 0;">Passo 3: Upload e
+              Vínculo de Videoaulas</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 24px !important; display: flex; flex-direction: column; gap: 16px;">
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Título da Aula / Conteúdo</mat-label>
+              <input matInput [(ngModel)]="aula.titulo" required>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>URL do Vídeo (YouTube ou MP4)</mat-label>
+              <input matInput [(ngModel)]="aula.videoUrl" name="videoUrl" placeholder="Ex: https://youtube.com"
+                required>
+              <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">video_library</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%;">
+              <mat-label>Breve Resumo ou Descrição da Aula</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="aula.descricao"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 120px;">
+              <mat-label>Ordem</mat-label>
+              <input matInput type="number" [(ngModel)]="aula.ordem">
+            </mat-form-field>
+          </mat-card-content>
+
+          <mat-card-actions
+            style="padding: 16px 24px; justify-content: space-between; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
+            <button mat-button style="color: #003366; font-weight: 700;" (click)="passoAtual = 4">Concluir Módulo e Ir
+              para o Quiz ➔</button>
+
+            <div style="display: flex; gap: 8px;">
+              <!-- 🌟 BOTÃO EXTRA: Se o RH já gravou pelo menos uma aula, libera o anexo passando o ID real da aula! -->
+              @if (idAulaCriada) {
+              <button mat-stroked-button style="color: #2e7d32; border-color: #2e7d32; height: 40px;"
+                (click)="abrirModalMateriais(idAulaCriada, aula.titulo || 'Aula Recém-Criada')">
+                <mat-icon>attach_file</mat-icon> Anexar PDFs nesta Aula
+              </button>
+              }
+
+              <button mat-raised-button color="primary"
+                style="background-color: #003366; color: #ffffff; height: 40px; padding: 0 24px;"
+                [disabled]="!aula.titulo || !aula.videoUrl" (click)="salvarAula()">
+                <mat-icon>add</mat-icon> Gravar e Adicionar Outra Aula
+              </button>
+            </div>
+          </mat-card-actions>
+
+
+        </mat-card>
+        }
+        <!-- PASSO 4: CONFIGURAÇÃO DO QUIZ DE AVALIAÇÃO -->
+        @if (passoAtual === 4) {
+        <mat-card class="form-card"
+          style="border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;">
+          <mat-card-header style="background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+            <mat-card-title style="font-size: 16px; font-weight: bold; color: #003366; margin: 0;">Passo 4: Configuração
+              da Avaliação (Quiz)</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 24px !important; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; gap: 16px; width: 100%;">
+              <mat-form-field appearance="outline" style="flex: 2;">
+                <mat-label>Título do Questionário</mat-label>
+                <input matInput [(ngModel)]="quizTitulo" placeholder="Ex: Prova de Certificação Regulamentar">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" style="flex: 1;">
+                <mat-label>Nota Mínima (Corte)</mat-label>
+                <input matInput type="number" [(ngModel)]="quizNotaMinima" min="0" max="10">
+              </mat-form-field>
+            </div>
+
+            <div
+              style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; flex-direction: column; gap: 12px;">
+              <h4 style="margin: 0; color: #003366; font-weight: 700; font-size: 14px;">Nova Pergunta Acadêmica</h4>
+
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Enunciado da Questão</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="novaQuestao.enunciado"
+                  placeholder="Digite a pergunta para o colaborador..."></textarea>
+              </mat-form-field>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <mat-form-field appearance="outline">
+                  <mat-label>Alternativa A</mat-label>
+                  <input matInput [(ngModel)]="novaQuestao.alternativaA">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Alternativa B</mat-label>
+                  <input matInput [(ngModel)]="novaQuestao.alternativaB">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Alternativa C</mat-label>
+                  <input matInput [(ngModel)]="novaQuestao.alternativaC">
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Alternativa D</mat-label>
+                  <input matInput [(ngModel)]="novaQuestao.alternativaD">
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>Gabarito / Resposta Correta</mat-label>
+                <mat-select [(ngModel)]="novaQuestao.respostaCorreta">
+                  <mat-option value="A">Alternativa A</mat-option>
+                  <mat-option value="B">Alternativa B</mat-option>
+                  <mat-option value="C">Alternativa C</mat-option>
+                  <mat-option value="D">Alternativa D</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-stroked-button color="primary"
+                style="height: 40px; font-weight: bold; border-color: #003366; color: #003366;"
+                (click)="adicionarQuestaoMemoria()">
+                <mat-icon>playlist_add</mat-icon> Inserir Pergunta no Banco ({{ perguntasQuiz.length }} salvas)
+              </button>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions
+            style="padding: 16px 24px; justify-content: space-between; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+            <button mat-button style="color: #64748b;" (click)="passoAtual = 3">Voltar</button>
+            <button mat-raised-button color="primary"
+              style="background-color: #003366; color: #ffffff; height: 40px; padding: 0 24px;"
+              (click)="salvarQuizCompleto()">
+              Gravar Prova e Ir para o RH ➔
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        }
+
+        <!-- PASSO 5: DISTRIBUIÇÃO ORGANIZACIONAL & DIRETRIZES DO RH -->
+
+        <!-- 💼 PASSO 5: CONFIGURAÇÃO DE PÚBLICO ALVO REGULAMENTAR (INTEGRAÇÃO PROTHEUS) -->
+        @if (passoAtual === 5) {
+        <mat-card
+          style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; animation: fadeIn 0.3s ease;">
+          <div style="background: linear-gradient(135deg, #003366 0%, #002244 100%); padding: 24px; color: #ffffff;">
+            <h2
+              style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
+              <mat-icon>hub</mat-icon> Passo 5: Lotação de RH e Público-Alvo
+            </h2>
+            <p style="margin: 4px 0 0 0; color: #93c5fd; font-size: 13px;">
+              Determine quais setores, cargos ou unidades do Protheus terão este treinamento obrigatório no feed.
+            </p>
+          </div>
+
+          <mat-card-content style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- FORMULÁRIO DE SELEÇÃO DINÂMICA -->
+            <div
+              style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+
+              <!-- Dropdown 1: Tipo de Filtro -->
+              <mat-form-field appearance="outline" style="flex: 1; min-width: 200px; margin-bottom: -1.25em;">
+                <mat-label>Vincular Curso Por:</mat-label>
+                <mat-select [(ngModel)]="tipoVinculoSelecionado" (selectionChange)="idReferenciaSelecionado = null">
+                  <mat-option value="EMPRESA">🏢 Empresa / CNPJ</mat-option>
+                  <mat-option value="UNIDADE">🏥 Unidade Hospitalar / Contrato</mat-option>
+                  <mat-option value="DEPARTAMENTO">📂 Departamento / Setor</mat-option>
+                  <mat-option value="CARGO">👔 Cargo / Função Regulamentar</mat-option>
+                  <mat-option value="USUARIO">👤 Colaborador Específico (Matrícula)</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Dropdown 2: Seleção condicional reativa baseado no Dropdown 1 -->
+              <mat-form-field appearance="outline" style="flex: 1.5; min-width: 250px; margin-bottom: -1.25em;">
+                <mat-label>Selecione o Alvo Encontrado no Protheus</mat-label>
+
+                <mat-select [(ngModel)]="idReferenciaSelecionado">
+                  @if (tipoVinculoSelecionado === 'EMPRESA') {
+                  <mat-option *ngFor="let emp of mockEmpresas" [value]="emp.id">{{ emp.nome }} (ID: {{ emp.id
+                    }})</mat-option>
+                  }
+                  @if (tipoVinculoSelecionado === 'UNIDADE') {
+                  <mat-option *ngFor="let uni of mockUnidades" [value]="uni.id">{{ uni.nome }} (ID: {{ uni.id
+                    }})</mat-option>
+                  }
+                  @if (tipoVinculoSelecionado === 'DEPARTAMENTO') {
+                  <mat-option *ngFor="let dep of mockDepartamentos" [value]="dep.id">{{ dep.nome }} (ID: {{ dep.id
+                    }})</mat-option>
+                  }
+                  @if (tipoVinculoSelecionado === 'CARGO') {
+                  <mat-option *ngFor="let car of mockCargos" [value]="car.id">{{ car.nome }} (ID: {{ car.id
+                    }})</mat-option>
+                  }
+                  @if (tipoVinculoSelecionado === 'USUARIO') {
+                  <mat-option *ngFor="let usr of mockUsuarios" [value]="usr.id">{{ usr.nome }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Botão de ação rápida de Inserção -->
+              <button mat-raised-button
+                style="background-color: #003366; color: #ffffff; height: 48px; padding: 0 20px;"
+                [disabled]="!idReferenciaSelecionado" (click)="salvarVinculoPublico()">
+                <mat-icon>add</mat-icon> Adicionar Regra
+              </button>
+            </div>
+
+            <!-- 📋 SEÇÃO: REGRAS DE DISTRIBUIÇÃO ATIVAS NO CURSO -->
+            <h3
+              style="margin: 12px 0 4px 0; color: #003366; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">verified</mat-icon> Públicos Vinculados
+              Ativamente a esta Esteira
+            </h3>
+
+            <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #ffffff;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                <thead>
+                  <tr style="background: #f1f5f9; color: #475569; font-weight: 600; border-bottom: 1px solid #e2e8f0;">
+                    <th style="padding: 12px 16px;">Escopo do Alvo</th>
+                    <th style="padding: 12px 16px;">Identificador Protheus / Nome</th>
+                    <th style="padding: 12px 16px; text-align: center; width: 100px;">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (vinculo of listaVinculosAtivos; track vinculo.id) {
+                  <tr style="border-bottom: 1px solid #f1f5f9; color: #334155;">
+                    <td style="padding: 12px 16px;">
+                      <span [style.background-color]="vinculo.tipo === 'USUARIO' ? '#e0f2fe' : '#f1f5f9'"
+                        [style.color]="vinculo.tipo === 'USUARIO' ? '#0369a1' : '#334155'"
+                        style="padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                        {{ vinculo.tipo }}
+                      </span>
+                    </td>
+                    <td style="padding: 12px 16px; font-weight: 500;">{{ vinculo.nome }}</td>
+                    <td style="padding: 12px 16px; text-align: center;">
+                      <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Salvo</span>
+                    </td>
+                  </tr>
+                  }
+                  @if (listaVinculosAtivos.length === 0) {
+                  <tr>
+                    <td colspan="3" style="padding: 32px; text-align: center; color: #94a3b8; font-style: italic;">
+                      ⚠️ Nenhuma regra de RH cadastrada. Este curso ficará Universal (Livre para todos os
+                      colaboradores).
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+          </mat-card-content>
+
+          <!-- MAT-CARD-ACTIONS DE ENCERRAMENTO DA ESTEIRA -->
+          <mat-card-actions
+            style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0; box-sizing: border-box;">
+            <button mat-raised-button
+              style="background: linear-gradient(135deg, #1e3a8a 0%, #0d1b3e 100%); color: #ffffff; padding: 0 32px; height: 44px; font-weight: bold; border-radius: 6px;"
+              (click)="finalizarEsteiraTreinamento()">
+              <mat-icon>rocket_launch</mat-icon> Concluir e Publicar Treinamento
+            </button>
+          </mat-card-actions>
+        </mat-card>
+        }
+
+      </div>
+      }
+    </div>
+    }
+
+    <!-- SUB-TELA C: GERENCIAMENTO DE COLABORADORES -->
+    @if (abaAtiva === 'usuarios') {
+    <div class="fade-in-animation">
+      <app-user></app-user>
+    </div>
+    }
+
+  </main>
+</div>
