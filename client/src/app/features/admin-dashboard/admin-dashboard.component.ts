@@ -26,6 +26,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { ControleUsuariosComponent } from '../user/user.component';
 import { ModalMateriaisComponent } from './modal-materiais.component';
+import { NotificationService } from '../../core/services/notification.service';
 
 Chart.register(...registerables);
 
@@ -46,6 +47,7 @@ export class AdminDashboardComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private alerts = inject(AlertsService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   // Estados do Controle de Usuários (Aba 'usuarios')
@@ -55,6 +57,17 @@ export class AdminDashboardComponent implements OnInit {
   exibirFormularioCadastro = false;
   colunasTabela: string[] = ['nome', 'email', 'lotacao', 'cargo', 'role', 'status'];
   novoUsuario = { name: '', email: '', role: 'user', empresa_id: 1, unidade_id: 1, departamento_id: 1, cargo_id: 1 };
+
+
+  // FORMULÁRIO DE COMUNICADOS DO RH (EM MASSA)
+  comunicadoForm = {
+    escopo: 'GERAL' as 'GERAL' | 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO',
+    referenciaId: null as number | null,
+    titulo: '',
+    mensagem: ''
+  };
+  isEnviandoComunicado = false;
+
 
   // Controladores do Menu e Assistente (Wizard)
   abaAtiva = 'bi';
@@ -101,11 +114,11 @@ export class AdminDashboardComponent implements OnInit {
   listaVinculosAtivos: any[] = []; // Guarda os públicos já amarrados ao curso ativo
 
   // Listas temporárias de simulação (Mock do Protheus) até a carga de dados rodar
-  mockEmpresas = [ { id: 1, nome: 'Fundação ABC - Matriz' }, { id: 2, nome: 'Central de Convênios' } ];
-  mockUnidades = [ { id: 10, nome: 'Hospital Mário Covas' }, { id: 11, nome: 'CHM Santo André' } ];
-  mockDepartamentos = [ { id: 100, nome: 'Enfermagem' }, { id: 101, nome: 'Recursos Humanos' } ];
-  mockCargos = [ { id: 50, nome: 'Técnico de Enfermagem' }, { id: 51, nome: 'Médico Plantonista' } ];
-  mockUsuarios = [ { id: 999, nome: 'Julio Valente (Mtr: 1234)' }, { id: 888, nome: 'Colaborador Teste' } ];
+  mockEmpresas = [{ id: 1, nome: 'Fundação ABC - Matriz' }, { id: 2, nome: 'Central de Convênios' }];
+  mockUnidades = [{ id: 10, nome: 'Hospital Mário Covas' }, { id: 11, nome: 'CHM Santo André' }];
+  mockDepartamentos = [{ id: 100, nome: 'Enfermagem' }, { id: 101, nome: 'Recursos Humanos' }];
+  mockCargos = [{ id: 50, nome: 'Técnico de Enfermagem' }, { id: 51, nome: 'Médico Plantonista' }];
+  mockUsuarios = [{ id: 999, nome: 'Julio Valente (Mtr: 1234)' }, { id: 888, nome: 'Colaborador Teste' }];
 
   // BI
   public pieChartType: ChartType = 'pie';
@@ -167,16 +180,16 @@ export class AdminDashboardComponent implements OnInit {
   carregarCatalogoGerencial(): void {
     this.isLoadingCursos = true;
     this.treinamentoService.obterTreinamentosGerencial().subscribe({
-      next: (dados) => { 
-        this.listaCursosGerencial = dados; 
-        
+      next: (dados) => {
+        this.listaCursosGerencial = dados;
+
         // 🌟 A REATIVIDADE CIRÚRGICA: Reseta o filtro de texto exato do seu HTML
-        this.filtroTextoAdmin = ''; 
+        this.filtroTextoAdmin = '';
 
         // 🌟 VOLTA PARA A PÁGINA 1: Garante que o novo curso (que entra no topo) apareça de primeira na tela!
-        this.paginaAtualAdmin = 1; 
-        
-        this.isLoadingCursos = false; 
+        this.paginaAtualAdmin = 1;
+
+        this.isLoadingCursos = false;
       },
       error: () => this.isLoadingCursos = false
     });
@@ -244,9 +257,9 @@ export class AdminDashboardComponent implements OnInit {
 
       // 2. Concatena exatamente na sintaxe de sucesso do player
       const urlFinal = 'https://youtube.com' + idVideoPuro.trim();
-      
+
       // ✅ RETORNO 1 (SUCESSO): Se o código rodar sem quebras, devolve a URL Perfeita aqui e encerra a função!
-      return urlFinal; 
+      return urlFinal;
 
     } catch (error) {
       console.error('Erro na conversão automática da URL do YouTube:', error);
@@ -337,12 +350,12 @@ export class AdminDashboardComponent implements OnInit {
   // Tipagem estrita casando com a propriedade do formulário e aceitando null no ID
   private obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: number | null): string {
     if (!id) return '';
-    
+
     if (tipo === 'EMPRESA') return this.mockEmpresas.find(e => e.id === id)?.nome || `Empresa ID: ${id}`;
     if (tipo === 'UNIDADE') return this.mockUnidades.find(u => u.id === id)?.nome || `Unidade ID: ${id}`;
     if (tipo === 'DEPARTAMENTO') return this.mockDepartamentos.find(d => d.id === id)?.nome || `Depto ID: ${id}`;
     if (tipo === 'CARGO') return this.mockCargos.find(c => c.id === id)?.nome || `Cargo ID: ${id}`;
-    
+
     return this.mockUsuarios.find(u => u.id === id)?.nome || `Usuário ID: ${id}`;
   }
 
@@ -367,7 +380,7 @@ export class AdminDashboardComponent implements OnInit {
     this.treinamentoService.vincularPublico(payloadVinculo).subscribe({
       next: (res) => {
         this.alerts.sucesso(`Público alvo (${this.tipoVinculoSelecionado}) vinculado com sucesso!`);
-        
+
         // Armazena temporariamente os valores antes de resetar o formulário
         const tipoAtual = this.tipoVinculoSelecionado;
         const idAtual = this.idReferenciaSelecionado;
@@ -377,7 +390,7 @@ export class AdminDashboardComponent implements OnInit {
           tipo: tipoAtual,
           referenciaId: idAtual,
           // ✅ AGORA PASSA PERFEITO: Os tipos batem letra por letra!
-          nome: this.obterNomeMock(tipoAtual, idAtual) 
+          nome: this.obterNomeMock(tipoAtual, idAtual)
         });
 
         // Reseta o seletor secundário para o próximo vínculo com segurança
@@ -393,7 +406,7 @@ export class AdminDashboardComponent implements OnInit {
   // Finalizar a esteira de treinamento
   finalizarEsteiraTreinamento(): void {
     this.alerts.sucesso('Parabéns! Esteira de treinamento publicada e integrada com sucesso!');
-    
+
     this.carregarCatalogoGerencial();
 
     this.passoAtual = 1;
@@ -407,6 +420,46 @@ export class AdminDashboardComponent implements OnInit {
       width: '500px',
       disableClose: false, // Permite fechar clicando fora
       data: { id: cursoId, titulo: cursoTitulo }
+    });
+  }
+
+  dispararAlertaInstitucional(): void {
+    if (!this.comunicadoForm.titulo.trim() || !this.comunicadoForm.mensagem.trim()) {
+      this.alerts.erro('Por favor, preencha o título e a mensagem do comunicado.');
+      return;
+    }
+    if (this.comunicadoForm.escopo !== 'GERAL' && !this.comunicadoForm.referenciaId) {
+      this.alerts.erro('Por favor, selecione o alvo organizacional correspondente.');
+      return;
+    }
+
+    this.isEnviandoComunicado = true;
+
+    const payload = {
+      escopo: this.comunicadoForm.escopo,
+      referenciaId: this.comunicadoForm.escopo === 'GERAL' ? null : Number(this.comunicadoForm.referenciaId),
+      titulo: this.comunicadoForm.titulo,
+      mensagem: this.comunicadoForm.mensagem
+    };
+
+    console.log('=== DISPARANDO COMUNICADO EM MASSA PROTHEUS ===', payload);
+
+    this.notificationService.dispararComunicadoAdmin(payload).subscribe({
+      next: (res) => {
+        // 🔥 Sucesso premium chancelado pelo AlertsService global!
+        this.alerts.sucesso(res.mensagem || 'Comunicado institucional disparado com sucesso!');
+
+        // Reseta o formulário de forma limpa para o próximo envio
+        this.comunicadoForm.titulo = '';
+        this.comunicadoForm.mensagem = '';
+        this.comunicadoForm.referenciaId = null;
+        this.isEnviandoComunicado = false;
+      },
+      error: (err) => {
+        console.error('Erro ao disparar comunicado em lote:', err);
+        this.alerts.erro('Falha ao processar o envio em massa das notificações.');
+        this.isEnviandoComunicado = false;
+      }
     });
   }
 
