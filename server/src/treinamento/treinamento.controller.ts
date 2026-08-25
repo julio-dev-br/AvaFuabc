@@ -83,4 +83,11 @@ export class TreinamentoController {
     return this.treinamentosService.obterConteudoCurso(Number(id));
   }
 
+  // 💼 ROTA DO GESTOR: GET /treinamentos/admin/projetos
+  @Get('admin/projetos')
+  async obterProjetosAdmin() {
+    return this.treinamentosService.listarProjetosAdmin(); // Ajuste o nome conforme o seu construtor
+  }
+
+
 }

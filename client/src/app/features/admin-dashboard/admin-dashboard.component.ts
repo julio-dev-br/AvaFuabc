@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,6 +6,12 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
 import { QuizService } from '../../core/services/quiz.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertsService } from '../../core/services/alerts.service';
+import { ComunicadosComponent } from './components/comunicados/comunicados.component';
+import { ProjetosKanbanComponent } from './components/projetos-kanban/projetos-kanban.component';
+
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 
 // Angular Material Modules
 import { MatCardModule } from '@angular/material/card';
@@ -18,7 +24,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 // Componentes de Gráficos (Chart.js)
@@ -27,6 +32,7 @@ import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from '
 import { ControleUsuariosComponent } from '../user/user.component';
 import { ModalMateriaisComponent } from './modal-materiais.component';
 import { NotificationService } from '../../core/services/notification.service';
+import { MatPaginator } from '@angular/material/paginator';
 
 Chart.register(...registerables);
 
@@ -36,7 +42,9 @@ Chart.register(...registerables);
   imports: [
     CommonModule, FormsModule, RouterLink, MatCardModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatSelectModule, MatCheckboxModule, MatIconModule, MatSnackBarModule,
-    MatToolbarModule, MatRadioModule, BaseChartDirective, ControleUsuariosComponent, MatDialogModule
+    MatToolbarModule, MatRadioModule, BaseChartDirective, ControleUsuariosComponent, MatDialogModule,
+    MatTableModule,
+    MatPaginatorModule, ComunicadosComponent, ProjetosKanbanComponent
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
@@ -58,8 +66,7 @@ export class AdminDashboardComponent implements OnInit {
   colunasTabela: string[] = ['nome', 'email', 'lotacao', 'cargo', 'role', 'status'];
   novoUsuario = { name: '', email: '', role: 'user', empresa_id: 1, unidade_id: 1, departamento_id: 1, cargo_id: 1 };
 
-
-  // FORMULÁRIO DE COMUNICADOS DO RH (EM MASSA)
+  // Formulário de comunicados do RH (em massa)
   comunicadoForm = {
     escopo: 'GERAL' as 'GERAL' | 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO',
     referenciaId: null as number | null,
@@ -68,12 +75,11 @@ export class AdminDashboardComponent implements OnInit {
   };
   isEnviandoComunicado = false;
 
-
   // Controladores do Menu e Assistente (Wizard)
   abaAtiva = 'bi';
   passoAtual = 0; // Começa na listagem gerencial
 
-  // Chaves de Persistência Física do PostgreSQL
+  // Chaves de Persistência Física
   idCursoCriado: number | null = null;
   idModuloCriado: number | null = null;
   idAulaCriada: number | null = null;
@@ -120,6 +126,9 @@ export class AdminDashboardComponent implements OnInit {
   mockCargos = [{ id: 50, nome: 'Técnico de Enfermagem' }, { id: 51, nome: 'Médico Plantonista' }];
   mockUsuarios = [{ id: 999, nome: 'Julio Valente (Mtr: 1234)' }, { id: 888, nome: 'Colaborador Teste' }];
 
+  listaProjetosAdmin: any[] = [];
+  isLoadingProjetos = false;
+
   // BI
   public pieChartType: ChartType = 'pie';
   public pieChartOptions: ChartConfiguration['options'] = { responsive: true, plugins: { legend: { position: 'top' } } };
@@ -133,10 +142,14 @@ export class AdminDashboardComponent implements OnInit {
     this.carregarDadosBI();
     this.carregarCatalogoGerencial();
     this.carregarDicionariosRH();
+    this.carregarProjetosKanbanAdmin();
   }
+  
   mudarAba(aba: string): void {
     this.abaAtiva = aba;
     if (aba === 'cadastro') this.carregarCatalogoGerencial();
+
+    if (aba === 'projetos')  this.carregarProjetosKanbanAdmin();
   }
 
   get cursosGerenciaisExibidos(): any[] {
@@ -183,10 +196,10 @@ export class AdminDashboardComponent implements OnInit {
       next: (dados) => {
         this.listaCursosGerencial = dados;
 
-        // 🌟 A REATIVIDADE CIRÚRGICA: Reseta o filtro de texto exato do seu HTML
+        // Reseta o filtro de texto exato do seu HTML
         this.filtroTextoAdmin = '';
 
-        // 🌟 VOLTA PARA A PÁGINA 1: Garante que o novo curso (que entra no topo) apareça de primeira na tela!
+        // Garante que o novo curso (que entra no topo) apareça de primeira na tela!
         this.paginaAtualAdmin = 1;
 
         this.isLoadingCursos = false;
@@ -258,14 +271,14 @@ export class AdminDashboardComponent implements OnInit {
       // 2. Concatena exatamente na sintaxe de sucesso do player
       const urlFinal = 'https://youtube.com' + idVideoPuro.trim();
 
-      // ✅ RETORNO 1 (SUCESSO): Se o código rodar sem quebras, devolve a URL Perfeita aqui e encerra a função!
+      // Se o código rodar sem quebras, devolve a URL Perfeita aqui e encerra a função!
       return urlFinal;
 
     } catch (error) {
       console.error('Erro na conversão automática da URL do YouTube:', error);
     }
 
-    // ✅ RETORNO 2 (FALLBACK): Fora do bloco. Só será executado se o try falhar e der erro de processamento!
+    // Fora do bloco. Só será executado se o try falhar e der erro de processamento!
     return urlCrua;
   }
 
@@ -423,44 +436,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  dispararAlertaInstitucional(): void {
-    if (!this.comunicadoForm.titulo.trim() || !this.comunicadoForm.mensagem.trim()) {
-      this.alerts.erro('Por favor, preencha o título e a mensagem do comunicado.');
-      return;
-    }
-    if (this.comunicadoForm.escopo !== 'GERAL' && !this.comunicadoForm.referenciaId) {
-      this.alerts.erro('Por favor, selecione o alvo organizacional correspondente.');
-      return;
-    }
-
-    this.isEnviandoComunicado = true;
-
-    const payload = {
-      escopo: this.comunicadoForm.escopo,
-      referenciaId: this.comunicadoForm.escopo === 'GERAL' ? null : Number(this.comunicadoForm.referenciaId),
-      titulo: this.comunicadoForm.titulo,
-      mensagem: this.comunicadoForm.mensagem
-    };
-
-    console.log('=== DISPARANDO COMUNICADO EM MASSA PROTHEUS ===', payload);
-
-    this.notificationService.dispararComunicadoAdmin(payload).subscribe({
-      next: (res) => {
-        // 🔥 Sucesso premium chancelado pelo AlertsService global!
-        this.alerts.sucesso(res.mensagem || 'Comunicado institucional disparado com sucesso!');
-
-        // Reseta o formulário de forma limpa para o próximo envio
-        this.comunicadoForm.titulo = '';
-        this.comunicadoForm.mensagem = '';
-        this.comunicadoForm.referenciaId = null;
-        this.isEnviandoComunicado = false;
-      },
-      error: (err) => {
-        console.error('Erro ao disparar comunicado em lote:', err);
-        this.alerts.erro('Falha ao processar o envio em massa das notificações.');
-        this.isEnviandoComunicado = false;
-      }
-    });
+  // Método reativo que puxa os cursos/projetos da API do NestJS
+  carregarProjetosKanbanAdmin(): void {
+    // this.abaAtiva = 'projetos'; 
   }
 
   logoutAdmin(): void {

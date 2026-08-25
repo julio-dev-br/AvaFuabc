@@ -31,7 +31,6 @@ export class AuthController {
                 name: true,
                 email: true,
                 role: true,
-                // Se o seu usuário tiver outros campos de RH (unidade, cargo), adicione-os aqui no select!
                 avatar_url: true
             }
         });

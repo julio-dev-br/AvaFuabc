@@ -6,7 +6,7 @@ import { NotificacoesService } from './motificacoes.service'; // Mantido conform
 @Controller('notificacoes')
 @UseGuards(AuthGuard) // Blindagem de segurança: Só colaboradores logados acessam
 export class NotificacoesController {
-  constructor(private readonly notificacoesService: NotificacoesService) {}
+  constructor(private readonly notificacoesService: NotificacoesService) { }
 
   // 👤 ROTA DO ALUNO: GET /notificacoes (Alimenta o sininho do cabeçalho)
   @Get()
@@ -35,4 +35,11 @@ export class NotificacoesController {
 
     return this.notificacoesService.dispararComunicadoEmMassa(dadosFormatados);
   }
+
+  // 💼 ROTA DO GESTOR: GET /notificacoes/admin/historico
+  @Get('admin/historico')
+  async obterHistoricoAdmin() {
+    return this.notificacoesService.listarHistoricoAdmin(); // Ajuste para bater com o nome do seu construtor
+  }
+
 }

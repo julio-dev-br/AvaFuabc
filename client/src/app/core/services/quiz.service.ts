@@ -10,7 +10,7 @@ export class QuizService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/quizzes`;
 
-  // 🔐 FUNÇÃO BLINDADA: Envia o token em todos os formatos comuns que o Guard do NestJS pode estar esperando
+  // Envia o token em todos os formatos comuns que o Guard do NestJS pode estar esperando
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken') || '';
     return new HttpHeaders({

@@ -23,8 +23,14 @@
         <mat-icon>group</mat-icon> Colaboradores
       </button>
 
-      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'comunicados'" (click)="mudarAba('comunicados')">
-        <mat-icon>group</mat-icon> Comunicados
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'comunicados'"
+        (click)="mudarAba('comunicados')">
+        <mat-icon>campaign</mat-icon> Comunicados
+      </button>
+
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'projetos'"
+        (click)="mudarAba('projetos')">
+        <mat-icon>dashboard</mat-icon> Projetos
       </button>
 
       <hr class="nav-divider" style="border: 0; border-top: 1px solid #002d59; margin: auto 0 12px 0;">
@@ -238,7 +244,7 @@
       }
       <!-- 🧙‍♂️ ASSISTENTE DE CRIAÇÃO PASSO A PASSO (WIZARD) -->
       @if (passoAtual > 0) {
-      <div class="wizard-container" style="width: 100%; max-width: 650px; margin: 12px auto 0 auto;">
+      <div class="wizard-container" style="width: 100%; max-width: 850px; margin: 12px auto 0 auto;">
 
         <div class="steps-indicator"
           style="display: flex; justify-content: space-between; background: #e2e8f0; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; color: #64748b;">
@@ -246,7 +252,7 @@
           <span [class.step-active]="passoAtual === 2">2. Módulos</span>
           <span [class.step-active]="passoAtual === 3">3. Aulas & Vídeos</span>
           <span [class.step-active]="passoAtual === 4">4. Quiz Final</span>
-          <span [class.step-active]="passoAtual === 5">5. RH</span>
+          <span [class.step-active]="passoAtual === 5">5. RH </span>
         </div>
 
         <!-- PASSO 1: CONFIGURAÇÕES DO CURSO BASE -->
@@ -324,7 +330,6 @@
           </mat-card-actions>
         </mat-card>
         }
-
         <!-- PASSO 3: VINCULO DE VIDEOAULAS REATIVAS -->
         @if (passoAtual === 3) {
         <mat-card class="form-card" style="border: 1px solid #cbd5e1; border-radius: 8px;">
@@ -362,7 +367,7 @@
               para o Quiz ➔</button>
 
             <div style="display: flex; gap: 8px;">
-              <!-- 🌟 BOTÃO EXTRA: Se o RH já gravou pelo menos uma aula, libera o anexo passando o ID real da aula! -->
+              <!-- Se o RH já gravou pelo menos uma aula, libera o anexo passando o ID real da aula! -->
               @if (idAulaCriada) {
               <button mat-stroked-button style="color: #2e7d32; border-color: #2e7d32; height: 40px;"
                 (click)="abrirModalMateriais(idAulaCriada, aula.titulo || 'Aula Recém-Criada')">
@@ -596,90 +601,12 @@
 
     <!-- 📢 GERENCIAMENTO CENTRAL DE COMUNICADOS E ALERTAS INSTITUCIONAIS -->
     @if (abaAtiva === 'comunicados') {
-    <div style="padding: 24px; max-width: 900px; margin: 0 auto; animation: fadeIn 0.3s ease;">
-      <mat-card
-        style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden;">
+    <app-comunicados></app-comunicados>
+    }
 
-        <!-- CABEÇALHO CORPORATIVO -->
-        <div style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); padding: 24px; color: #ffffff;">
-          <h2
-            style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
-            <mat-icon>campaign</mat-icon> Painel de Comunicados e Notificações em Massa
-          </h2>
-          <p style="margin: 4px 0 0 0; color: #fca5a5; font-size: 13px;">
-            Dispare avisos importantes em tempo real para os sininhos dos colaboradores com base na lotação do Protheus.
-          </p>
-        </div>
-
-        <!-- CORPO DO FORMULÁRIO -->
-        <mat-card-content style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-
-          <!-- FILTROS DE ESCOPO ORGANIZACIONAL REATIVOS -->
-          <div
-            style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-
-            <!-- Dropdown 1: Escopo do Destinatário -->
-            <mat-form-field appearance="outline" style="flex: 1; min-width: 250px; margin-bottom: -1.25em;">
-              <mat-label>Enviar Comunicado Para:</mat-label>
-              <mat-select [(ngModel)]="comunicadoForm.escopo" (selectionChange)="comunicadoForm.referenciaId = null">
-                <mat-option value="GERAL">📢 Todos os Colaboradores (Geral)</mat-option>
-                <mat-option value="EMPRESA">🏢 Por Empresa / CNPJ</mat-option>
-                <mat-option value="UNIDADE">🏥 Por Unidade Hospitalar / Contrato</mat-option>
-                <mat-option value="DEPARTAMENTO">📂 Por Departamento / Setor</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <!-- Dropdown 2: Seleção Dinâmica Condicional baseada no Mocks do Protheus que você já possui -->
-            @if (comunicadoForm.escopo !== 'GERAL') {
-            <mat-form-field appearance="outline"
-              style="flex: 1.5; min-width: 250px; margin-bottom: -1.25em; animation: fadeIn 0.2s ease;">
-              <mat-label>Selecione o Alvo do Protheus</mat-label>
-              <mat-select [(ngModel)]="comunicadoForm.referenciaId">
-                @if (comunicadoForm.escopo === 'EMPRESA') {
-                <mat-option *ngFor="let emp of mockEmpresas" [value]="emp.id">{{ emp.nome }}</mat-option>
-                }
-                @if (comunicadoForm.escopo === 'UNIDADE') {
-                <mat-option *ngFor="let uni of mockUnidades" [value]="uni.id">{{ uni.nome }}</mat-option>
-                }
-                @if (comunicadoForm.escopo === 'DEPARTAMENTO') {
-                <mat-option *ngFor="let dep of mockDepartamentos" [value]="dep.id">{{ dep.nome }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-            }
-          </div>
-
-          <!-- INPUT DE TÍTULO -->
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Título do Alerta</mat-label>
-            <input matInput [(ngModel)]="comunicadoForm.titulo"
-              placeholder="Ex: Importante: Atualização sobre Reciclagem de NR-32" maxlength="100">
-            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">title</mat-icon>
-          </mat-form-field>
-
-          <!-- TEXTAREA DE MENSAGEM -->
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Conteúdo da Mensagem explicativa</mat-label>
-            <textarea matInput [(ngModel)]="comunicadoForm.mensagem" rows="5"
-              placeholder="Digite aqui o texto completo do comunicado oficial da Fundação ABC..."
-              maxlength="500"></textarea>
-            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">chat</mat-icon>
-          </mat-form-field>
-
-        </mat-card-content>
-
-        <!-- MAT-CARD-ACTIONS DE DISPARO -->
-        <mat-card-actions
-          style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0; box-sizing: border-box;">
-          <button mat-raised-button
-            style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #ffffff; padding: 0 32px; height: 44px; font-weight: bold; border-radius: 6px;"
-            [disabled]="isEnviandoComunicado || !comunicadoForm.titulo.trim() || !comunicadoForm.mensagem.trim()"
-            (click)="dispararAlertaInstitucional()">
-            <mat-icon>rocket_launch</mat-icon>
-            {{ isEnviandoComunicado ? 'Transmitindo...' : 'Disparar Alerta Geral' }}
-          </button>
-        </mat-card-actions>
-      </mat-card>
+    @if (abaAtiva === 'projetos') {
+    <div class="fade-in-animation">
+      <app-projetos-kanban></app-projetos-kanban>
     </div>
     }
 

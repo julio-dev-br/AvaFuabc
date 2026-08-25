@@ -4,7 +4,7 @@ import { join } from 'path';
 import * as express from 'express';
 import { ValidationPipe } from '@nestjs/common';
 
-// 🌟 VACINA DE RUNTIME: Aplica com checagem de segurança para evitar Crash no Linux
+// Aplica com checagem de segurança para evitar Crash no Linux
 if (typeof BigInt !== 'undefined' && !BigInt.prototype.hasOwnProperty('toJSON')) {
   (BigInt.prototype as any).toJSON = function () {
     return Number(this);
@@ -22,7 +22,6 @@ async function bootstrap() {
   };
 
   const porta = process.env.PORT || 3000;
-
 
   app.enableCors({
     origin: 'http://localhost:4200',

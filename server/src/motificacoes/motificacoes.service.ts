@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class NotificacoesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   // 👤 1. ROTA DO ALUNO: Lista todos os alertas ativos e não lidos do colaborador
   async listarDoUsuario(usuarioId: number) {
@@ -78,4 +78,24 @@ export class NotificacoesService {
       mensagem: `Comunicado institucional disparado com sucesso para ${usuariosAlvo.length} colaboradores!`
     };
   }
+
+  // HISTÓRICO DO GESTOR: Busca os comunicados enviados em lote (Distinct por título)
+  async listarHistoricoAdmin() {
+    // Busca os registros agrupando por título e mensagem para não repetir linhas na tabela de auditoria
+    const notificacoes = await this.prisma.notification.findMany({
+      distinct: ['titulo', 'mensagem'],
+      select: {
+        id: true,
+        titulo: true,
+        mensagem: true,
+        created_at: true
+      },
+      orderBy: {
+        created_at: 'desc'
+      }
+    });
+
+    return notificacoes;
+  }
+
 }

@@ -43,10 +43,10 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private readonly apiUrl = `${environment.apiUrl}`;
 
-  // 🧭 O RADAR DO HTML: Captura o componente do paginador quando a tela terminar de desenhar
+  // O RADAR DO HTML: Captura o componente do paginador quando a tela terminar de desenhar
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  // 📊 DECLARAÇÃO DO DATASOURCE NATIVO: Agora com o plural 's' e inicializado com a classe do Material
+  //  DECLARAÇÃO DO DATASOURCE NATIVO: Agora com o plural 's' e inicializado com a classe do Material
   historicoMatriculas = new MatTableDataSource<any>([]);
 
   isLoading = true;
@@ -111,10 +111,10 @@ export class PerfilComponent implements OnInit, AfterViewInit {
           };
         });
 
-        // ✅ AGORA OPERA SEM ERROS: Injeta o array tratado no DataSource nativo
+        // Injeta o array tratado no DataSource nativo
         this.historicoMatriculas.data = listaMapeada;
 
-        // ✅ AGORA OPERA SEM ERROS: Vincula o paginador de forma assíncrona segura
+        // Vincula o paginador de forma assíncrona segura
         setTimeout(() => {
           this.historicoMatriculas.paginator = this.paginator;
         });

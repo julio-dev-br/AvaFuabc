@@ -8,22 +8,50 @@ import type { MoverCardDTO } from './dtos/mover-card.dto';
 export class KanbanService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. Puxa todo o quadro (Colunas + Cards) do usuário logado
+  // 1. Puxa todo o quadro (Colunas + Cards) e inicializa automaticamente se for um aluno novo
   async obterQuadro(userId: number) {
-    return this.prisma.kanbanColuna.findMany({
+    // Busca inicial no PostgreSQL
+    let colunas = await this.prisma.kanbanColuna.findMany({
       where: { usuario_id: userId },
       include: {
         cards: {
-          orderBy: { ordem: 'asc' }, // Ordena os cartões dentro da coluna
+          orderBy: { ordem: 'asc' },
         },
       },
-      orderBy: { ordem: 'asc' }, // Ordena as colunas na tela
+      orderBy: { ordem: 'asc' },
     });
+
+    // 🌟 A MÁGICA AUTOMÁTICA: Se o array vier vazio, significa que é o primeiro acesso do colaborador!
+    if (colunas.length === 0) {
+      console.log(`=== 📋 KANBAN: INICIALIZANDO QUADRO AUTOMÁTICO PARA O USUÁRIO ID ${userId} ===`);
+
+      // Cria as 3 colunas regulamentares em um bloco rápido no Postgres
+      await this.prisma.kanbanColuna.createMany({
+        data: [
+          { usuario_id: userId, titulo: '📌 A Fazer', ordem: 1 },
+          { usuario_id: userId, titulo: '📖 Estudando', ordem: 2 },
+          { usuario_id: userId, titulo: '✅ Concluído', ordem: 3 },
+        ],
+      });
+
+      // Refaz a busca para trazer a estrutura recém-criada limpa com os cards vazios []
+      colunas = await this.prisma.kanbanColuna.findMany({
+        where: { usuario_id: userId },
+        include: {
+          cards: {
+            orderBy: { ordem: 'asc' },
+          },
+        },
+        orderBy: { ordem: 'asc' },
+      });
+    }
+
+    return colunas;
   }
 
   // 2. Cria uma nova coluna no quadro (A Fazer, Em Andamento...)
-  async criarColuna(userId: number, dto: CriarColunaDTO) {
-    // Descobre a última ordem para colocar a nova coluna no final
+  // 2. Cria uma nova coluna (Adaptada para aceitar a cor personalizada do Admin)
+  async criarColuna(userId: number, dto: { titulo: string; cor?: string }) {
     const colunasContagem = await this.prisma.kanbanColuna.count({
       where: { usuario_id: userId },
     });
@@ -33,6 +61,7 @@ export class KanbanService {
         usuario_id: userId,
         titulo: dto.titulo,
         ordem: colunasContagem + 1,
+        cor: dto.cor || '#cbd5e1', // 🎨 Grava a cor selecionada pelo gestor no painel
       },
     });
   }

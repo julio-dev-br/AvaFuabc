@@ -96,14 +96,14 @@ export class TreinamentoService {
 
     // Injetado o 'www.', a barra '/' e o 'embed/' obrigatório para o player rodar!
     const urlFinal = 'https://www.youtube.com/embed/' + idVideoPuro.trim();
-    
+
     // Persiste fisicamente no contêiner do PostgreSQL
     return this.prisma.aula.create({
       data: {
         modulo_id: Number(data.moduloId),
         titulo: data.titulo,
         descricao: data.descricao || null,
-        video_url: urlFinal, 
+        video_url: urlFinal,
         ordem: Number(data.ordem)
       }
     });
@@ -266,7 +266,7 @@ export class TreinamentoService {
               orderBy: { ordem: 'asc' },
               include: {
                 // 🌟 A fiação relacional que precisávamos para os PDFs pularem na tela do Aluno!
-                materiais: true 
+                materiais: true
               }
             }
           }
@@ -274,5 +274,44 @@ export class TreinamentoService {
       }
     });
   }
+
+  // 💼 PAINEL DO ADMIN: Lista todos os treinamentos/projetos com dados de auditoria estruturados
+  async listarProjetosAdmin() {
+    const projetos = await this.prisma.treinamento.findMany({
+      select: {
+        id: true,
+        titulo: true,
+        descricao: true,
+        carga_horaria: true,
+        obrigatorio: true,
+        ativo: true,
+        createdAt: true,
+        // 📊 Agrega a contagem de módulos criados no projeto para exibir no card do Kanban
+        _count: {
+          select: {
+            modulos: true,
+            publicos: true
+          }
+        }
+      },
+      orderBy: {
+        id: 'desc'
+      }
+    });
+
+    // Trata o retorno para enviar chaves limpas e fáceis de ler no Angular
+    return projetos.map(p => ({
+      id: p.id,
+      titulo: p.titulo,
+      descricao: p.descricao,
+      cargaHoraria: p.carga_horaria,
+      obrigatorio: p.obrigatorio,
+      ativo: p.ativo,
+      dataCriacao: p.createdAt,
+      totalModulos: p._count.modulos,
+      totalRegrasPublico: p._count.publicos
+    }));
+  }
+
 
 }

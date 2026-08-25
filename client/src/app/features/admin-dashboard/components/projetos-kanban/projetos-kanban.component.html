@@ -1,0 +1,89 @@
+<!-- 📋 HEADER CORPORATIVO DO PAINEL -->
+<div style="padding: 24px 24px 0 24px; max-width: 1600px; margin: 0 auto; animation: fadeIn 0.3s ease;">
+  <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+        <mat-icon style="color: #2563eb;">dashboard</mat-icon> Projetos de Treinamento
+      </h2>
+      <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">
+        Monitore visualmente o progresso da produção dos cursos da Fundação ABC antes do lançamento oficial.
+      </p>
+    </div>
+    <button mat-stroked-button color="primary" (click)="carregarProjetosEEstrutura()">
+      <mat-icon>refresh</mat-icon> Atualizar Quadro
+    </button>
+  </div>
+</div>
+<!-- CONTAINER DO QUADRO KANBAN DE GESTÃO COM SUPORTE A ARRASTE -->
+@if (isLoading) {
+  <div style="display: flex; justify-content: center; align-items: center; height: 350px;">
+    <mat-progress-spinner diameter="45" mode="indeterminate"></mat-progress-spinner>
+  </div>
+} @else {
+  <!-- 🌟 ADICIONADO cdkDropListGroup: Conecta todas as colunas para aceitarem cards umas das outras -->
+  <div cdkDropListGroup 
+       style="padding: 24px; max-width: 1600px; margin: 0 auto; display: flex; gap: 20px; overflow-x: auto; align-items: flex-start; background: #f8fafc; min-height: 70vh; animation: fadeIn 0.3s ease;">
+    
+    <!-- 🎛️ LOOP DAS COLUNAS (Cada uma vira uma cdkDropList) -->
+    <div *ngFor="let coluna of colunasKanbanAdmin" 
+         cdkDropList
+         [cdkDropListData]="coluna.cards"
+         (cdkDropListDropped)="aoSoltarCardCurso($event, coluna.id)"
+         style="flex: 1; min-width: 320px; background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; max-height: 80vh;">
+      
+      <!-- CABEÇALHO DA COLUNA -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px;">
+        <span style="font-weight: 700; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+          <span [style.background]="coluna.cor" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px rgba(0,0,0,0.1);"></span>
+          {{ coluna.titulo }}
+        </span>
+        <span style="background: #cbd5e1; color: #475569; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+          {{ coluna.cards.length }}
+        </span>
+      </div>
+
+      <!-- ÁREA DE CARDS -->
+      <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 2px; min-height: 200px;">
+        
+        <!-- CARD ESPELHO DO TREINAMENTO (Adicionado cdkDrag) -->
+        <mat-card *ngFor="let curso of coluna.cards" 
+                  cdkDrag
+                  [cdkDragData]="curso"
+                  style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; background: #ffffff; padding: 0; overflow: hidden; transition: transform 0.2s; cursor: grab;">
+          
+          <div [style.background]="coluna.cor" style="height: 5px; width: 100%;"></div>
+          
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-weight: 700; color: #0f172a; font-size: 14px; letter-spacing: -0.3px; line-height: 1.3;">
+              {{ curso.titulo }}
+            </div>
+            
+            <div style="color: #64748b; font-size: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              {{ curso.descricao || 'Sem descrição cadastrada pelo gestor.' }}
+            </div>
+
+            <div style="margin-top: 6px; padding-top: 10px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; color: #64748b; font-size: 11px; font-weight: 600;">
+              <span style="display: flex; align-items: center; gap: 4px;" matTooltip="Total de Módulos Configurados">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px; color: #94a3b8;">view_module</mat-icon>
+                {{ curso.totalModulos }} {{ curso.totalModulos === 1 ? 'Módulo' : 'Módulos' }}
+              </span>
+              
+              <span style="display: flex; align-items: center; gap: 4px;" matTooltip="Regras de Público Ativas (Protheus)">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px; color: #94a3b8;">groups</mat-icon>
+                {{ curso.totalRegrasPublico }} {{ curso.totalRegrasPublico === 1 ? 'Regra' : 'Regras' }}
+              </span>
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- MENSAGEM SE A COLUNA ESTIVER VAZIA -->
+        <div *ngIf="coluna.cards.length === 0" 
+             style="text-align: center; color: #94a3b8; font-size: 12px; padding: 24px 10px; border: 2px dashed #cbd5e1; border-radius: 8px; margin: 4px 0;">
+          Nenhum projeto neste estágio
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+}
