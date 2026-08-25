@@ -8,24 +8,25 @@ import type { MoverCardDTO } from './dtos/mover-card.dto';
 export class KanbanService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. Puxa todo o quadro (Colunas + Cards) e inicializa automaticamente se for um aluno novo
+  // 1. ROTA DO ALUNO: Puxa o quadro isolando rigorosamente apenas as tarefas pessoais (Ignora cards de cursos do Admin)
   async obterQuadro(userId: number) {
     // Busca inicial no PostgreSQL
     let colunas = await this.prisma.kanbanColuna.findMany({
       where: { usuario_id: userId },
       include: {
         cards: {
+          // 🌟 A VACINA DE ISOLAMENTO: Filtra para o Aluno ver APENAS os cards normais dele!
+          where: { treinamento_id: null },
           orderBy: { ordem: 'asc' },
         },
       },
       orderBy: { ordem: 'asc' },
     });
 
-    // 🌟 A MÁGICA AUTOMÁTICA: Se o array vier vazio, significa que é o primeiro acesso do colaborador!
+    // Se o array de colunas vier vazio, inicializa o quadro pessoal padrão do aluno
     if (colunas.length === 0) {
-      console.log(`=== 📋 KANBAN: INICIALIZANDO QUADRO AUTOMÁTICO PARA O USUÁRIO ID ${userId} ===`);
+      console.log(`=== 📋 KANBAN ALUNO: INICIALIZANDO QUADRO PESSOAL PARA O USUÁRIO ID ${userId} ===`);
 
-      // Cria as 3 colunas regulamentares em um bloco rápido no Postgres
       await this.prisma.kanbanColuna.createMany({
         data: [
           { usuario_id: userId, titulo: '📌 A Fazer', ordem: 1 },
@@ -34,11 +35,12 @@ export class KanbanService {
         ],
       });
 
-      // Refaz a busca para trazer a estrutura recém-criada limpa com os cards vazios []
+      // Refaz a busca aplicando a mesma vacina de segurança
       colunas = await this.prisma.kanbanColuna.findMany({
         where: { usuario_id: userId },
         include: {
           cards: {
+            where: { treinamento_id: null }, // 🌟 Mantém o isolamento
             orderBy: { ordem: 'asc' },
           },
         },
@@ -48,6 +50,7 @@ export class KanbanService {
 
     return colunas;
   }
+
 
   // 2. Cria uma nova coluna no quadro (A Fazer, Em Andamento...)
   // 2. Cria uma nova coluna (Adaptada para aceitar a cor personalizada do Admin)
@@ -113,4 +116,57 @@ export class KanbanService {
       },
     });
   }
+
+    // 💼 EXCLUSIVO DO GESTOR: Move o card da esteira de cursos ignorando travas de aluno comum
+  // 💼 EXCLUSIVO DO GESTOR: Altera ou inicializa o card do curso no Kanban avançado de forma física
+  async moverCardAdmin(cardIdOuTreinamentoId: number, dto: { colunaId: number; ordem: number }) {
+    
+    // 1. Tenta localizar o card pelo ID enviado
+    let card = await this.prisma.kanbanCard.findUnique({
+      where: { id: Number(cardIdOuTreinamentoId) }
+    });
+
+    // 2. 🌟 A REAÇÃO INTELIGENTE: Se não achou pelo ID do card, busca se existe algum card amarrado a esse ID como Treinamento!
+    if (!card) {
+      card = await this.prisma.kanbanCard.findFirst({
+        where: { treinamento_id: Number(cardIdOuTreinamentoId) }
+      });
+    }
+
+    // 3. 🚀 UPSERT REAL NO POSTGRESQL: Se o card existir, atualiza. Se não existir (curso órfão antigo), cria um novo na hora!
+    if (card) {
+      return this.prisma.kanbanCard.update({
+        where: { id: card.id },
+        data: {
+          coluna_id: Number(dto.colunaId),
+          ordem: dto.ordem ? Number(dto.ordem) : card.ordem
+        }
+      });
+    } else {
+      // Busca o treinamento para capturar o título oficial e carimbar no card novo
+      const treinamento = await this.prisma.treinamento.findUnique({
+        where: { id: Number(cardIdOuTreinamentoId) },
+        select: { titulo: true, descricao: true }
+      });
+
+      if (!treinamento) {
+        throw new NotFoundException('Treinamento/Projeto base não localizado no sistema.');
+      }
+
+      console.log(`=== 🛠️ KANBAN ADMIN: GERANDO CARD REATIVO PARA O CURSO ANTIGO "${treinamento.titulo}" ===`);
+
+      // Cria a linha física do cartão espelho vinculada ao curso no Postgres
+      return this.prisma.kanbanCard.create({
+        data: {
+          coluna_id: Number(dto.colunaId),
+          treinamento_id: Number(cardIdOuTreinamentoId),
+          titulo: treinamento.titulo,
+          descricao: treinamento.descricao || null,
+          ordem: dto.ordem ? Number(dto.ordem) : 1
+        }
+      });
+    }
+  }
+
+
 }

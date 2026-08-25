@@ -9,7 +9,7 @@ import type { MoverCardDTO } from './dtos/mover-card.dto';
 @Controller('kanban')
 @UseGuards(AuthGuard)
 export class KanbanController {
-  constructor(private readonly kanbanService: KanbanService) {}
+  constructor(private readonly kanbanService: KanbanService) { }
 
   // 1. Obter o quadro completo: GET /kanban
   @Get()
@@ -38,4 +38,17 @@ export class KanbanController {
   ) {
     return this.kanbanService.moverCard(user.id, cardId, body);
   }
+
+  // 💼 ROTA DO GESTOR: PATCH /kanban/admin/mover-card/:id
+  // 💼 ROTA DO GESTOR: PATCH /notificacoes/../admin/mover-card/:id
+  @Patch('admin/mover-card/:id')
+  async moverCardAdmin(
+    @Param('id', ParseIntPipe) cardId: number,
+    @Body() corpo: { colunaId: number; ordem: number },
+  ) {
+    // ✅ CORRIGIDO: Agora chama o motor exclusivo do administrador livre de travas de segurança de aluno!
+    return this.kanbanService.moverCardAdmin(cardId, corpo);
+  }
+
+
 }

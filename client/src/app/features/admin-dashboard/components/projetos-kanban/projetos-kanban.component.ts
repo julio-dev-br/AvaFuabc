@@ -13,6 +13,7 @@ import { DragDropModule, moveItemInArray, transferArrayItem, CdkDragDrop } from 
 
 // Serviços
 import { TreinamentoService } from '../../../../core/services/treinamento.service';
+import { KanbanService } from '../../../../core/services/kanban.service';
 import { AlertsService } from '../../../../core/services/alerts.service';
 
 @Component({
@@ -31,11 +32,12 @@ import { AlertsService } from '../../../../core/services/alerts.service';
   templateUrl: './projetos-kanban.component.html',
   styleUrl: './projetos-kanban.component.css'
 })
+
 export class ProjetosKanbanComponent implements OnInit {
   private treinamentoService = inject(TreinamentoService);
+  private kanbanService = inject(KanbanService);
   private alerts = inject(AlertsService);
 
-  // 📊 LISTAGENS
   listaProjetos: any[] = [];
   colunasKanbanAdmin: any[] = [];
   isLoading = true;
@@ -60,8 +62,6 @@ export class ProjetosKanbanComponent implements OnInit {
     });
   }
 
-
-  // 🧠 ENGENHARIA DE AGRUPAMENTO DINÂMICO CORRIGIDA
   private agruparProjetosEmColunas(): void {
     // Define os 3 estágios fixos e sofisticados do RH com indexadores limpos
     const estagiosPadrao = [
@@ -87,13 +87,11 @@ export class ProjetosKanbanComponent implements OnInit {
     this.colunasKanbanAdmin = estagiosPadrao;
   }
 
-  // 🚀 O MOVIMENTO SUPREMO: Organiza o layout e prepara a persistência de estágio
   aoSoltarCardCurso(event: CdkDragDrop<any[]>, colunaIdAlvo: number): void {
-    // Se arrastou e soltou dentro da mesma coluna, apenas reorganiza a ordem visual
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      // Transfere o card fisicamente entre as colunas reativas do front-end
+      // 1. Move visualmente no front-end para dar sensação de velocidade instantânea
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -101,14 +99,31 @@ export class ProjetosKanbanComponent implements OnInit {
         event.currentIndex
       );
 
+      // 2. Captura o card e o ID do projeto que acabaram de ser soltos na nova coluna
       const cursoMovido = event.container.data[event.currentIndex];
-      console.log(`=== 🎨 CURSO MOVIDO: "${cursoMovido.titulo}" PARA O ESTÁGIO ID ${colunaIdAlvo} ===`);
 
-      // 💡 PRÓXIMO PASSO: Aqui faremos a chamada HTTP (ex: PATCH /treinamentos/:id/estagio) 
-      // para fixar o estágio no banco de dados. Por enquanto o front já se move perfeitamente!
-      this.alerts.sucesso(`Fase de "${cursoMovido.titulo}" atualizada! 🚀`);
+      // 🌟 A VACINA: Verifica se o curso já tem um card associado na relação, senão usa o próprio id do curso como fallback de segurança
+      const cardIdParaSalvar = cursoMovido.kanban_cards && cursoMovido.kanban_cards.length > 0
+        ? Number(cursoMovido.kanban_cards[0].id)
+        : Number(cursoMovido.id);
+
+      // 3. Dispara a persistência de background no PostgreSQL via NestJS
+      this.kanbanService.atualizarEstagioCardAdmin(cardIdParaSalvar, colunaIdAlvo, event.currentIndex + 1).subscribe({
+        next: (resposta) => {
+          this.alerts.sucesso(`Estágio de "${cursoMovido.titulo}" atualizado com sucesso! 🚀`);
+
+          // 🌟 REATIVIDADE LOCAL: Sintoniza o ID do estágio no objeto para manter o estado íntegro na tela
+          cursoMovido.estagioId = colunaIdAlvo;
+        },
+        error: (err) => {
+          console.error('Erro ao persistir movimento do card no banco:', err);
+          this.alerts.erro('Falha ao salvar nova fase no servidor. Revertendo alteração...');
+          this.carregarProjetosEEstrutura();
+        }
+      });
+
     }
-  }
 
+  }
 
 }

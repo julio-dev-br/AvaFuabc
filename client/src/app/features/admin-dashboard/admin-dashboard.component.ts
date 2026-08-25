@@ -144,12 +144,12 @@ export class AdminDashboardComponent implements OnInit {
     this.carregarDicionariosRH();
     this.carregarProjetosKanbanAdmin();
   }
-  
+
   mudarAba(aba: string): void {
     this.abaAtiva = aba;
     if (aba === 'cadastro') this.carregarCatalogoGerencial();
 
-    if (aba === 'projetos')  this.carregarProjetosKanbanAdmin();
+    if (aba === 'projetos') this.carregarProjetosKanbanAdmin();
   }
 
   get cursosGerenciaisExibidos(): any[] {
@@ -449,5 +449,55 @@ export class AdminDashboardComponent implements OnInit {
   carregarDicionariosRH(): void {
     // IMPLEMENTAR AQUI
   }
+
+  // 📈 1. CONFIGURAÇÃO DO GRÁFICO DE ADESÃO MENSAL (LINHA)
+  public lineChartType: ChartType = 'line';
+  public lineChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: true, position: 'top' }
+    },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } }
+    }
+  };
+  public lineChartData: ChartData<'line'> = {
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'],
+    datasets: [
+      {
+        // ✅ CORRIGIDO: Array populado com números simulados para o TypeScript compilar
+        data: [20, 30, 21, 10, 10, 5, 3, 6],
+        label: 'Novos Alunos Matriculados',
+        borderColor: '#2563eb', // Azul institucional
+        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        fill: true,
+        tension: 0.3 // Deixa a linha suave/curvada estilo Trello
+      }
+    ]
+  };
+
+  // 🏥 2. CONFIGURAÇÃO DO GRÁFICO DE CONFORMIDADE POR UNIDADE (BARRAS VERTICAIS)
+  public unidadeBarChartType: ChartType = 'bar';
+  public unidadeBarChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: { beginAtZero: true, max: 100, title: { display: true, text: 'Conformidade (%)' } }
+    }
+  };
+  public unidadeBarChartData: ChartData<'bar'> = {
+    labels: ['Hosp. Mário Covas', 'CHM Santo André', 'Ame Mauá', 'Matriz'],
+    datasets: [
+      {
+        // ✅ CORRIGIDO: Array populado com percentuais reais simulados para o gráfico subir
+        data: [20, 30, 21, 10, 10, 5, 3, 6],
+        label: 'Percentual de Conclusão',
+        backgroundColor: ['#16a34a', '#eab308', '#2563eb', '#dc2626'] // Cores variadas para UX elegante
+      }
+    ]
+  };
+
   tratarErro(err: HttpErrorResponse): void { console.error(err); }
 }

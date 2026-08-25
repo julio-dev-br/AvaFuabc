@@ -28,8 +28,7 @@
         <mat-icon>campaign</mat-icon> Comunicados
       </button>
 
-      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'projetos'"
-        (click)="mudarAba('projetos')">
+      <button mat-button class="nav-item" [class.nav-active]="abaAtiva === 'projetos'" (click)="mudarAba('projetos')">
         <mat-icon>dashboard</mat-icon> Projetos
       </button>
 
@@ -114,6 +113,36 @@
       </div>
       }
     </div>
+    <!-- 📊 SEÇÃO INFERIOR: NOVOS GRÁFICOS DE EVOLUÇÃO E UNIDADES (LADO A LADO) -->
+    <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-top: 24px; animation: fadeIn 0.4s ease;">
+
+      <!-- Bloco do Gráfico de Linhas -->
+      <mat-card
+        style="flex: 1.2; min-width: 450px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; padding: 20px;">
+        <h3 style="margin: 0 0 16px 0; color: #1e293b; font-weight: 700; font-size: 14px; letter-spacing: -0.3px;">
+          Evolução de Matrículas (Histórico Mensal)
+        </h3>
+        <div style="display: block; height: 260px;">
+          <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="lineChartType">
+          </canvas>
+        </div>
+      </mat-card>
+
+      <!-- Bloco do Gráfico de Barras por Unidades -->
+      <mat-card
+        style="flex: 1; min-width: 350px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; padding: 20px;">
+        <h3 style="margin: 0 0 16px 0; color: #1e293b; font-weight: 700; font-size: 14px; letter-spacing: -0.3px;">
+          Índice de Conformidade por Unidade Hospitalar
+        </h3>
+        <div style="display: block; height: 260px;">
+          <canvas baseChart [data]="unidadeBarChartData" [options]="unidadeBarChartOptions"
+            [type]="unidadeBarChartType">
+          </canvas>
+        </div>
+      </mat-card>
+
+    </div>
+
     }
     <!-- SUB-TELA B: GESTÃO DE CURSOS (CATÁLOGO + WIZARD) -->
     @if (abaAtiva === 'cadastro') {

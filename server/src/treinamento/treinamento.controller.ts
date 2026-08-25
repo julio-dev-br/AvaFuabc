@@ -89,5 +89,12 @@ export class TreinamentoController {
     return this.treinamentosService.listarProjetosAdmin(); // Ajuste o nome conforme o seu construtor
   }
 
+  // 💼 ROTA DO GESTOR: GET /treinamentos/admin/metricas
+  @Get('admin/metricas')
+  async obterMetricasAnaliticas() {
+    return this.treinamentosService.obterMetricasAnaliticas();
+  }
+
+
 
 }

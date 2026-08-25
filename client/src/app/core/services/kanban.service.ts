@@ -30,4 +30,23 @@ export class KanbanService {
   moverCard(cardId: number, colunaId: number, ordem: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/cards/${cardId}/mover`, { colunaId, ordem }, { headers: this.getHeaders() });
   }
+
+  // 💼 ROTA DO GESTOR: Salva no Postgres a nova coluna do card arrastado usando PATCH legítimo!
+  atualizarEstagioCardAdmin(cardId: number, colunaId: number, ordem: number = 1): Observable<any> {
+    const token = localStorage.getItem('accessToken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+
+    // Envelopa o corpo da requisição exatamente como o NestJS espera receber no @Body()
+    const payload = { 
+      colunaId: Number(colunaId), 
+      ordem: Number(ordem) 
+    };
+
+    // ✅ CORRIGIDO: Usa o método .patch(), que aceita a URL, o payload no meio e as opções de headers no final!
+    return this.http.patch<any>(`${this.apiUrl}/admin/mover-card/${cardId}`, payload, { headers });
+  }
+
 }
