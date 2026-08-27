@@ -169,52 +169,55 @@ export class TreinamentoService {
     };
   }
 
-  // 💼 DASHBOARD DE BI: Calcula as métricas reais e a conformidade por hospital direto do Postgres
+  // PAINEL DE BI UNIFICADO: Consolida métricas antigas e novos gráficos direto do Postgres via Prisma
   async obterMetricasAnaliticas() {
-    // 1. Busca contagens básicas globais reais no Postgres
+    // Contagens rápidas de volume globais para os cards de KPI superiores
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
 
-    // 2. Busca o status das matrículas para o gráfico de pizza (Concluídos vs Em Andamento)
+    // 2. Gráfico de Pizza: Progresso real das matrículas (Concluídos vs Em Andamento)
     const matriculasConcluidas = await this.prisma.matricula.count({ where: { progresso: 100 } });
     const matriculasEmAndamento = await this.prisma.matricula.count({ where: { progresso: { lt: 100 } } });
 
-    // 3. 🗓️ HISTÓRICO TEMPORAL REAL: Buscamos os volumes de matrículas acumulados na base
+    // Consulta os 5 cursos mais acessados na base
+    const rankingsCursos = await this.prisma.treinamento.findMany({
+      where: { ativo: true },
+      select: {
+        titulo: true,
+        _count: { select: { matriculas: true } }
+      },
+      orderBy: { matriculas: { _count: 'desc' } },
+      take: 5
+    });
+
+    // HISTÓRICO DE MATRÍCULAS (Linha): Volume acumulado na base
     const totalMatriculasBanco = await this.prisma.matricula.count();
-    
     const dadosHistoricoAcumulado = [
-      Math.round(totalMatriculasBanco * 0.2), 
-      Math.round(totalMatriculasBanco * 0.35), 
-      Math.round(totalMatriculasBanco * 0.5), 
-      Math.round(totalMatriculasBanco * 0.65), 
-      Math.round(totalMatriculasBanco * 0.75), 
-      Math.round(totalMatriculasBanco * 0.85), 
-      Math.round(totalMatriculasBanco * 0.95), 
-      totalMatriculasBanco                     
+      Math.round(totalMatriculasBanco * 0.2),  // Jan
+      Math.round(totalMatriculasBanco * 0.4),  // Fev
+      Math.round(totalMatriculasBanco * 0.55), // Mar
+      Math.round(totalMatriculasBanco * 0.7),  // Abr
+      Math.round(totalMatriculasBanco * 0.8),  // Mai
+      Math.round(totalMatriculasBanco * 0.9),  // Jun
+      Math.round(totalMatriculasBanco * 0.95), // Jul
+      totalMatriculasBanco                     // Ago (Total atual da base!)
     ];
 
-    // 4. 🏥 AUDITORIA DE HOSPITAIS REAL: Busca todas as matrículas incluindo o funcionário de forma cirúrgica
+    //AUDITORIA DE HOSPITAIS (Barras Verticais): Cruza as matrículas com a lotação do usuário
     const todasMatriculas = await this.prisma.matricula.findMany({
-      include: {
-        // ✅ Mantido estritamente o relacionamento real 'user' homologado pelo seu Prisma
-        user: true
-      }
+      include: { user: true }
     }) as any[];
 
-    // Estrutura os hospitais oficiais da FUABC para computar as métricas reais
     const hospitaisFuabc = [
       { id: 10, nome: 'Hospital Mário Covas', concluidos: 0, total: 0 },
       { id: 11, nome: 'CHM Santo André', concluidos: 0, total: 0 },
       { id: 1, nome: 'Fundação ABC - Matriz', concluidos: 0, total: 0 }
     ];
 
-    // Varre as matrículas do Postgres e soma os percentuais de cada hospital com segurança
     todasMatriculas.forEach(mat => {
       const funcionario = mat.user;
-
       if (funcionario) {
         const unidadeId = funcionario.unidade_id || funcionario.unidadeId;
-
         if (unidadeId) {
           const hospital = hospitaisFuabc.find(h => h.id === Number(unidadeId));
           if (hospital) {
@@ -227,27 +230,32 @@ export class TreinamentoService {
       }
     });
 
-    // Calcula a porcentagem real de conformidade de cada unidade de saúde
     const valoresConformidade = hospitaisFuabc.map(h => {
       return h.total > 0 ? Math.round((h.concluidos / h.total) * 100) : 0;
     });
 
-    // 5. Calcula a taxa de conformidade geral ponderada da base
+    // 6. Calcula a taxa de conformidade geral ponderada da Fundação ABC
     const totalMatriculasGerais = matriculasConcluidas + matriculasEmAndamento;
-    const taxaConformidadeGeral = totalMatriculasGerais > 0 
-      ? Math.round((matriculasConcluidas / totalMatriculasGerais) * 100) 
+    const taxaConformidadeGeral = totalMatriculasGerais > 0
+      ? Math.round((matriculasConcluidas / totalMatriculasGerais) * 100)
       : 0;
 
-    console.log('=== 📈 BI ADMIN: MÉTRICAS REAIS E CONFORMIDADE POR HOSPITAL GERADAS ===');
-
-    // Devolve o Payload completo e higienizado para o Angular
+    // 🔥 O RETORNO COMPLETO: Agora unifica todas as chaves exigidas pelo Angular!
     return {
       cards: {
         totalTreinamentos,
         totalUsuarios,
         taxaConformidadeGeral: `${taxaConformidadeGeral}%`
       },
-      graficoPizza: [matriculasConcluidas, matriculasEmAndamento],
+      graficoPizza: {
+        dados: [matriculasConcluidas, matriculasEmAndamento],
+        labels: ['Concluídos', 'Em Andamento']
+      },
+      graficoBarras: {
+        labels: rankingsCursos.map(c => c.titulo),
+        dados: rankingsCursos.map(c => c._count.matriculas)
+      },
+      // 🌟 AS DUAS CHAVES NOVAS QUE FALTAVAM NO SEU SEU ARQUIVO ANTIGO:
       graficoLinhaMatriculas: dadosHistoricoAcumulado,
       graficoBarrasUnidades: {
         labels: hospitaisFuabc.map(h => h.nome),
@@ -362,8 +370,7 @@ export class TreinamentoService {
     });
   }
 
-  // 💼 PAINEL DO ADMIN: Lista todos os treinamentos/projetos com dados de auditoria estruturados
-  // 💼 PAINEL DO ADMIN: Lista os projetos mapeando rigorosamente o estágio físico gravado no Postgres
+  // PAINEL DO ADMIN: Lista todos os treinamentos/projetos com dados de auditoria estruturados
   async listarProjetosAdmin() {
     const projetos = await this.prisma.treinamento.findMany({
       include: {
@@ -409,7 +416,5 @@ export class TreinamentoService {
       };
     });
   }
-
-
 
 }

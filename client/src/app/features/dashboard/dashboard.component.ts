@@ -1,12 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
 import { TreinamentoService } from '../../core/services/treinamento.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 
-// Angular Material Components para o Dashboard
+// Angular Material Components para o Dashboard de Alta Performance
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field'; 
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { AlertsService } from '../../core/services/alerts.service';
 
 @Component({
@@ -23,14 +23,14 @@ import { AlertsService } from '../../core/services/alerts.service';
   imports: [
     CommonModule,
     RouterLink,
-    FormsModule, 
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
     MatMenuModule,
     MatBadgeModule,
-    MatInputModule, 
+    MatInputModule,
     MatFormFieldModule
   ],
   templateUrl: './dashboard.component.html',
@@ -40,33 +40,71 @@ export class DashboardComponent implements OnInit {
   private treinamentoService = inject(TreinamentoService);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
-  private alerts = inject(AlertsService); 
+  private alerts = inject(AlertsService);
   private router = inject(Router);
 
-  // Array que guardará a lista original de treinamentos vinda do NestJS
+  // Arrays estruturais que guardam os dados vindos do banco PostgreSQL
   treinamentos: any[] = [];
   notificacoes: any[] = [];
-
   rankingAlunos: any[] = [];
   minhasMedalhas: any[] = [];
   isLoading = true;
 
-  // Variáveis de Controle de Busca e Paginação
+  // Variáveis de Controle de Busca e Paginação Matemática
   filtroTexto: string = '';
   paginaAtual: number = 1;
   itensPorPagina: number = 6; // Exibe 6 cards (grade ideal de 3x2) por página
 
+  // Controladores de Estado da Nova Sidebar SaaS e Responsividade Mobile
+  abaAtiva: string = 'cursos';
+  isSidebarAberta: boolean = true;
+  isMobile: boolean = false;
+  // Escuta nativamente o redimensionamento do navegador para adequar a tela para Mobile!
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.verificarTamanhoTela();
+  }
+
   ngOnInit(): void {
-    this.carregarCursos();
+    this.verificarTamanhoTela();
+    this.mudarAba('cursos'); // Carrega a esteira acadêmica logo no boot inicial
     this.carregarNotificacoes();
-    this.carregarGamificacao();
+  }
+
+  private verificarTamanhoTela(): void {
+    this.isMobile = window.innerWidth <= 768;
+    if (this.isMobile) {
+      this.isSidebarAberta = false; // Fecha a barra por padrão no celular para dar espaço
+    } else {
+      this.isSidebarAberta = true;  // Mantém aberta fixada na lateral do computador
+    }
+  }
+
+  // 🧭 CONTROLADOR CENTRAL DE ABAS: Reabastece o estado do Postgres conforme o aluno navega
+  mudarAba(aba: string): void {
+    this.abaAtiva = aba;
+    console.log(`=== 📡 PORTAL ALUNO: CHAVEANDO PARA A ABA "${aba.toUpperCase()}" ===`);
+
+    if (this.isMobile) {
+      this.isSidebarAberta = false; // Auto-fecha a barra no mobile após o clique para liberar a tela
+    }
+
+    if (aba === 'cursos') {
+      this.carregarCursos();
+    }
+    if (aba === 'progresso') {
+      this.carregarGamificacao();
+    }
+    if (aba === 'kanban') {
+      this.abrirKanban();
+    }
   }
 
   // PROPRIEDADE COMPUTADA REATIVA: Filtra por título e fatia a lista para a página atual
   get treinamentosExibidos(): any[] {
     const textoBusca = this.filtroTexto.toLowerCase().trim();
-    
-    // 1. Filtra a lista com base no que foi digitado
+
+    // 1. Filtra a lista com base no que foi digitado na barra de pesquisa
     const filtrados = this.treinamentos.filter(curso =>
       curso.titulo?.toLowerCase().includes(textoBusca)
     );
@@ -93,26 +131,21 @@ export class DashboardComponent implements OnInit {
     return Math.ceil(filtrados.length / this.itensPorPagina) || 1;
   }
 
-    // A SINTONIA PREMUM DO CLIQUE: Matrícula automatizada antes de abrir o player!
+  // A SINTONIA PREMIUM DO CLIQUE: Matrícula automatizada antes de abrir o player!
   acessarCurso(treinamentoId: number): void {
-    this.isLoading = true; // Liga o esqueleto/spinner visual se houver
+    this.isLoading = true;
 
     this.treinamentoService.matricularAluno(treinamentoId).subscribe({
       next: (res) => {
         console.log('=== POSTGRES: MATRÍCULA EFETIVADA COM SUCESSO ===', res);
-        
-        // Injeta o pop-up verde sutil avisando que a esteira de estudos começou!
         this.alerts.sucesso('Treinamento iniciado! Bons estudos.');
-
-        //  NAVEGAÇÃO SEGURA: Só joga para o player após o banco confirmar o insert físico!
         this.router.navigate(['/curso', treinamentoId]);
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Erro ao inicializar matrícula no NestJS:', err);
         this.isLoading = false;
-        
-        // Se der erro 400 por ele já estar matriculado, podemos apenas deixar navegar direto!
+
         if (err.status === 400 || err.error?.message?.includes('já matriculado')) {
           this.router.navigate(['/curso', treinamentoId]);
         } else {
@@ -122,7 +155,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // Métodos de navegação das páginas
+  // Métodos executivos de navegação das páginas
   proximaPagina(): void {
     if (this.paginaAtual < this.totalPaginas) {
       this.paginaAtual++;
@@ -141,6 +174,7 @@ export class DashboardComponent implements OnInit {
   }
 
   carregarCursos(): void {
+    this.isLoading = true;
     this.treinamentoService.obterTreinamentosDisponiveis().subscribe({
       next: (dados) => {
         this.treinamentos = dados;
@@ -167,8 +201,8 @@ export class DashboardComponent implements OnInit {
   carregarGamificacao(): void {
     this.treinamentoService.obterDadosGamificacao().subscribe({
       next: (res) => {
-        this.rankingAlunos = res.ranking;
-        this.minhasMedalhas = res.medalhas;
+        this.rankingAlunos = res.ranking || [];
+        this.minhasMedalhas = res.medalhas || [];
       },
       error: (err) => console.error('Erro ao buscar gamificação:', err)
     });
@@ -185,10 +219,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // abrirCurso(id: number): void {
-  //   this.router.navigate([`/curso`, id]);
-  // }
-
   abrirKanban(): void {
     this.router.navigate(['/kanban']);
   }
@@ -198,3 +228,4 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 }
+

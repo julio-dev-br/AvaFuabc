@@ -92,9 +92,8 @@ export class TreinamentoController {
   // 💼 ROTA DO GESTOR: GET /treinamentos/admin/metricas
   @Get('admin/metricas')
   async obterMetricasAnaliticas() {
+    // 🌟 A CORREÇÃO: Mude de obterMetricasPainel() para obterMetricasAnaliticas()
     return this.treinamentosService.obterMetricasAnaliticas();
   }
-
-
 
 }

@@ -110,7 +110,7 @@ export class ProjetosKanbanComponent implements OnInit {
       // 3. Dispara a persistência de background no PostgreSQL via NestJS
       this.kanbanService.atualizarEstagioCardAdmin(cardIdParaSalvar, colunaIdAlvo, event.currentIndex + 1).subscribe({
         next: (resposta) => {
-          this.alerts.sucesso(`Estágio de "${cursoMovido.titulo}" atualizado com sucesso! 🚀`);
+          this.alerts.sucesso(`Estágio de "${cursoMovido.titulo}" atualizado com sucesso!`);
 
           // 🌟 REATIVIDADE LOCAL: Sintoniza o ID do estágio no objeto para manter o estado íntegro na tela
           cursoMovido.estagioId = colunaIdAlvo;
