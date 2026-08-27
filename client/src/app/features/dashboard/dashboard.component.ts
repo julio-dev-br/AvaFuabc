@@ -1,10 +1,13 @@
 import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TreinamentoService } from '../../core/services/treinamento.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
+
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 // Angular Material Components para o Dashboard de Alta Performance
 import { MatCardModule } from '@angular/material/card';
@@ -41,7 +44,10 @@ export class DashboardComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private alerts = inject(AlertsService);
+  private http = inject(HttpClient);
+  private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
+  private readonly apiUrl = `${environment.apiUrl}`;
 
   // Arrays estruturais que guardam os dados vindos do banco PostgreSQL
   treinamentos: any[] = [];
@@ -59,16 +65,42 @@ export class DashboardComponent implements OnInit {
   abaAtiva: string = 'cursos';
   isSidebarAberta: boolean = true;
   isMobile: boolean = false;
+
+  // Objeto recheado dinamicamente pelo PostgreSQL via Prisma
+  usuario = {
+    nome: '',
+    email: '',
+    empresa: '',
+    unidade: '',
+    cargo: '',
+    avatarUrl: 'https://depositphotos.com'
+  };
+
   // Escuta nativamente o redimensionamento do navegador para adequar a tela para Mobile!
   @HostListener('window:resize', ['$event'])
   onResize(): void {
     this.verificarTamanhoTela();
   }
 
+  // 🛡️ NG-ON-INIT REATIVO: Monitora a URL da Master Page a cada clique da Sidebar
   ngOnInit(): void {
     this.verificarTamanhoTela();
-    this.mudarAba('cursos'); // Carrega a esteira acadêmica logo no boot inicial
     this.carregarNotificacoes();
+    this.carregarDadosPerfilReal(); // Carrega os dados reais do rodapé no boot inicial
+
+    // 📡 ESCUTA DE ROTA EM TEMPO REAL: Se a URL mudar, chaveia a aba dinamicamente!
+    this.router.events.subscribe(() => {
+      const urlAtual = this.router.url;
+      if (urlAtual.includes('progresso')) {
+        this.mudarAba('progresso');
+      } else {
+        this.mudarAba('cursos');
+      }
+    });
+
+    // Carga inicial de segurança com base na URL do momento do boot
+    const urlBoot = this.router.url;
+    this.mudarAba(urlBoot.includes('progresso') ? 'progresso' : 'cursos');
   }
 
   private verificarTamanhoTela(): void {
@@ -80,7 +112,7 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  // 🧭 CONTROLADOR CENTRAL DE ABAS: Reabastece o estado do Postgres conforme o aluno navega
+  // Reabastece o estado do Postgres conforme o aluno navega
   mudarAba(aba: string): void {
     this.abaAtiva = aba;
     console.log(`=== 📡 PORTAL ALUNO: CHAVEANDO PARA A ABA "${aba.toUpperCase()}" ===`);
@@ -100,6 +132,31 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('accessToken');
+    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+  }
+
+  // 👤 BATE NO ENDPOINT DO POSTGRES AND ATUALIZA O SEU OBJETO 'USUARIO' EXISTENTE
+  carregarDadosPerfilReal(): void {
+    this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
+      next: (dados) => {
+        console.log('=== 📡 DATA RECEIVED FROM POSTGRES ===', dados);
+
+        this.usuario.nome = dados.nome;
+        this.usuario.email = dados.email;
+
+        if (dados.avatarUrl) {
+          this.usuario.avatarUrl = dados.avatarUrl;
+        }
+
+        console.log('=== 📡 POSTGRES: PERFIL DO RODAPÉ DA SIDEBAR ATUALIZADO COM SUCESSO! ===');
+      },
+      error: (err) => {
+        console.error('Erro ao carregar dados cadastrais do Postgres:', err);
+      }
+    });
+  }
   // PROPRIEDADE COMPUTADA REATIVA: Filtra por título e fatia a lista para a página atual
   get treinamentosExibidos(): any[] {
     const textoBusca = this.filtroTexto.toLowerCase().trim();
@@ -139,7 +196,8 @@ export class DashboardComponent implements OnInit {
       next: (res) => {
         console.log('=== POSTGRES: MATRÍCULA EFETIVADA COM SUCESSO ===', res);
         this.alerts.sucesso('Treinamento iniciado! Bons estudos.');
-        this.router.navigate(['/curso', treinamentoId]);
+        // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+        this.router.navigate(['/dashboard/curso', treinamentoId]);
         this.isLoading = false;
       },
       error: (err) => {
@@ -147,9 +205,10 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
 
         if (err.status === 400 || err.error?.message?.includes('já matriculado')) {
-          this.router.navigate(['/curso', treinamentoId]);
+          // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+          this.router.navigate(['/dashboard/curso', treinamentoId]);
         } else {
-          this.alerts.erro('Não foi possível iniciar este treinamento. Tente novamente.');
+          this.alerts.erro('Não foi Counseling iniciar este treinamento. Tente novamente.');
         }
       }
     });
@@ -220,12 +279,13 @@ export class DashboardComponent implements OnInit {
   }
 
   abrirKanban(): void {
-    this.router.navigate(['/kanban']);
+    // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+    this.router.navigate(['/dashboard/kanban']);
   }
 
   logout(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);
   }
-}
 
+} // Chave final da classe fechada com sucesso!

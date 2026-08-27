@@ -1,19 +1,11 @@
-<mat-toolbar color="primary" class="player-toolbar" style="background-color: #003366 !important; color: #ffffff;">
-  <button mat-icon-button (click)="voltarDashboard()" title="Voltar ao Painel">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  @if (curso) {
-  <span class="curso-titulo-topo">{{ curso.titulo }}</span>
-  }
-</mat-toolbar>
-
 @if (isLoading) {
-<div class="player-loading">Carregando estrutura do curso...</div>
+<div class="player-loading"
+  style="text-align: center; padding: 48px; color: #64748b; font-weight: 500; font-size: 14px;">Carregando
+  estrutura do curso...</div>
 }
 
 @if (!isLoading && curso) {
-<div class="player-grid">
-
+<div class="player-grid" style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
   <!-- 1. COLUNA DA ESQUERDA: Player de Vídeo Real e Detalhes da Aula Ativa -->
   <div class="video-section">
     @if (aulaAtiva) {
@@ -51,24 +43,22 @@
 
       <div
         style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <!--  BOTÃO DE AVALIAÇÃO VACINADO CONTRA CHAVES UNDEFINED -->
-        <button mat-raised-button [routerLink]="['/quiz/aula', aulaAtiva?.id || aulaAtiva?.id]"
-          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px;">
+        <!-- 🌟 CORRIGIDO: Rota sintonizada com as sub-rotas da Master Page -->
+        <button mat-raised-button [routerLink]="['/dashboard/quiz/aula', aulaAtiva?.id]"
+          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px; border: none; cursor: pointer; border-radius: 6px;">
           <mat-icon style="margin-right: 8px; vertical-align: middle;">assignment</mat-icon>
           Fazer Avaliação
         </button>
 
-
-        <!-- Botão do Fórum -->
-        <button mat-raised-button [routerLink]="['/forum/aula', aulaAtiva?.id]"
-          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px;">
+        <!-- 🌟 CORRIGIDO: Rota sintonizada com as sub-rotas da Master Page -->
+        <button mat-raised-button [routerLink]="['/dashboard/forum/aula', aulaAtiva?.id]"
+          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px; border: none; cursor: pointer; border-radius: 6px;">
           <mat-icon style="margin-right: 8px; vertical-align: middle;">chat</mat-icon>
           Fórum de Dúvidas
         </button>
-
       </div>
 
-      <!-- SEÇÃO DE MATERIAIS DE APOIO DA AULA (VISÃO DO ALUNO) -->
+      <!-- SEÇÃO DE MATERIAIS DE APOIO DA AULA -->
       @if (aulaAtiva?.materiais && aulaAtiva?.materiais.length > 0) {
       <div style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
         <h3
@@ -78,9 +68,8 @@
 
         <div style="display: flex; flex-wrap: wrap; gap: 12px;">
           @for (material of aulaAtiva.materiais; track material.id) {
-          <!-- O botão resolve o link de forma inteligente: se for upload do PC, anexa o host do environment -->
           <a mat-stroked-button [href]="configurarUrlMaterial(material.url)" target="_blank"
-            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 40px;">
+            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 40px; text-decoration: none;">
             <mat-icon style="margin-right: 4px; vertical-align: middle;">
               {{ material.tipo === 'LINK' ? 'link' : 'file_download' }}
             </mat-icon>
@@ -99,29 +88,34 @@
     </div>
     }
   </div>
-
   <!-- 2. COLUNA DA DIREITA: Barra Lateral com Módulos e Aulas (Accordion) -->
   <div class="sidebar-section">
-    <h3 class="sidebar-title">Conteúdo Programático</h3>
+    <h3 class="sidebar-title"
+      style="color: #003366; font-weight: 700; font-size: 15px; margin: 0 0 16px 0; padding-left: 4px;">
+      Conteúdo Programático
+    </h3>
 
     <mat-accordion multi="true">
       @for (modulo of curso.modulos; track modulo.id; let first = $first) {
-      <mat-expansion-panel [expanded]="first" class="modulo-panel">
-        <mat-expansion-panel-header>
-          <mat-panel-title class="modulo-titulo">
+      <mat-expansion-panel [expanded]="first" class="modulo-panel"
+        style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px !important; box-shadow: none !important;">
+        <mat-expansion-panel-header style="height: 48px;">
+          <mat-panel-title class="modulo-titulo" style="color: #003366; font-weight: 600; font-size: 14px;">
             {{ modulo.titulo }}
           </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <mat-action-list>
-          <!-- 🌟 AJUSTADO: Adicionado ?. no loop e na classe ativa -->
+        <mat-action-list style="padding: 0;">
           @for (aula of modulo?.aulas; track aula.id) {
           <button mat-list-item (click)="selecionarAula(aula)" [class.aula-ativa-item]="aulaAtiva?.id === aula.id"
-            class="aula-list-button">
-            <mat-icon matListItemIcon class="aula-status-icon">
+            class="aula-list-button"
+            style="border-radius: 6px; margin: 4px 0; transition: all 0.2s; border: none; cursor: pointer; text-align: left; width: 100%;">
+            <mat-icon matListItemIcon class="aula-status-icon"
+              style="color: #64748b; margin-right: 8px; font-size: 20px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">
               play_circle_outline
             </mat-icon>
-            <span class="aula-item-titulo">{{ aula?.titulo }}</span>
+            <span class="aula-item-titulo" style="font-size: 13px; font-weight: 500; vertical-align: middle;">{{
+              aula?.titulo }}</span>
           </button>
           }
         </mat-action-list>
@@ -130,5 +124,5 @@
     </mat-accordion>
   </div>
 
-</div>
-}
+</div> <!-- Fim da player-grid -->
+} <!-- Fim do @if (!isLoading && curso) -->

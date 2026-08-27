@@ -1,0 +1,127 @@
+<div
+    style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
+
+    <!-- 👤 1. SIDEBAR SAAS UNIFICADA MASTER -->
+    <aside
+        style="width: 260px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.3s ease; z-index: 50;">
+
+        <!-- Identidade Visual Fuabc com o Símbolo Recortado -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px;">
+            <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <img src="assets/logo-simbolo.png" alt="Logo FUABC"
+                    style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <div>
+                <h2
+                    style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; line-spacing: 1.2;">
+                    Portal do Aluno</h2>
+                <span style="font-size: 11px; color: #003366; font-weight: 700; letter-spacing: 0.2px;">Fundação do
+                    ABC</span>
+            </div>
+        </div>
+
+        <!-- Links de Navegação Real baseados em Rotas ( routerLink ) -->
+        <nav style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+
+            <a mat-button routerLink="/dashboard/cursos" routerLinkActive="active-saas-link"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
+                <mat-icon>school</mat-icon> <span style="font-weight: 600; font-size: 14px;">Meus Cursos</span>
+            </a>
+
+            <a mat-button routerLink="/dashboard/progresso" routerLinkActive="active-saas-link"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
+                <mat-icon>emoji_events</mat-icon> <span style="font-weight: 600; font-size: 14px;">Meu Progresso</span>
+            </a>
+
+            <a mat-button routerLink="/dashboard/kanban" routerLinkActive="active-saas-link"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
+                <mat-icon>dashboard</mat-icon> <span style="font-weight: 600; font-size: 14px;">Quadro de Estudos</span>
+            </a>
+
+        </nav>
+
+        <!-- RODAPÉ DROPDOWN DO AVATAR CONECTADO AO POSTGRES -->
+        <div
+            style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div [matMenuTriggerFor]="userMenu"
+                style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.backgroundColor='#f8fafc'"
+                onmouseout="this.style.backgroundColor='transparent'">
+                <img [src]="usuario.avatarUrl || 'assets/default-avatar.png'" alt="Avatar"
+                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #003366;">
+                <div style="flex: 1; min-width: 0;">
+                    <p
+                        style="margin: 0; font-size: 13px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ usuario.nome }}</p>
+                    <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">Matrícula Ativa</span>
+                </div>
+                <mat-icon style="font-size: 18px; color: #64748b;">expand_less</mat-icon>
+            </div>
+
+            <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
+                <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 200px;">
+                    <p style="margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8;">Logado como</p>
+                    <p
+                        style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ usuario.email }}</p>
+                </div>
+                <button mat-menu-item routerLink="/dashboard/perfil"><mat-icon
+                        style="color: #003366;">account_circle</mat-icon><span>Meu Perfil</span></button>
+                <div style="height: 1px; background-color: #f1f5f9; margin: 4px 0;"></div>
+                <button mat-menu-item (click)="logout()" style="color: #dc2626;"><mat-icon
+                        style="color: #dc2626;">logout</mat-icon><span>Sair do AVA</span></button>
+            </mat-menu>
+        </div>
+
+    </aside>
+
+    <!-- 💻 2. PAINEL DE CONTEÚDO PRINCIPAL (Header Unificado + Telas Filhas) -->
+    <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+
+        <header
+            style="height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 40;">
+            <div>
+                <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #003366;">Olá, Julio! Bons estudos hoje
+                    no AVA FUABC. 👋</h1>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                @if (isAdmin()) {
+                <button mat-icon-button routerLink="/admin" title="Painel Admin"
+                    style="color: #ff9800; display: flex; align-items: center; justify-content: center;"><mat-icon>admin_panel_settings</mat-icon></button>
+                }
+                <button mat-icon-button [matMenuTriggerFor]="menuNoti" style="color: #64748b;">
+                    <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn"
+                        [matBadgeHidden]="notificacoes.length === 0">notifications</mat-icon>
+                </button>
+                <mat-menu #menuNoti="matMenu">
+                    <div
+                        style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px;">
+                        Notificações Recentes</div>
+                    @for (n of notificacoes; track n.id) {
+                    <div
+                        style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 280px; max-width: 320px; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-weight: 600; color: #003366; font-size: 14px;">{{ n.titulo }}</span>
+                        <span style="color: #475569; font-size: 13px;">{{ n.mensagem }}</span>
+                    </div>
+                    }
+                </mat-menu>
+
+                <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
+
+                <button mat-icon-button (click)="logout()" title="Sair" style="color: #64748b;">
+                    <mat-icon style="font-size: 22px;">logout</mat-icon>
+                </button>
+            </div>
+        </header>
+
+        <!-- 🎭 3. O CORAÇÃO REATIVO DO REDIRECIONAMENTO -->
+        <main style="padding: 32px; overflow-y: auto; flex: 1; box-sizing: border-box;">
+
+            <!-- 🌟 A MÁGICA DO ANGULAR: Injeta a página solicitada mantendo a Sidebar intacta! -->
+            <router-outlet></router-outlet>
+
+        </main>
+
+    </div>
+</div>

@@ -1,315 +1,177 @@
-<!-- CONTAINER MESTRE: Divide a tela entre Sidebar (esquerda) e Painel Principal (direita) -->
-<div
-  style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
+<!-- ======================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
+<div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
 
-  <!-- 👤 1. NOVA SIDEBAR REATIVA DO ALUNO -->
-  <aside
-    style="width: 260px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.3s ease; z-index: 50;">
+  <div style="margin-bottom: 24px;">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus
+      Treinamentos Disponíveis</h2>
+    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Cursos liberados de acordo com sua empresa,
+      unidade hospitalar ou cargo.</p>
+  </div>
 
-    <!-- Identidade Visual Fuabc -->
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px;">
-      <div
-        style="width: 36px; height: 36px; background: linear-gradient(135deg, #003366, #004080); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 18px;">
-        A
-      </div>
-      <div>
-        <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px;">Portal do
-          Aluno</h2>
-        <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">Fundação ABC</span>
-      </div>
-    </div>
+  <!-- BARRA DE PESQUISA REATIVA -->
+  @if (!isLoading && treinamentos.length > 0) {
+  <div style="margin: 0 0 24px 0; width: 100%; max-width: 460px;">
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Pesquisar treinamento pelo título...</mat-label>
+      <input matInput [(ngModel)]="filtroTexto" (input)="paginaAtual = 1"
+        placeholder="Ex: Integração, NR-10, Prevenção...">
+      <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">search</mat-icon>
+    </mat-form-field>
+  </div>
+  }
 
-    <!-- Links de Navegação Vertical Corrigidos com Flexbox Alinhado -->
-    <nav style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
+  @if (isLoading) {
+  <p style="color: #666; font-weight: 500; font-size: 14px;">Carregando sua esteira acadêmica...</p>
+  }
 
-      <!-- ITEM: MEUS CURSOS -->
-      <button mat-button
-        style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; transition: all 0.2s; border: none; cursor: pointer; text-align: left;"
-        [style.background]="abaAtiva === 'cursos' ? 'rgba(0, 51, 102, 0.08)' : 'transparent'"
-        [style.color]="abaAtiva === 'cursos' ? '#003366' : '#64748b'" (click)="mudarAba('cursos')">
-        <mat-icon
-          style="font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: 0;">school</mat-icon>
-        <span style="font-weight: 600; font-size: 14px; line-height: 1;">Meus Cursos</span>
-      </button>
+  <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS -->
+  @if (!isLoading && treinamentos.length > 0) {
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+    @for (curso of treinamentosExibidos; track curso.id) {
+    <mat-card
+      style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between;">
+      <mat-card-header style="padding: 16px 16px 0 16px;">
+        <div class="course-icon-area"
+          style="background-color: rgba(0, 51, 102, 0.05); padding: 8px; border-radius: 6px; color: #003366; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+          <mat-icon class="course-icon">school</mat-icon>
+        </div>
+        <mat-card-title style="color: #003366; font-size: 15px !important; font-weight: 700; line-height: 1.2;">
+          {{ curso.titulo }}
+        </mat-card-title>
+        <mat-card-subtitle style="font-size: 12px; color: #64748b; margin-top: 4px;">Carga Horária: {{
+          curso.carga_horaria }}h</mat-card-subtitle>
+      </mat-card-header>
 
-      <!-- ITEM: MEU PROGRESSO & GAMIFICAÇÃO -->
-      <button mat-button
-        style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; transition: all 0.2s; border: none; cursor: pointer; text-align: left;"
-        [style.background]="abaAtiva === 'progresso' ? 'rgba(0, 51, 102, 0.08)' : 'transparent'"
-        [style.color]="abaAtiva === 'progresso' ? '#003366' : '#64748b'" (click)="mudarAba('progresso')">
-        <mat-icon
-          style="font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: 0;">emoji_events</mat-icon>
-        <span style="font-weight: 600; font-size: 14px; line-height: 1;">Meu Progresso</span>
-      </button>
+      <mat-card-content style="padding: 16px !important; color: #475569; font-size: 13px; flex: 1; line-height: 1.5;">
+        <p style="margin: 0;">{{ curso.descricao || 'Treinamento de qualificação institucional.' }}</p>
+      </mat-card-content>
 
-      <!-- ITEM: KANBAN DE ESTUDOS PRIVADO -->
-      <button mat-button
-        style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; transition: all 0.2s; border: none; cursor: pointer; text-align: left;"
-        [style.background]="abaAtiva === 'kanban' ? 'rgba(0, 51, 102, 0.08)' : 'transparent'"
-        [style.color]="abaAtiva === 'kanban' ? '#003366' : '#64748b'" (click)="mudarAba('kanban')">
-        <mat-icon
-          style="font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: 0;">dashboard</mat-icon>
-        <span style="font-weight: 600; font-size: 14px; line-height: 1;">Quadro de Estudos</span>
-      </button>
-
-    </nav>
-
-    <!-- Rodapé de Ações da Sidebar -->
-    <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; flex-direction: column; gap: 12px;">
-      <button mat-button routerLink="/perfil"
-        style="width: 100%; padding: 8px 12px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px; color: #475569; font-size: 13px; text-align: left;">
-        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">account_circle</mat-icon>
-        <span>Meu Perfil / Certificados</span>
-      </button>
-
-      @if (isAdmin()) {
-      <button mat-button routerLink="/admin"
-        style="width: 100%; padding: 8px 12px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px; color: #ff9800; font-size: 13px; font-weight: bold; background: rgba(255, 152, 0, 0.05); border-radius: 6px; text-align: left;">
-        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">admin_panel_settings</mat-icon>
-        <span>Painel Admin</span>
-      </button>
-      }
-    </div>
-
-  </aside>
-  <!-- 💻 2. PAINEL DE CONTEÚDO PRINCIPAL (Header Otimizado + Telas Dinâmicas) -->
-  <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-
-    <!-- 🧼 HEADER LIMPO CORPORATIVO -->
-    <header
-      style="height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 40;">
-      <div>
-        <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #003366; letter-spacing: -0.3px;">
-          Olá, Julio! Bons estudos.
-        </h1>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 16px;">
-
-        <!-- DROPDOWN DE ALERTAS ORIGINAL PRESERVADO -->
-        <button mat-icon-button [matMenuTriggerFor]="menuNoti" title="Notificações" style="color: #64748b;">
-          <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn" [matBadgeHidden]="notificacoes.length === 0">
-            notifications
-          </mat-icon>
+      <mat-card-actions class="course-actions"
+        style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;">
+        @if (curso.obrigatorio) {
+        <span class="required-badge"
+          style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Obrigatório</span>
+        }
+        <span style="flex: 1 1 auto;"></span>
+        <button mat-flat-button color="primary"
+          style="background-color: #003366 !important; font-weight: 600; font-size: 13px; border-radius: 6px;"
+          (click)="acessarCurso(curso.id)">
+          Acessar Curso
         </button>
+      </mat-card-actions>
+    </mat-card>
+    }
+  </div>
 
-        <mat-menu #menuNoti="matMenu">
-          <div
-            style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; color: #333; font-size: 14px;">
-            Notificações Recentes
-          </div>
-          @if (notificacoes.length === 0) {
-          <div style="padding: 16px; text-align: center; color: #888; font-size: 13px; min-width: 260px;">
-            Nenhuma notificação pendente.
-          </div>
-          }
-          @for (n of notificacoes; track n.id) {
-          <div
-            style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 280px; max-width: 320px; display: flex; flex-direction: column; gap: 4px;">
-            <span style="font-weight: 600; color: #003366; font-size: 14px;">{{ n.titulo }}</span>
-            <span style="color: #475569; font-size: 13px; line-height: 1.4;">{{ n.mensagem }}</span>
-            <button mat-button color="primary"
-              style="height: 28px; font-size: 11px; align-self: flex-end; margin-top: 4px; font-weight: bold;"
-              (click)="marcarLida(n.id); $event.stopPropagation();">
-              Marcar como lida
-            </button>
-          </div>
-          }
-        </mat-menu>
+  <!-- CONTROLES EXECUTIVOS DE PAGINAÇÃO MATEMÁTICA REAL INJETADOS -->
+  @if (totalPaginas > 1) {
+  <div
+    style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+    <button mat-stroked-button [disabled]="paginaAtual === 1" (click)="paginaAnterior()"
+      style="border-color: #003366; color: #003366;">
+      <mat-icon style="vertical-align: middle; margin-right: 4px;">chevron_left</mat-icon>Anterior
+    </button>
 
-        <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
+    <span style="font-size: 13px; color: #475569; font-weight: 500;">
+      Página <strong style="color: #003366;">{{ paginaAtual }}</strong> de {{ totalPaginas }}
+    </span>
 
-        <button mat-icon-button (click)="logout()" title="Sair" style="color: #64748b;">
-          <mat-icon style="font-size: 22px;">logout</mat-icon>
-        </button>
-      </div>
-    </header>
+    <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()"
+      style="border-color: #003366; color: #003366;">
+      Próxima<mat-icon style="vertical-align: middle; margin-left: 4px;">chevron_right</mat-icon>
+    </button>
+  </div>
+  }
+  }
 
-    <!-- 🎭 3. ÁREA DE CONTEÚDO REATIVO COMPLETO -->
-    <main style="padding: 32px; overflow-y: auto; flex: 1; box-sizing: border-box;">
+  <!-- Fallback de nenhum curso disponível -->
+  @if (!isLoading && treinamentos.length === 0) {
+  <div class="empty-state"
+    style="text-align: center; padding: 48px; color: #888888; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px;">
+    <mat-icon class="empty-icon" style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8;">info</mat-icon>
+    <p style="font-size: 15px; margin-top: 8px; font-weight: 500;">Nenhum treinamento localizado ou liberado para
+      o seu perfil atual.</p>
+  </div>
+  }
+</div>
 
-      <!-- ==================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
-      <div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
+<!-- ==================== ABA 2: CENTRAL DE ENGAJAMENTO (GAMIFICAÇÃO) ==================== -->
+<div *ngIf="abaAtiva === 'progresso'" style="animation: fadeIn 0.3s ease;">
 
-        <div style="margin-bottom: 24px;">
-          <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus
-            Treinamentos Disponíveis</h2>
-          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Cursos liberados de acordo com sua empresa,
-            unidade hospitalar ou cargo.</p>
-        </div>
+  <div style="margin-bottom: 24px;">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu
+      Desempenho & Conquistas</h2>
+    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Acompanhe suas insígnias e veja a sua posição
+      no pódio da Fundação ABC.</p>
+  </div>
 
-        <!-- BARRA DE PESQUISA REATIVA -->
-        @if (!isLoading && treinamentos.length > 0) {
-        <div style="margin: 0 0 24px 0; width: 100%; max-width: 460px;">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Pesquisar treinamento pelo título...</mat-label>
-            <input matInput [(ngModel)]="filtroTexto" (input)="paginaAtual = 1"
-              placeholder="Ex: Integração, NR-10, Prevenção...">
-            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">search</mat-icon>
-          </mat-form-field>
-        </div>
-        }
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
 
-        @if (isLoading) {
-        <p style="color: #666; font-weight: 500; font-size: 14px;">Carregando sua esteira acadêmica...</p>
-        }
-
-        <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS -->
-        @if (!isLoading && treinamentos.length > 0) {
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
-          @for (curso of treinamentosExibidos; track curso.id) {
-          <mat-card
-            style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between;">
-            <mat-card-header style="padding: 16px 16px 0 16px;">
-              <div class="course-icon-area"
-                style="background-color: rgba(0, 51, 102, 0.05); padding: 8px; border-radius: 6px; color: #003366; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
-                <mat-icon class="course-icon">school</mat-icon>
-              </div>
-              <mat-card-title style="color: #003366; font-size: 15px !important; font-weight: 700; line-height: 1.2;">
-                {{ curso.titulo }}
-              </mat-card-title>
-              <mat-card-subtitle style="font-size: 12px; color: #64748b; margin-top: 4px;">Carga Horária: {{
-                curso.carga_horaria }}h</mat-card-subtitle>
-            </mat-card-header>
-
-            <mat-card-content
-              style="padding: 16px !important; color: #475569; font-size: 13px; flex: 1; line-height: 1.5;">
-              <p style="margin: 0;">{{ curso.descricao || 'Treinamento de qualificação institucional.' }}</p>
-            </mat-card-content>
-
-            <mat-card-actions class="course-actions"
-              style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;">
-              @if (curso.obrigatorio) {
-              <span class="required-badge"
-                style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Obrigatório</span>
-              }
-              <span style="flex: 1 1 auto;"></span>
-              <button mat-flat-button color="primary"
-                style="background-color: #003366 !important; font-weight: 600; font-size: 13px; border-radius: 6px;"
-                (click)="acessarCurso(curso.id)">
-                Acessar Curso
-              </button>
-            </mat-card-actions>
-          </mat-card>
-          }
-        </div>
-
-          <!-- 📐 CONTROLES EXECUTIVOS DE PAGINAÇÃO MATEMÁTICA REAL INJETADOS -->
-          @if (totalPaginas > 1) {
-          <div
-            style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
-            <button mat-stroked-button [disabled]="paginaAtual === 1" (click)="paginaAnterior()"
-              style="border-color: #003366; color: #003366;">
-              <mat-icon style="vertical-align: middle; margin-right: 4px;">chevron_left</mat-icon>Anterior
-            </button>
-
-            <span style="font-size: 13px; color: #475569; font-weight: 500;">
-              Página <strong style="color: #003366;">{{ paginaAtual }}</strong> de {{ totalPaginas }}
-            </span>
-
-            <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()"
-              style="border-color: #003366; color: #003366;">
-              Próxima<mat-icon style="vertical-align: middle; margin-left: 4px;">chevron_right</mat-icon>
-            </button>
-          </div>
-          }
-        }
-
-        <!-- Fallback de nenhum curso disponível -->
-        @if (!isLoading && treinamentos.length === 0) {
-        <div class="empty-state"
-          style="text-align: center; padding: 48px; color: #888888; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px;">
-          <mat-icon class="empty-icon"
-            style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8;">info</mat-icon>
-          <p style="font-size: 15px; margin-top: 8px; font-weight: 500;">Nenhum treinamento localizado ou liberado para
-            o seu perfil atual.</p>
-        </div>
-        }
-      </div>
-
-      <!-- ==================== ABA 2: CENTRAL DE ENGAJAMENTO (GAMIFICAÇÃO) ==================== -->
-      <div *ngIf="abaAtiva === 'progresso'" style="animation: fadeIn 0.3s ease;">
-
-        <div style="margin-bottom: 24px;">
-          <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu
-            Desempenho & Conquistas</h2>
-          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Acompanhe suas insígnias e veja a sua posição
-            no pódio da Fundação ABC.</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-
-          <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS) -->
-          <mat-card
-            style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
-            <h3
-              style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
-              <mat-icon style="color: #ff9800;">military_tech</mat-icon> Minhas Conquistas
-            </h3>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-              @for (m of minhasMedalhas; track m.id) {
-              <div
-                style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9; background-color: #f8fafc;"
-                [style.opacity]="m.conquistada ? 1 : 0.4">
-                <mat-icon [style.color]="m.conquistada ? m.cor : '#94a3b8'"
-                  style="font-size: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-                  {{ m.icone }}
-                </mat-icon>
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-weight: 600; font-size: 13px;"
-                    [style.color]="m.conquistada ? '#1e293b' : '#64748b'">{{ m.titulo }}</span>
-                  <span style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ m.desc }}</span>
-                </div>
-              </div>
-              }
-            </div>
-          </mat-card>
-
-          <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS -->
-          <mat-card
-            style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
-            <h3
-              style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
-              <mat-icon style="color: #ff9800;">emoji_events</mat-icon> Ranking de Acertos (Top 5)
-            </h3>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              @for (aluno of rankingAlunos; track aluno.nome; let idx = $index) {
-              <div
-                style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 6px;"
-                [style.background-color]="aluno.isMe ? '#e6f0fa' : '#f8fafc'"
-                [style.border-left]="aluno.isMe ? '4px solid #003366' : '1px solid #e2e8f0'">
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
-                  <span style="font-weight: bold; width: 18px; color: #64748b;">{{ idx + 1 }}º</span>
-                  <span [style.font-weight]="aluno.isMe ? 'bold' : 'normal'" style="color: #334155;">{{ aluno.nome
-                    }}</span>
-                </div>
-                <span style="font-weight: bold; font-size: 13px; color: #003366;">{{ aluno.pontuacao }} pts</span>
-              </div>
-              }
-            </div>
-          </mat-card>
-
-        </div>
-      </div>
-
-      <!-- ==================== ABA 3: SEU KANBAN PRIVADO DE ESTUDOS ==================== -->
-      <div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
+    <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS) -->
+    <mat-card
+      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
+      <h3
+        style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+        <mat-icon style="color: #ff9800;">military_tech</mat-icon> Minhas Conquistas
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        @for (m of minhasMedalhas; track m.id) {
         <div
-          style="background-color: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
-          <div
-            style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
-            <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
-            <h2 style="margin: 0; font-size: 18px; color: #003366; font-weight: 700;">Quadro Kanban de Tarefas Pessoais
-            </h2>
+          style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9; background-color: #f8fafc;"
+          [style.opacity]="m.conquistada ? 1 : 0.4">
+          <mat-icon [style.color]="m.conquistada ? m.cor : '#94a3b8'"
+            style="font-size: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+            {{ m.icone }}
+          </mat-icon>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-weight: 600; font-size: 13px;" [style.color]="m.conquistada ? '#1e293b' : '#64748b'">{{
+              m.titulo }}</span>
+            <span style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ m.desc }}</span>
           </div>
-          <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-            Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou
-            leituras regulamentares você executará hoje.
-          </p>
         </div>
+        }
       </div>
+    </mat-card>
 
-    </main>
+    <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS -->
+    <mat-card
+      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
+      <h3
+        style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+        <mat-icon style="color: #ff9800;">emoji_events</mat-icon> Ranking de Acertos (Top 5)
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        @for (aluno of rankingAlunos; track aluno.nome; let idx = $index) {
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 6px;"
+          [style.background-color]="aluno.isMe ? '#e6f0fa' : '#f8fafc'"
+          [style.border-left]="aluno.isMe ? '4px solid #003366' : '1px solid #e2e8f0'">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+            <span style="font-weight: bold; width: 18px; color: #64748b;">{{ idx + 1 }}º</span>
+            <span [style.font-weight]="aluno.isMe ? 'bold' : 'normal'" style="color: #334155;">{{ aluno.nome
+              }}</span>
+          </div>
+          <span style="font-weight: bold; font-size: 13px; color: #003366;">{{ aluno.pontuacao }} pts</span>
+        </div>
+        }
+      </div>
+    </mat-card>
 
+  </div>
+</div>
+
+<!-- =========================== ABA 3: SEU KANBAN PRIVADO DE ESTUDOS ==================== -->
+<div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
+  <div style="background-color: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
+    <div
+      style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+      <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
+      <h2 style="margin: 0; font-size: 18px; color: #003366; font-weight: 700;">Quadro Kanban de Tarefas Pessoais
+      </h2>
+    </div>
+    <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
+      Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou
+      leituras regulamentares você executará hoje.
+    </p>
   </div>
 </div>

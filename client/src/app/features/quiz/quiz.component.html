@@ -1,110 +1,109 @@
-<mat-toolbar color="primary" class="quiz-toolbar" style="background-color: #003366 !important; color: #ffffff;">
-  <button mat-icon-button (click)="voltarParaAula()" title="Voltar para a Aula">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span>Avaliação do Conteúdo</span>
-</mat-toolbar>
+<div class="quiz-container" style="max-width: 800px; margin: 0 auto; padding: 0;">
 
-<div class="quiz-container" style="max-width: 800px; margin: 0 auto; padding: 32px 16px;">
-  
   <!-- ⏳ TELA 0: Estado de Carregamento -->
   @if (isLoading) {
-    <div style="text-align: center; padding: 48px; color: #666666; font-size: 15px; font-weight: 500;">
-      Processando informações, por favor aguarde...
-    </div>
+  <div style="text-align: center; padding: 48px; color: #64748b; font-size: 15px; font-weight: 500;">
+    Processando informações, por favor aguarde...
+  </div>
   }
 
   <!-- 📝 TELA 1: Formulário de Perguntas -->
   <div [style.display]="(!isLoading && quiz && !foiEnviado) ? 'block' : 'none'">
     <div style="margin-bottom: 24px;">
       <h2 style="color: #003366; font-size: 24px; font-weight: bold; margin-bottom: 4px;">{{ quiz?.titulo }}</h2>
-      <p style="color: #666666; font-size: 14px;">Nota mínima para aprovação: <strong>{{ quiz?.nota_minima }}</strong></p>
+      <p style="color: #666666; font-size: 14px;">Nota mínima para aprovação: <strong>{{ quiz?.nota_minima
+          }}</strong></p>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 20px;">
       @if (quiz && quiz.perguntas) {
-        @for (pergunta of quiz.perguntas; track pergunta.id; let i = $index) {
-        <mat-card style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;">
-          <mat-card-header>
-            <mat-card-title
-              style="font-size: 16px !important; font-weight: 600; color: #333333; line-height: 1.4; padding: 16px 16px 0 16px;">
-              Questão {{ i + 1 }}: {{ pergunta.pergunta }}
-            </mat-card-title>
-          </mat-card-header>
+      @for (pergunta of quiz.perguntas; track pergunta.id; let i = $index) {
+      <mat-card
+        style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important;">
+        <mat-card-header>
+          <mat-card-title
+            style="font-size: 16px !important; font-weight: 600; color: #333333; line-height: 1.4; padding: 16px 16px 0 16px;">
+            Questão {{ i + 1 }}: {{ pergunta.pergunta }}
+          </mat-card-title>
+        </mat-card-header>
 
-          <mat-card-content style="padding: 8px 16px 16px 16px !important;">
-            <mat-radio-group style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;"
-              (change)="selecionarAlternativa(pergunta.id, $event.value)">
-              @for (alternativa of pergunta.alternativas; track alternativa.id) {
-              <mat-radio-button style="font-size: 14px; color: #4a5568;" [value]="alternativa.id">
-                {{ alternativa.descricao }}
-              </mat-radio-button>
-              }
-            </mat-radio-group>
-          </mat-card-content>
-        </mat-card>
-        }
+        <mat-card-content style="padding: 8px 16px 16px 16px !important;">
+          <mat-radio-group style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;"
+            (change)="selecionarAlternativa(pergunta.id, $event.value)">
+            @for (alternativa of pergunta.alternativas; track alternativa.id) {
+            <mat-radio-button style="font-size: 14px; color: #4a5568;" [value]="alternativa.id">
+              {{ alternativa.descricao }}
+            </mat-radio-button>
+            }
+          </mat-radio-group>
+        </mat-card-content>
+      </mat-card>
+      }
       }
     </div>
 
     <div style="margin-top: 32px; text-align: right; padding-bottom: 50px;">
-      <!-- 🌟 SEGURANÇA: Botão reativado com [disabled] usando a sua função corrigida que conta chaves de ID -->
-      <button mat-raised-button 
-              color="primary"
-              style="background-color: #003366; color: white; padding: 0 24px; height: 44px; font-size: 14px; font-weight: 600;"
-              [disabled]="!formularioValido()" 
-              (click)="entregarProva()">
+      <button mat-raised-button color="primary"
+        style="background-color: #003366; color: white; padding: 0 24px; height: 44px; font-size: 14px; font-weight: 600;"
+        [disabled]="!formularioValido()" (click)="entregarProva()">
         Enviar Quiz para Correção
       </button>
     </div>
   </div>
-
   <!-- 🏆 TELA 2: Painel de Feedback e Notas -->
   @if (!isLoading && foiEnviado && resultadoEnvio) {
-    <mat-card [style.border]="resultadoEnvio.aprovado ? '2px solid #2e7d32' : '2px solid #c62828'"
-      style="text-align: center; padding: 40px 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;">
-      <mat-card-content style="display: flex; flex-direction: column; align-items: center;">
-        
-        <!-- Ícone Reativo -->
-        <mat-icon [style.color]="resultadoEnvio.aprovado ? '#2e7d32' : '#c62828'"
-          style="font-size: 72px; width: 72px; height: 72px; margin-bottom: 16px; line-height: 1;">
-          {{ resultadoEnvio.aprovado ? 'check_circle' : 'cancel' }}
-        </mat-icon>
+  <mat-card [style.border]="resultadoEnvio.aprovado ? '2px solid #2e7d32' : '2px solid #c62828'"
+    style="text-align: center; padding: 40px 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;">
+    <mat-card-content style="display: flex; flex-direction: column; align-items: center;">
 
-        <h2 style="font-size: 26px; font-weight: bold; margin-bottom: 8px; color: #333333;">
-          {{ resultadoEnvio.aprovado ? 'Aprovado!' : 'Não Atingiu a Nota Mínima' }}
-        </h2>
-        
-        <p style="color: #666666; font-size: 15px; margin-bottom: 24px; max-width: 450px; line-height: 1.5;">
-          {{ resultadoEnvio.mensagem }}
-        </p>
+      <!-- Ícone Reativo de Sucesso ou Falha -->
+      <mat-icon [style.color]="resultadoEnvio.aprovado ? '#2e7d32' : '#c62828'"
+        style="font-size: 72px; width: 72px; height: 72px; margin-bottom: 16px; line-height: 1;">
+        {{ resultadoEnvio.aprovado ? 'check_circle' : 'cancel' }}
+      </mat-icon>
 
-        <!-- Box de Placar de Notas -->
-        <div style="display: flex; gap: 40px; margin-bottom: 32px; background-color: #f8fafc; padding: 16px 40px; border-radius: 8px; border: 1px solid #e2e8f0;">
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <span style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px;">
-              Sua Nota Final
-            </span>
-            <span [style.color]="resultadoEnvio.aprovado ? '#2e7d32' : '#c62828'" style="font-size: 38px; font-weight: bold; line-height: 1;">
-              {{ resultadoEnvio.notaFinal }}
-            </span>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; align-items: center; border-left: 1px solid #cbd5e1; padding-left: 40px;">
-            <span style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px;">
-              Acertos
-            </span>
-            <span style="font-size: 22px; font-weight: bold; color: #334155; margin-top: 8px; line-height: 1;">
-              {{ resultadoEnvio.totalAcertos }} <span style="font-size: 14px; color: #64748b; font-weight: 400;">de {{ resultadoEnvio.totalPerguntas }}</span>
-            </span>
-          </div>
+      <h2 style="font-size: 26px; font-weight: bold; margin-bottom: 8px; color: #333333;">
+        {{ resultadoEnvio.aprovado ? 'Aprovado!' : 'Não Atingiu a Nota Mínima' }}
+      </h2>
+
+      <p style="color: #666666; font-size: 15px; margin-bottom: 24px; max-width: 450px; line-height: 1.5;">
+        {{ resultadoEnvio.mensagem }}
+      </p>
+
+      <!-- Box de Placar de Notas Corporativo -->
+      <div
+        style="display: flex; gap: 40px; margin-bottom: 32px; background-color: #f8fafc; padding: 16px 40px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <span
+            style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px;">
+            Sua Nota Final
+          </span>
+          <span [style.color]="resultadoEnvio.aprovado ? '#2e7d32' : '#c62828'"
+            style="font-size: 38px; font-weight: bold; line-height: 1;">
+            {{ resultadoEnvio.notaFinal }}
+          </span>
         </div>
 
-        <button mat-flat-button color="primary" style="height: 48px; padding: 0 24px; font-size: 15px; background-color: #003366 !important;"
-          (click)="voltarParaAula()">
-          Voltar para o Fluxo do Curso
-        </button>
-      </mat-card-content>
-    </mat-card>
+        <div
+          style="display: flex; flex-direction: column; align-items: center; border-left: 1px solid #cbd5e1; padding-left: 40px;">
+          <span
+            style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.5px;">
+            Acertos
+          </span>
+          <span style="font-size: 22px; font-weight: bold; color: #334155; margin-top: 8px; line-height: 1;">
+            {{ resultadoEnvio.totalAcertos }} <span style="font-size: 14px; color: #64748b; font-weight: 400;">de
+              {{ resultadoEnvio.totalPerguntas }}</span>
+          </span>
+        </div>
+      </div>
+
+      <button mat-flat-button color="primary"
+        style="height: 48px; padding: 0 24px; font-size: 15px; background-color: #003366 !important; font-weight: 600; border-radius: 6px;"
+        (click)="voltarParaAula()">
+        Voltar para o Fluxo do Curso
+      </button>
+    </mat-card-content>
+  </mat-card>
   }
-</div>
+
+</div> <!-- Fim da quiz-container -->

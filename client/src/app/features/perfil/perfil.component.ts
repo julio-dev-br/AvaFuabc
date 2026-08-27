@@ -1,22 +1,22 @@
-import { Component, OnInit, inject, ViewChild, AfterViewInit } from '@angular/core'; // 🌟 Ajustado ViewChild aqui
+import { Component, OnInit, inject, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // 🌟 Adicionado RouterLink
 import { UserService } from '../../core/services/user.service';
 
-// Angular Material Components
+// Angular Material Components para Layout Premium
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // 🌟 Adicionado MatSnackBarModule
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
-import { MatTableDataSource } from '@angular/material/table'; 
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-perfil',
@@ -24,6 +24,7 @@ import { MatTableDataSource } from '@angular/material/table';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -31,7 +32,8 @@ import { MatTableDataSource } from '@angular/material/table';
     MatTableModule,
     MatPaginatorModule,
     MatInputModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatSnackBarModule
   ],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css'
@@ -43,22 +45,30 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private readonly apiUrl = `${environment.apiUrl}`;
 
-  // O RADAR DO HTML: Captura o componente do paginador quando a tela terminar de desenhar
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  //  DECLARAÇÃO DO DATASOURCE NATIVO: Agora com o plural 's' e inicializado com a classe do Material
+  // DataSource nativo que gerencia a tabela do histórico
   historicoMatriculas = new MatTableDataSource<any>([]);
 
   isLoading = true;
   colunasTabela = ['treinamento', 'progresso', 'nota', 'status', 'acoes'];
 
+  // 🧭 CONTROLADOR DE ABAS HORIZONTAIS: Separa responsabilidades na interface
+  abaPerfilAtiva: 'dados' | 'certificados' = 'dados';
+
+  // 🔒 MODELOS REATIVOS DO FORMULÁRIO DE SEGURANÇA
+  senhaAtual: string = '';
+  novaSenha: string = '';
+  confirmarSenha: string = '';
+
+  // Objeto recheado dinamicamente pelo PostgreSQL via Prisma
   usuario = {
-    nome: 'Julio Valente',
-    email: 'julio@fuabc.org.br',
-    empresa: 'Fundação do ABC',
-    unidade: 'Hospital Central',
-    cargo: 'Colaborador Corporativo',
-    avatarUrl: 'https://st5.depositphotos.com/89768192/81688/v/450/depositphotos_816882272-stock-illustration-minimalist-dark-gray-profile-icon.jpg'
+    nome: '',
+    email: '',
+    empresa: '',
+    unidade: '',
+    cargo: '',
+    avatarUrl: 'assets/default-avatar.png'
   };
 
   ngOnInit(): void {
@@ -75,7 +85,6 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
 
-  // 🔍 FUNÇÃO DE FILTRO: Filtra as linhas nativamente na velocidade do clique
   aplicarFiltroHistorico(event: Event): void {
     const valorFiltro = (event.target as HTMLInputElement).value;
     this.historicoMatriculas.filter = valorFiltro.trim().toLowerCase();
@@ -88,7 +97,6 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   carregarHistoricoAcademico(): void {
     this.http.get<any[]>(`${this.apiUrl}/treinamentos/disponiveis`, { headers: this.getHeaders() }).subscribe({
       next: (dados: any[]) => {
-
         const listaMapeada = dados.map((curso: any) => {
           const m = (curso.matriculas && curso.matriculas.length > 0) ? curso.matriculas[0] : (curso.matricula || null);
 
@@ -111,10 +119,8 @@ export class PerfilComponent implements OnInit, AfterViewInit {
           };
         });
 
-        // Injeta o array tratado no DataSource nativo
         this.historicoMatriculas.data = listaMapeada;
 
-        // Vincula o paginador de forma assíncrona segura
         setTimeout(() => {
           this.historicoMatriculas.paginator = this.paginator;
         });
@@ -128,19 +134,52 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Bate no novo endpoint integrado do Postgres via Prisma
   carregarDadosPerfilReal(): void {
-    const token = localStorage.getItem('accessToken');
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-
-    this.http.get<any>(`${this.apiUrl}/auth/me`, { headers }).subscribe({
+    this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
       next: (dados) => {
-        this.usuario.nome = dados.name;
+        this.usuario.nome = dados.nome;
         this.usuario.email = dados.email;
-        if (dados.avatar_url) {
-          this.usuario.avatarUrl = dados.avatar_url;
+        this.usuario.empresa = dados.empresa;
+        this.usuario.unidade = dados.unidade;
+        this.usuario.cargo = dados.cargo;
+        if (dados.avatarUrl) {
+          this.usuario.avatarUrl = dados.avatarUrl;
         }
       },
-      error: (err) => console.error('Erro ao carregar dados cadastrais:', err)
+      error: (err) => console.error('Erro ao carregar dados cadastrais do Postgres:', err)
+    });
+  }
+
+  // Dispara o payload com a senha criptografada via bcrypt no NestJS
+  salvarNovaSenha(): void {
+    if (!this.senhaAtual.trim() || !this.novaSenha.trim() || !this.confirmarSenha.trim()) {
+      this.snackBar.open('Todos os campos de senha são obrigatórios!', 'Fechar', { duration: 4000, verticalPosition: 'top' });
+      return;
+    }
+
+    if (this.novaSenha !== this.confirmarSenha) {
+      this.snackBar.open('A nova senha e a confirmação não conferem.', 'Fechar', { duration: 4000, verticalPosition: 'top' });
+      return;
+    }
+
+    const payload = {
+      senhaAtual: this.senhaAtual,
+      novaSenha: this.novaSenha
+    };
+
+    this.http.patch(`${this.apiUrl}/user/perfil/senha`, payload, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.snackBar.open('Senha atualizada com sucesso no ecossistema!', 'Fechar', { duration: 3000, verticalPosition: 'top' });
+        // Limpa os campos após a gravação bem-sucedida
+        this.senhaAtual = '';
+        this.novaSenha = '';
+        this.confirmarSenha = '';
+      },
+      error: (err: HttpErrorResponse) => {
+        const msg = err.error?.message || 'Erro ao atualizar sua senha corporativa.';
+        this.snackBar.open(msg, 'Fechar', { duration: 4000, verticalPosition: 'top' });
+      }
     });
   }
 
@@ -151,7 +190,7 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     this.userService.atualizarFotoPerfil(arquivo).subscribe({
       next: (res) => {
         this.usuario.avatarUrl = res.avatar_url;
-        this.snackBar.open('Foto de perfil updated com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top' });
+        this.snackBar.open('Foto de perfil atualizada com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top' });
       },
       error: (err: HttpErrorResponse) => {
         const msg = err.error?.message || 'Erro ao fazer upload da imagem.';

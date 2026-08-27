@@ -21,7 +21,8 @@
   gap: 20px;
   padding: 24px;
   align-items: flex-start;
-  height: calc(100vh - 64px);
+  /* 🌟 CORRIGIDO: Altura calibrada para respeitar o <main> da Master Page */
+  height: calc(100vh - 150px);
   overflow-x: auto;
   background-color: #f4f6f8;
   box-sizing: border-box;

@@ -1,53 +1,54 @@
-<mat-toolbar color="primary" class="forum-toolbar" style="background-color: #003366 !important; color: #ffffff;">
-    <button mat-icon-button (click)="voltarParaCurso()" title="Voltar">
-        <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span>Fórum de Discussões da Aula</span>
-</mat-toolbar>
-
-<div class="forum-grid">
+<div class="forum-grid"
+    style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; height: calc(100vh - 140px);">
 
     <!-- COLUNA DA ESQUERDA: LISTA DE DÚVIDAS -->
-    <div class="topics-sidebar">
+    <div class="topics-sidebar"
+        style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
         <div class="sidebar-header"
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="margin: 0; font-weight: bold; color: #333;">Dúvidas Criadas</h3>
-            <button mat-flat-button color="accent" style="background-color: #ff9800; color: #fff;"
+            <h3 style="margin: 0; font-weight: 700; color: #003366; font-size: 15px;">Dúvidas Criadas</h3>
+            <button mat-flat-button
+                style="background-color: #ff9800; color: #fff; font-weight: 600; font-size: 12px; border-radius: 6px; height: 32px; padding: 0 12px;"
                 (click)="exibindoFormularioCriacao = true; topicoAtivo = null;">
                 Nova Dúvida
             </button>
         </div>
 
         @if (isLoading) {
-        <p style="color: #666; text-align: center; padding: 24px;">Carregando...</p>
+        <p style="color: #64748b; text-align: center; padding: 24px; font-size: 13px; font-weight: 500;">
+            Carregando discussões...</p>
         }
 
         @if (!isLoading && topicos.length === 0) {
         <div class="empty-forum-state"
-            style="text-align: center; padding: 32px; color: #888; border: 1px dashed #ccc; border-radius: 6px;">
+            style="text-align: center; padding: 32px; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 500; background: #f8fafc;">
             Nenhuma dúvida postada nesta aula ainda. Seja o primeiro!
         </div>
         }
 
-        <mat-action-list>
+        <mat-action-list style="padding: 0;">
             @for (t of topicos; track t.id) {
             <button mat-list-item (click)="abrirTopico(t.id)" [class.topico-ativo-item]="topicoAtivo?.id === t.id"
-                style="border-bottom: 1px solid #e0e0e0; margin-bottom: 4px; border-radius: 4px;">
-                <mat-icon matListItemIcon style="color: #003366;">forum</mat-icon>
-                <span matListItemTitle style="font-weight: 600; color: #003366;">{{ t.titulo }}</span>
-                <span matListItemLine style="color: #666; font-size: 12px;">Por: {{ t.autor?.name }} | Respostas: {{
-                    t._count?.respostas }}</span>
+                style="border: 1px solid #e2e8f0; margin-bottom: 8px; border-radius: 8px; transition: all 0.2s;">
+                <mat-icon matListItemIcon
+                    style="color: #003366; font-size: 18px; width: 18px; height: 18px;">forum</mat-icon>
+                <span matListItemTitle style="font-weight: 700; color: #003366; font-size: 13px;">{{
+                    t.titulo }}</span>
+                <span matListItemLine style="color: #64748b; font-size: 11px;">Por: {{ t.autor?.name }} |
+                    Respostas: {{ t._count?.respostas }}</span>
             </button>
             }
         </mat-action-list>
     </div>
 
     <!-- COLUNA DA DIREITA: DETALHES OU NOVO FORMULÁRIO -->
-    <div class="content-view-panel" style="background-color: #ffffff; padding: 24px; overflow-y: auto;">
+    <div class="content-view-panel"
+        style="background-color: #ffffff; padding: 24px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
 
         <!-- CENÁRIO A: FORMULÁRIO PARA CRIAR NOVA PERGUNTA -->
         @if (exibindoFormularioCriacao) {
-        <h2 style="color: #003366; font-weight: bold; margin-bottom: 24px;">O que você gostaria de perguntar?</h2>
+        <h2 style="color: #003366; font-weight: 700; margin-bottom: 20px; font-size: 18px; letter-spacing: -0.3px;">
+            O que você gostaria de perguntar?</h2>
         <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
             <mat-label>Título da sua dúvida</mat-label>
             <input matInput [(ngModel)]="novoTitulo" placeholder="Ex: Erro ao validar o artigo 7º">
@@ -60,8 +61,10 @@
         </mat-form-field>
 
         <div style="text-align: right; gap: 12px; display: flex; justify-content: flex-end;">
-            <button mat-button (click)="exibindoFormularioCriacao = false">Cancelar</button>
-            <button mat-flat-button color="primary" style="background-color: #003366;"
+            <button mat-button (click)="exibindoFormularioCriacao = false"
+                style="color: #64748b; font-weight: 600;">Cancelar</button>
+            <button mat-flat-button
+                style="background-color: #003366; color: white; font-weight: 600; border-radius: 6px;"
                 [disabled]="!novoTitulo.trim() || !novoConteudo.trim()" (click)="publicarDuvida()">Publicar
                 Pergunta</button>
         </div>
@@ -70,36 +73,39 @@
         <!-- CENÁRIO B: VISUALIZANDO TÓPICO SELECIONADO E SUAS RESPOSTAS -->
         @if (topicoAtivo && !exibindoFormularioCriacao) {
         <div class="main-question-block"
-            style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 32px;">
-            <h2 style="color: #003366; font-weight: bold; margin-bottom: 8px;">{{ topicoAtivo.titulo }}</h2>
-            <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">Postado por <strong>{{
-                    topicoAtivo.autor?.name }}</strong></p>
-            <p style="color: #334155; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">{{ topicoAtivo.conteudo
-                }}</p>
+            style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 32px;">
+            <h2 style="color: #003366; font-weight: 700; margin-bottom: 6px; font-size: 18px; letter-spacing: -0.3px;">
+                {{ topicoAtivo.titulo }}</h2>
+            <p style="color: #64748b; font-size: 12px; margin: 0 0 16px 0; font-weight: 500;">Postado por
+                <strong style="color: #334155;">{{ topicoAtivo.autor?.name }}</strong>
+            </p>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin: 0;">
+                {{ topicoAtivo.conteudo }}</p>
         </div>
 
         <h3
-            style="font-weight: bold; color: #333; margin-bottom: 16px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+            style="font-weight: 700; color: #003366; font-size: 15px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; letter-spacing: -0.2px;">
             Respostas</h3>
 
         <div class="replies-timeline" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px;">
             @for (resp of topicoAtivo.respostas; track resp.id) {
-            <!-- 🌟 DESTAQUE VISUAL SE FOR TUTOR/ADMIN: Usa classe 'tutor-reply-card' -->
             <div class="reply-card" [class.tutor-reply-card]="resp.is_tutor"
-                style="padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0; background-color: #ffffff;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="font-weight: bold; font-size: 14px; color: #333;">{{ resp.autor?.name }}</span>
+                style="padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #ffffff;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;">
+                    <span style="font-weight: 700; font-size: 13px; color: #1e293b;">{{ resp.autor?.name
+                        }}</span>
                     @if (resp.is_tutor) {
                     <span
-                        style="background-color: #e6f4ea; color: #137333; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Resposta
+                        style="background-color: #e6f4ea; color: #137333; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Resposta
                         Oficial</span>
                     }
                 </div>
-                <p style="color: #475569; font-size: 14px; margin: 0; line-height: 1.5; white-space: pre-wrap;">{{
-                    resp.conteudo }}</p>
+                <p style="color: #475569; font-size: 13px; margin: 0; line-height: 1.5; white-space: pre-wrap;">
+                    {{ resp.conteudo }}</p>
             </div>
             }
         </div>
+
         <!-- CAIXA DE TEXTO RÁPIDA PARA ENVIAR RESPOSTA -->
         <div class="reply-input-box" style="border-top: 1px solid #e2e8f0; padding-top: 24px;">
             <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 12px;">
@@ -108,9 +114,9 @@
                     placeholder="Digite uma resposta ou dica colaborativa..."></textarea>
             </mat-form-field>
             <div style="text-align: right;">
-                <!-- 🌟 ATUALIZADO: Adicionada a classe 'submit-reply-btn' e removido o style antigo -->
-                <button mat-flat-button class="submit-reply-btn" [disabled]="!novaResposta.trim()"
-                    (click)="enviarResposta()">
+                <button mat-flat-button class="submit-reply-btn"
+                    style="background-color: #003366; color: white; font-weight: 600; border-radius: 6px;"
+                    [disabled]="!novaResposta.trim()" (click)="enviarResposta()">
                     Enviar Resposta
                 </button>
             </div>
@@ -120,10 +126,13 @@
         <!-- CENÁRIO C: TELA EM BRANCO INICIAL (AGUARDANDO CLIQUE) -->
         @if (!topicoAtivo && !exibindoFormularioCriacao) {
         <div
-            style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center;">
-            <mat-icon style="font-size: 64px; width: 64px; height: 64px; margin-bottom: 16px;">forum</mat-icon>
-            <h2>Bem-vindo ao Fórum Colaborativo</h2>
-            <p>Selecione um tópico na barra lateral para ler a discussão ou crie uma nova pergunta.</p>
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8; text-align: center; padding: 48px 0;">
+            <mat-icon
+                style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px; color: #cbd5e1;">forum</mat-icon>
+            <h2 style="color: #334155; font-weight: 700; font-size: 16px; margin: 0 0 4px 0;">Bem-vindo ao
+                Fórum Colaborativo</h2>
+            <p style="margin: 0; font-size: 13px; color: #64748b;">Selecione um tópico na barra lateral para
+                ler a discussão ou crie uma nova pergunta.</p>
         </div>
         }
 

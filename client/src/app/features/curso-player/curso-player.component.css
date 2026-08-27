@@ -20,7 +20,8 @@
 .player-grid {
   display: grid;
   grid-template-columns: 7fr 3fr;
-  height: calc(100vh - 64px);
+  /* 🌟 CORRIGIDO: Altura calibrada para se encaixar milimetricamente na Master Page */
+  height: calc(100vh - 150px);
   overflow: hidden;
 }
 
@@ -96,7 +97,7 @@
   border: 1px solid #e0e0e0;
   padding: 10px 16px;
   border-radius: 6px;
-  color: #c62828; /* Cor vermelha para PDF */
+  color: #c62828;
   text-decoration: none;
   font-weight: 500;
   transition: background-color 0.2s;

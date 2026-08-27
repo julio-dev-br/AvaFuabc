@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/login/login.component';
+import { LayoutComponent } from './core/layout/layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CursoPlayerComponent } from './features/curso-player/curso-player.component';
 import { KanbanBoardComponent } from './features/kanban-board/kanban-board.component';
@@ -10,19 +11,31 @@ import { AdminDashboardComponent } from './features/admin-dashboard/admin-dashbo
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // Rota inicial redireciona para o Login público
+  // Rota inicial pública redireciona para o Login
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
-  // Rotas Protegidas: O Angular valida o token antes de permitir desenhar a tela
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'curso/:id', component: CursoPlayerComponent, canActivate: [authGuard] },
-  { path: 'kanban', component: KanbanBoardComponent, canActivate: [authGuard] },
-  { path: 'quiz/aula/:id', component: QuizComponent, canActivate: [authGuard] },
-  { path: 'forum/aula/:id', component: ForumComponent, canActivate: [authGuard] },
-  { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
+  // Quem entra aqui herda a Sidebar e o Header automaticamente!
+  { 
+    path: 'dashboard', 
+    component: LayoutComponent, 
+    canActivate: [authGuard],
+    children: [
+      // Injetadas dinamicamente dentro do <router-outlet> do painel central
+      { path: '', redirectTo: 'cursos', pathMatch: 'full' },
+      { path: 'cursos', component: DashboardComponent },
+      { path: 'progresso', component: DashboardComponent },
+      { path: 'kanban', component: KanbanBoardComponent },
+      { path: 'curso/:id', component: CursoPlayerComponent },
+      { path: 'quiz/aula/:id', component: QuizComponent },
+      { path: 'forum/aula/:id', component: ForumComponent },
+      { path: 'perfil', component: PerfilComponent }
+    ]
+  },
+
+  // Painel Administrativo do RH isolado do escopo do aluno
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
   
-  // Fallback para rotas inexistentes ou tentativas de invasão
+  // Fallback de segurança para caminhos inexistentes
   { path: '**', redirectTo: 'login' }
 ];

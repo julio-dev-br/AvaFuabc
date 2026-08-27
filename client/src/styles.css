@@ -60,3 +60,8 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   color: #ffffff !important;
   font-weight: bold !important;
 }
+
+.active-saas-link {
+  background-color: rgba(0, 51, 102, 0.08) !important;
+  color: #003366 !important;
+}

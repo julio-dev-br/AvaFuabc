@@ -134,5 +134,67 @@ export class UserController {
       select: { id: true, name: true, email: true, avatar_url: true }
     });
   }
+
+
+  // 👤 1. BUSCA O PERFIL DO USUÁRIO LOGADO DIRETO DO POSTGRESQL VIA JWT
+  @Get('perfil/me')
+  async obterPerfilLogado(@CurrentUser() user: any) {
+    const usuario = await this.prisma.user.findUnique({
+      where: { id: user.id }
+    });
+
+    if (!usuario) {
+      throw new BadRequestException('Usuário não localizado no ecossistema.');
+    }
+
+    // Retorna o JSON higienizado lendo as colunas exatas do seu Schema Prisma!
+    return {
+      id: usuario.id,
+      nome: usuario.name || 'Colaborador',
+      email: usuario.email,
+      avatarUrl: usuario.avatar_url || 'assets/default-avatar.png',
+      // Mapeia os códigos de BigInt vindos do Protheus de forma amigável
+      empresa: usuario.empresa_id ? `Empresa ${usuario.empresa_id.toString()}` : 'Fundação ABC',
+      unidade: usuario.unidade_id ? `Unidade ${usuario.unidade_id.toString()}` : 'Hospital Mário Covas',
+      cargo: usuario.cargo_id ? `Cargo ${usuario.cargo_id.toString()}` : 'Colaborador'
+    };
+  }
+
+  // 🔒 2. ATUALIZA APENAS A SENHA CRIPTOGRAFADA DO ALUNO COM VALIDAÇÃO SEGURA
+  @Patch('perfil/senha')
+  async atualizarSenha(@CurrentUser() user: any, @Body() body: any) {
+    const { senhaAtual, novaSenha } = body;
+
+    if (!senhaAtual || !novaSenha) {
+      throw new BadRequestException('A senha atual e a nova senha são obrigatórias.');
+    }
+
+    const usuarioDB = await this.prisma.user.findUnique({ where: { id: user.id } });
+    if (!usuarioDB) throw new BadRequestException('Usuário não localizado.');
+
+    // Valida se a senha atual digitada bate com o hash criptografado do banco
+    const senhaValida = await bcrypt.compare(senhaAtual, usuarioDB.password);
+    if (!senhaValida) {
+      throw new BadRequestException('A senha atual informada está incorreta.');
+    }
+
+    if (novaSenha.length < 6) {
+      throw new BadRequestException('A nova senha deve conter no mínimo 6 caracteres.');
+    }
+
+    // Gera o novo hash bcrypt com total segurança corporativa
+    const salt = await bcrypt.genSalt(10);
+    const novoPasswordHash = await bcrypt.hash(novaSenha, salt);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password: novoPasswordHash }
+    });
+
+    return { message: 'Senha atualizada com sucesso no ecossistema!' };
+  }
+
+
+
 }
 
