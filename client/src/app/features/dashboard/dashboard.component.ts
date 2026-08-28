@@ -18,6 +18,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AlertsService } from '../../core/services/alerts.service';
 
 @Component({
@@ -34,7 +35,8 @@ import { AlertsService } from '../../core/services/alerts.service';
     MatMenuModule,
     MatBadgeModule,
     MatInputModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatProgressBarModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -82,13 +84,13 @@ export class DashboardComponent implements OnInit {
     this.verificarTamanhoTela();
   }
 
-  // 🛡️ NG-ON-INIT REATIVO: Monitora a URL da Master Page a cada clique da Sidebar
+  // Monitora a URL da Master Page a cada clique da Sidebar
   ngOnInit(): void {
     this.verificarTamanhoTela();
     this.carregarNotificacoes();
     this.carregarDadosPerfilReal(); // Carrega os dados reais do rodapé no boot inicial
 
-    // 📡 ESCUTA DE ROTA EM TEMPO REAL: Se a URL mudar, chaveia a aba dinamicamente!
+    // Se a URL mudar, chaveia a aba dinamicamente!
     this.router.events.subscribe(() => {
       const urlAtual = this.router.url;
       if (urlAtual.includes('progresso')) {
@@ -115,7 +117,6 @@ export class DashboardComponent implements OnInit {
   // Reabastece o estado do Postgres conforme o aluno navega
   mudarAba(aba: string): void {
     this.abaAtiva = aba;
-    console.log(`=== 📡 PORTAL ALUNO: CHAVEANDO PARA A ABA "${aba.toUpperCase()}" ===`);
 
     if (this.isMobile) {
       this.isSidebarAberta = false; // Auto-fecha a barra no mobile após o clique para liberar a tela
@@ -137,11 +138,9 @@ export class DashboardComponent implements OnInit {
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
 
-  // 👤 BATE NO ENDPOINT DO POSTGRES AND ATUALIZA O SEU OBJETO 'USUARIO' EXISTENTE
   carregarDadosPerfilReal(): void {
     this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
       next: (dados) => {
-        console.log('=== 📡 DATA RECEIVED FROM POSTGRES ===', dados);
 
         this.usuario.nome = dados.nome;
         this.usuario.email = dados.email;
@@ -149,15 +148,13 @@ export class DashboardComponent implements OnInit {
         if (dados.avatarUrl) {
           this.usuario.avatarUrl = dados.avatarUrl;
         }
-
-        console.log('=== 📡 POSTGRES: PERFIL DO RODAPÉ DA SIDEBAR ATUALIZADO COM SUCESSO! ===');
       },
       error: (err) => {
         console.error('Erro ao carregar dados cadastrais do Postgres:', err);
       }
     });
   }
-  // PROPRIEDADE COMPUTADA REATIVA: Filtra por título e fatia a lista para a página atual
+
   get treinamentosExibidos(): any[] {
     const textoBusca = this.filtroTexto.toLowerCase().trim();
 
@@ -194,9 +191,9 @@ export class DashboardComponent implements OnInit {
 
     this.treinamentoService.matricularAluno(treinamentoId).subscribe({
       next: (res) => {
-        console.log('=== POSTGRES: MATRÍCULA EFETIVADA COM SUCESSO ===', res);
+
         this.alerts.sucesso('Treinamento iniciado! Bons estudos.');
-        // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+
         this.router.navigate(['/dashboard/curso', treinamentoId]);
         this.isLoading = false;
       },
@@ -205,7 +202,7 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
 
         if (err.status === 400 || err.error?.message?.includes('já matriculado')) {
-          // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+
           this.router.navigate(['/dashboard/curso', treinamentoId]);
         } else {
           this.alerts.erro('Não foi Counseling iniciar este treinamento. Tente novamente.');
@@ -233,7 +230,6 @@ export class DashboardComponent implements OnInit {
   }
 
   carregarCursos(): void {
-    this.isLoading = true;
     this.treinamentoService.obterTreinamentosDisponiveis().subscribe({
       next: (dados) => {
         this.treinamentos = dados;
@@ -258,12 +254,18 @@ export class DashboardComponent implements OnInit {
   }
 
   carregarGamificacao(): void {
+    this.isLoading = true;
     this.treinamentoService.obterDadosGamificacao().subscribe({
       next: (res) => {
         this.rankingAlunos = res.ranking || [];
         this.minhasMedalhas = res.medalhas || [];
+
+        this.isLoading = false;
       },
-      error: (err) => console.error('Erro ao buscar gamificação:', err)
+      error: (err) => {
+        console.error('Erro ao buscar gamificação:', err);
+        this.isLoading = false; 
+      }
     });
   }
 
@@ -279,7 +281,7 @@ export class DashboardComponent implements OnInit {
   }
 
   abrirKanban(): void {
-    // 🌟 SINTONIZADO COM A MASTER PAGE: Aponta o caminho relativo da rota filha
+    // Aponta o caminho relativo da rota filha
     this.router.navigate(['/dashboard/kanban']);
   }
 

@@ -9,11 +9,10 @@ import { AlertsService } from '../../core/services/alerts.service';
 import { ComunicadosComponent } from './components/comunicados/comunicados.component';
 import { ProjetosKanbanComponent } from './components/projetos-kanban/projetos-kanban.component';
 
+// Angular Material Modules
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-
-// Angular Material Modules
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -29,6 +28,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 // Componentes de Gráficos (Chart.js)
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from 'chart.js';
+
 import { ControleUsuariosComponent } from '../user/user.component';
 import { ModalMateriaisComponent } from './modal-materiais.component';
 import { NotificationService } from '../../core/services/notification.service';
@@ -471,7 +471,6 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  // Tipagem estrita casando com a propriedade do formulário e aceitando null no ID
   private obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: number | null): string {
     if (!id) return '';
 
@@ -483,7 +482,6 @@ export class AdminDashboardComponent implements OnInit {
     return this.mockUsuarios.find(u => u.id === id)?.nome || `Usuário ID: ${id}`;
   }
 
-  // Apontar e selecionar público alvo
   salvarVinculoPublico(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum curso base ativo para vincular o público.');
@@ -527,7 +525,6 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  // Finalizar a esteira de treinamento
   finalizarEsteiraTreinamento(): void {
     this.alerts.sucesso('Parabéns! Esteira de treinamento publicada e integrada com sucesso!');
 
@@ -547,7 +544,6 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  // Método reativo que puxa os cursos/projetos da API do NestJS
   carregarProjetosKanbanAdmin(): void {
     // this.abaAtiva = 'projetos'; 
   }

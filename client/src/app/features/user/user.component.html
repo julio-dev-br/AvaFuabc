@@ -1,67 +1,77 @@
 <!-- Cabeçalho Interno da Aba Administrativa -->
-<div class="content-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div class="content-header"
+  style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
   <div>
-    <h1 class="page-title" style="font-size: 24px; font-weight: bold; color: #003366; margin: 0 0 4px 0;">Controle de Usuários e Acessos</h1>
-    <p class="page-subtitle" style="color: #64748b; font-size: 14px; margin: 0;">Cadastre novos funcionários e controle as chaves de bloqueio lógico da Fundação ABC.</p>
+    <h1 class="page-title" style="font-size: 24px; font-weight: bold; color: #003366; margin: 0 0 4px 0;">Controle de
+      Usuários e Acessos</h1>
+    <p class="page-subtitle" style="color: #64748b; font-size: 14px; margin: 0;">Cadastre novos funcionários e controle
+      as chaves de bloqueio lógico da Fundação ABC.</p>
   </div>
-  
+
   @if (!exibirFormularioCadastro) {
-    <button mat-raised-button style="background-color: #ffb300; color: #003366; font-weight: 700; height: 44px; border-radius: 6px;" (click)="exibirFormularioCadastro = true">
-      <mat-icon>person_add</mat-icon> Novo Colaborador
-    </button>
+  <button mat-raised-button
+    style="background-color: #ffb300; color: #003366; font-weight: 700; height: 44px; border-radius: 6px;"
+    (click)="exibirFormularioCadastro = true">
+    <mat-icon>person_add</mat-icon> Novo Colaborador
+  </button>
   }
 </div>
 
-<!-- 📝 CONTAINER 1: Formulário de Inclusão de Funcionário -->
+<!-- Formulário de Inclusão de Funcionário -->
 @if (exibirFormularioCadastro) {
-  <mat-card style="margin-bottom: 32px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important; overflow: hidden;">
-    <div style="background-color: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
-      <h3 style="margin: 0; font-size: 15px; font-weight: bold; color: #003366;">Matricular e Registrar Novo Funcionário</h3>
+<mat-card
+  style="margin-bottom: 32px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important; overflow: hidden;">
+  <div style="background-color: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0;">
+    <h3 style="margin: 0; font-size: 15px; font-weight: bold; color: #003366;">Matricular e Registrar Novo Funcionário
+    </h3>
+  </div>
+
+  <mat-card-content style="padding: 24px !important;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nome Completo</mat-label>
+        <input matInput [(ngModel)]="novoUsuario.name" placeholder="Ex: Julio Valente">
+        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">person</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>E-mail Corporativo</mat-label>
+        <input matInput type="email" [(ngModel)]="novoUsuario.email" placeholder="Ex: julio@fuabc.org">
+        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nível de Perfil de Acesso</mat-label>
+        <mat-select [(ngModel)]="novoUsuario.role">
+          <mat-option value="user">Colaborador (Aluno)</mat-option>
+          <mat-option value="manager">Liderança (Gestor)</mat-option>
+          <mat-option value="admin">Administrador Central</mat-option>
+        </mat-select>
+        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">admin_panel_settings</mat-icon>
+      </mat-form-field>
+
     </div>
-    
-    <mat-card-content style="padding: 24px !important;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        
-        <mat-form-field appearance="outline">
-          <mat-label>Nome Completo</mat-label>
-          <input matInput [(ngModel)]="novoUsuario.name" placeholder="Ex: Julio Valente">
-          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">person</mat-icon>
-        </mat-form-field>
 
-        <mat-form-field appearance="outline">
-          <mat-label>E-mail Corporativo</mat-label>
-          <input matInput type="email" [(ngModel)]="novoUsuario.email" placeholder="Ex: julio@fuabc.org">
-          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Nível de Perfil de Acesso</mat-label>
-          <mat-select [(ngModel)]="novoUsuario.role">
-            <mat-option value="user">Colaborador (Aluno)</mat-option>
-            <mat-option value="manager">Liderança (Gestor)</mat-option>
-            <mat-option value="admin">Administrador Central</mat-option>
-          </mat-select>
-          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">admin_panel_settings</mat-icon>
-        </mat-form-field>
-
-      </div>
-
-      <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
-        <button mat-button style="color: #64748b;" (click)="resetarFormulario()">Cancelar</button>
-        <button mat-raised-button color="primary" style="background-color: #003366; color: white; padding: 0 24px; height: 40px; font-weight: 600; border-radius: 6px;" 
-                [disabled]="!novoUsuario.name || !novoUsuario.email || isSalvando" (click)="salvarUsuario()">
-          {{ isSalvando ? 'Gravando...' : 'Confirmar e Registrar' }}
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+      <button mat-button style="color: #64748b;" (click)="resetarFormulario()">Cancelar</button>
+      <button mat-raised-button color="primary"
+        style="background-color: #003366; color: white; padding: 0 24px; height: 40px; font-weight: 600; border-radius: 6px;"
+        [disabled]="!novoUsuario.name || !novoUsuario.email || isSalvando" (click)="salvarUsuario()">
+        {{ isSalvando ? 'Gravando...' : 'Confirmar e Registrar' }}
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
 }
 
-<!-- 📊 CONTAINER 2: Tabela de Monitoramento das Contas do Postgres -->
-<mat-card style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important; border: 1px solid #cbd5e1; overflow: hidden;">
-  <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
+<!-- Tabela de Monitoramento das Contas do Postgres -->
+<mat-card
+  style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important; border: 1px solid #cbd5e1; overflow: hidden;">
+  <div
+    style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #f1f5f9; background-color: #ffffff;">
     <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #1e293b;">Lista Geral de Funcionários</h3>
-    
+
     <mat-form-field appearance="outline" style="width: 320px; margin-bottom: -16px;">
       <mat-label>Filtrar colaborador...</mat-label>
       <input matInput (keyup)="aplicarFiltro($event)" placeholder="Digite nome ou e-mail...">
@@ -70,72 +80,96 @@
   </div>
 
   <mat-card-content style="padding: 0 !important;">
-    @if (isLoadingUsuarios) {
-      <div style="text-align: center; padding: 48px; color: #64748b; font-weight: 500;">
-        Consultando registros no PostgreSQL, por favor aguarde...
+    @if (isLoading) {
+    <div class="loading-overlay-container">
+      <div class="loading-progress-box">
+        <mat-icon
+          style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+          cloud_download
+        </mat-icon>
+        <mat-progress-bar mode="indeterminate"
+          style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+        <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+          Sincronizando Ecossistema
+        </h3>
+        <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+          Carregando registros no banco...
+        </p>
       </div>
+    </div>
     } @else {
-      <div style="width: 100%; overflow-x: auto;">
-        <table mat-table [dataSource]="userDataSource" style="width: 100%; background: white;">
-          
-          <!-- Coluna Nome -->
-          <ng-container matColumnDef="nome">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; height: 52px; background: #f8fafc; padding-left: 24px;"> Nome Completo </th>
-            <td mat-cell *matCellDef="let user" style="font-weight: 600; color: #1e293b; padding: 16px 8px; padding-left: 24px;"> 
-              {{ user.name || 'Usuário Sem Nome' }} 
-            </td>
-          </ng-container>
+    <div style="width: 100%; overflow-x: auto;">
+      <table mat-table [dataSource]="userDataSource" style="width: 100%; background: white;">
 
-          <!-- Coluna E-mail -->
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> E-mail </th>
-            <td mat-cell *matCellDef="let user" style="color: #475569;"> 
-              {{ user.email }} 
-            </td>
-          </ng-container>
+        <!-- Coluna Nome -->
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; height: 52px; background: #f8fafc; padding-left: 24px;">
+            Nome Completo </th>
+          <td mat-cell *matCellDef="let user"
+            style="font-weight: 600; color: #1e293b; padding: 16px 8px; padding-left: 24px;">
+            {{ user.name || 'Usuário Sem Nome' }}
+          </td>
+        </ng-container>
 
-          <!-- 🏢 Coluna Lotação (Protegida contra valores nulos de tabelas estrangeiras) -->
-          <ng-container matColumnDef="lotacao">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Lotação (Unidade) </th>
-            <td mat-cell *matCellDef="let user" style="color: #334155; font-size: 13px; line-height: 1.4;"> 
-              {{ user.unidade?.nome || 'Fundação ABC' }} 
-              <br>
-              <small style="color: #64748b; font-weight: 500;">{{ user.departamento?.nome || 'Geral / RH' }}</small>
-            </td>
-          </ng-container>
+        <!-- Coluna E-mail -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> E-mail </th>
+          <td mat-cell *matCellDef="let user" style="color: #475569;">
+            {{ user.email }}
+          </td>
+        </ng-container>
 
-          <!-- 💼 Coluna Cargo (Protegida contra valores nulos) -->
-          <ng-container matColumnDef="cargo">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Cargo </th>
-            <td mat-cell *matCellDef="let user" style="color: #475569; font-size: 13px;"> 
-              {{ user.cargo?.nome || 'Não Configurado' }} 
-            </td>
-          </ng-container>
+        <!--Protegida contra valores nulos de tabelas estrangeiras -->
+        <ng-container matColumnDef="lotacao">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Lotação (Unidade) </th>
+          <td mat-cell *matCellDef="let user" style="color: #334155; font-size: 13px; line-height: 1.4;">
+            {{ user.unidade?.nome || 'Fundação ABC' }}
+            <br>
+            <small style="color: #64748b; font-weight: 500;">{{ user.departamento?.nome || 'Geral / RH' }}</small>
+          </td>
+        </ng-container>
 
-          <!-- Coluna Perfil -->
-          <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Perfil </th>
-            <td mat-cell *matCellDef="let user">
-              <span [style.background-color]="user.role === 'admin' ? '#fee2e2' : user.role === 'manager' ? '#ffedd5' : '#f1f5f9'"
-                    [style.color]="user.role === 'admin' ? '#991b1b' : user.role === 'manager' ? '#9a3412' : '#334155'"
-                    style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block;">
-                {{ user.role }}
-              </span>
-            </td>
-          </ng-container>
+        <!-- Protegida contra valores nulos -->
+        <ng-container matColumnDef="cargo">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Cargo </th>
+          <td mat-cell *matCellDef="let user" style="color: #475569; font-size: 13px;">
+            {{ user.cargo?.nome || 'Não Configurado' }}
+          </td>
+        </ng-container>
 
-          <!-- Coluna Status Toggle -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef style="font-weight: 700; color: #003366; font-size: 13px; text-align: center; background: #f8fafc;"> Status Acesso </th>
-            <td mat-cell *matCellDef="let user" style="text-align: center;">
-              <mat-slide-toggle [checked]="user.ativo" color="primary" (change)="mudarStatus(user)"></mat-slide-toggle>
-            </td>
-          </ng-container>
+        <!-- Coluna Perfil -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; background: #f8fafc;"> Perfil </th>
+          <td mat-cell *matCellDef="let user">
+            <span
+              [style.background-color]="user.role === 'admin' ? '#fee2e2' : user.role === 'manager' ? '#ffedd5' : '#f1f5f9'"
+              [style.color]="user.role === 'admin' ? '#991b1b' : user.role === 'manager' ? '#9a3412' : '#334155'"
+              style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block;">
+              {{ user.role }}
+            </span>
+          </td>
+        </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="colunasTabela"></tr>
-          <tr mat-row *matRowDef="let row; columns: colunasTabela;" style="height: 60px; border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;"></tr>
-        </table>
-      </div>
+        <!-- Coluna Status Toggle -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef
+            style="font-weight: 700; color: #003366; font-size: 13px; text-align: center; background: #f8fafc;"> Status
+            Acesso </th>
+          <td mat-cell *matCellDef="let user" style="text-align: center;">
+            <mat-slide-toggle [checked]="user.ativo" color="primary" (change)="mudarStatus(user)"></mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunasTabela"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasTabela;"
+          style="height: 60px; border-bottom: 1px solid #f1f5f9; transition: background-color 0.2s;"></tr>
+      </table>
+    </div>
     }
   </mat-card-content>
 </mat-card>

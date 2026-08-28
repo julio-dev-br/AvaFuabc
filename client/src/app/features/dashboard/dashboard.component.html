@@ -1,6 +1,25 @@
+@if (isLoading) {
+<div class="loading-overlay-container">
+  <div class="loading-progress-box">
+    <mat-icon
+      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      cloud_download
+    </mat-icon>
+    <mat-progress-bar mode="indeterminate"
+      style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+      Sincronizando Ecossistema
+    </h3>
+    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+      Buscando dados cadastrais reais no PostgreSQL...
+    </p>
+  </div>
+</div>
+}
+
+@if (!isLoading) {
 <!-- ======================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
 <div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
-
   <div style="margin-bottom: 24px;">
     <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus
       Treinamentos Disponíveis</h2>
@@ -20,10 +39,6 @@
   </div>
   }
 
-  @if (isLoading) {
-  <p style="color: #666; font-weight: 500; font-size: 14px;">Carregando sua esteira acadêmica...</p>
-  }
-
   <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS -->
   @if (!isLoading && treinamentos.length > 0) {
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
@@ -41,11 +56,9 @@
         <mat-card-subtitle style="font-size: 12px; color: #64748b; margin-top: 4px;">Carga Horária: {{
           curso.carga_horaria }}h</mat-card-subtitle>
       </mat-card-header>
-
       <mat-card-content style="padding: 16px !important; color: #475569; font-size: 13px; flex: 1; line-height: 1.5;">
         <p style="margin: 0;">{{ curso.descricao || 'Treinamento de qualificação institucional.' }}</p>
       </mat-card-content>
-
       <mat-card-actions class="course-actions"
         style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;">
         @if (curso.obrigatorio) {
@@ -97,7 +110,6 @@
 
 <!-- ==================== ABA 2: CENTRAL DE ENGAJAMENTO (GAMIFICAÇÃO) ==================== -->
 <div *ngIf="abaAtiva === 'progresso'" style="animation: fadeIn 0.3s ease;">
-
   <div style="margin-bottom: 24px;">
     <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu
       Desempenho & Conquistas</h2>
@@ -162,7 +174,8 @@
 
 <!-- =========================== ABA 3: SEU KANBAN PRIVADO DE ESTUDOS ==================== -->
 <div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
-  <div style="background-color: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
+  <div
+    style="background-color: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
     <div
       style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
       <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
@@ -175,3 +188,4 @@
     </p>
   </div>
 </div>
+}

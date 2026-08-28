@@ -41,7 +41,7 @@ body .snackbar-container-limpo .mat-mdc-snack-bar-container .mdc-snackbar__surfa
   /* Zera os paddings nativos para o nosso HTML inline dominar */
 }
 
-/* 🌟 CORREÇÃO DO ALERTA DE ERRO: Garante o vermelho corporativo idêntico na tela de login */
+/* CORREÇÃO DO ALERTA DE ERRO: Garante o vermelho corporativo idêntico na tela de login */
 body .snackbar-erro-MDC .mat-mdc-snack-bar-container .mdc-snackbar__surface {
   background-color: #c62828 !important;
   /* Vermelho escuro de atenção */
@@ -64,4 +64,54 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
 .active-saas-link {
   background-color: rgba(0, 51, 102, 0.08) !important;
   color: #003366 !important;
+}
+
+/* 🌌 CONTAINER MESTRE BLINDADO (Cobre a área de conteúdo) */
+.loading-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(248, 250, 252, 0.65);
+  /* Fundo sutilmente esmaecido para dar foco */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  /* 🌟 Sobrepõe qualquer menu, card ou elemento da tela */
+  backdrop-filter: blur(2px);
+  /* Efeito de desfoque premium no fundo */
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 📦 CARD CENTRALIZADO DE PROGRESSO */
+.loading-progress-box {
+  width: 90%;
+  max-width: 450px;
+  background-color: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(0, 51, 102, 0.1), 0 8px 10px -6px rgba(0, 51, 102, 0.05);
+  text-align: center;
+}
+
+
+/* O EFEITO PULSANTE SHIMMER ENTERPRISE */
+.shimmer-placeholder {
+  background: linear-gradient(90deg, #f0f2f5 25%, #e6e8eb 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: loadingShimmer 1.5s infinite linear;
+  border-radius: 8px;
+}
+
+@keyframes loadingShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core'; // 🌟 Adicionado OnDestroy
+import { Component, OnInit, OnDestroy, inject } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TreinamentoService } from '../../core/services/treinamento.service';
@@ -10,8 +10,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-// 🌟 IMPORTAÇÃO DE SEGURANÇA REQUERIDA PELO COMPILADOR:
+
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
@@ -24,20 +25,21 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     RouterLink,
     MatIconModule,
     MatButtonModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatProgressBarModule
   ],
   templateUrl: './curso-player.component.html',
   styleUrl: './curso-player.component.css'
 })
-export class CursoPlayerComponent implements OnInit, OnDestroy { // 🌟 Implementa OnDestroy
+export class CursoPlayerComponent implements OnInit, OnDestroy {
   private treinamentoService = inject(TreinamentoService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private sanitizer = inject(DomSanitizer); // 🌟 Injeta o motor de limpeza do Angular
+  private sanitizer = inject(DomSanitizer); 
 
-  curso: any = null;
+  curso: any     = null;
   aulaAtiva: any = null;
-  isLoading = true;
+  isLoading      = true;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -46,11 +48,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy { // 🌟 Impleme
     }
   }
 
-  // 🌟 A VACINA CONTRA O RETORNO DA PÁGINA: Limpa a memória RAM do player quando o aluno sai da tela!
+  //  Limpa a memória RAM do player quando o aluno sai da tela!
   ngOnDestroy(): void {
     this.aulaAtiva = null;
     this.curso = null;
-    console.log('=== COMPONENTE DESTRUIDO: CACHES LIMPOS ===');
   }
 
   carregarDadosCurso(id: number): void {

@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-user',
@@ -28,7 +29,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatProgressBarModule
   ],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
@@ -40,7 +42,7 @@ export class ControleUsuariosComponent implements OnInit {
   // Estados de Controle da Tela
   userDataSource = new MatTableDataSource<any>([]);
   exibirFormularioCadastro = false;
-  isLoadingUsuarios = true;
+  isLoading = true;
   isSalvando = false;
 
   // Cabeçalhos que a tabela do Material exige mapear no HTML
@@ -63,15 +65,15 @@ export class ControleUsuariosComponent implements OnInit {
 
   // 📋 ROTA ADMINISTRATIVA: Busca os funcionários cadastrados no PostgreSQL
   carregarColaboradores(): void {
-    this.isLoadingUsuarios = true;
+    this.isLoading = true;
     this.userService.listarTodosColaboradores().subscribe({
       next: (dados) => {
         this.userDataSource.data = dados;
-        this.isLoadingUsuarios = false;
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Erro ao buscar colaboradores:', err);
-        this.isLoadingUsuarios = false;
+        this.isLoading = false;
       }
     });
   }

@@ -1,11 +1,7 @@
 <div
     style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
-
-    <!-- 👤 1. SIDEBAR SAAS UNIFICADA MASTER -->
     <aside
         style="width: 260px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.3s ease; z-index: 50;">
-
-        <!-- Identidade Visual Fuabc com o Símbolo Recortado -->
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px;">
             <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                 <img src="assets/logo-simbolo.png" alt="Logo FUABC"
@@ -19,28 +15,20 @@
                     ABC</span>
             </div>
         </div>
-
-        <!-- Links de Navegação Real baseados em Rotas ( routerLink ) -->
         <nav style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-
             <a mat-button routerLink="/dashboard/cursos" routerLinkActive="active-saas-link"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
                 <mat-icon>school</mat-icon> <span style="font-weight: 600; font-size: 14px;">Meus Cursos</span>
             </a>
-
             <a mat-button routerLink="/dashboard/progresso" routerLinkActive="active-saas-link"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
                 <mat-icon>emoji_events</mat-icon> <span style="font-weight: 600; font-size: 14px;">Meu Progresso</span>
             </a>
-
             <a mat-button routerLink="/dashboard/kanban" routerLinkActive="active-saas-link"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none;">
                 <mat-icon>dashboard</mat-icon> <span style="font-weight: 600; font-size: 14px;">Quadro de Estudos</span>
             </a>
-
         </nav>
-
-        <!-- RODAPÉ DROPDOWN DO AVATAR CONECTADO AO POSTGRES -->
         <div
             style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; flex-direction: column; gap: 10px;">
             <div [matMenuTriggerFor]="userMenu"
@@ -57,7 +45,6 @@
                 </div>
                 <mat-icon style="font-size: 18px; color: #64748b;">expand_less</mat-icon>
             </div>
-
             <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
                 <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 200px;">
                     <p style="margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8;">Logado como</p>
@@ -69,59 +56,99 @@
                         style="color: #003366;">account_circle</mat-icon><span>Meu Perfil</span></button>
                 <div style="height: 1px; background-color: #f1f5f9; margin: 4px 0;"></div>
                 <button mat-menu-item (click)="logout()" style="color: #dc2626;"><mat-icon
-                        style="color: #dc2626;">logout</mat-icon><span>Sair do AVA</span></button>
+                        style="color: #dc2626;">logout</mat-icon><span>Sair</span></button>
             </mat-menu>
         </div>
-
     </aside>
-
-    <!-- 💻 2. PAINEL DE CONTEÚDO PRINCIPAL (Header Unificado + Telas Filhas) -->
     <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-
         <header
             style="height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 40;">
-            <div>
-                <h1 style="margin: 0; font-size: 16px; font-weight: 700; color: #003366;">Olá, Julio! Bons estudos hoje
-                    no AVA FUABC. 👋</h1>
-            </div>
 
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div
+                    style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500;">
+                    @for (bc of breadcrumbs; track bc.url; let last = $last) {
+                    @if (!last) {
+                    <a [routerLink]="bc.url" style="color: #64748b; text-decoration: none; transition: color 0.2s;"
+                        onmouseover="this.style.color='#003366'" onmouseout="this.style.color='#64748b'">
+                        {{ bc.texto }}
+                    </a>
+                    <mat-icon
+                        style="font-size: 14px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">chevron_right</mat-icon>
+                    } @else {
+                    <span style="color: #003366; font-weight: 700;">
+                        {{ bc.texto }}
+                    </span>
+                    }
+                    }
+                </div>
+                <h1 style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b; letter-spacing: -0.3px;">
+                    <!-- Olá, {{ usuario.nome }}! -->
+                </h1>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
                 @if (isAdmin()) {
-                <button mat-icon-button routerLink="/admin" title="Painel Admin"
-                    style="color: #ff9800; display: flex; align-items: center; justify-content: center;"><mat-icon>admin_panel_settings</mat-icon></button>
+                <a mat-stroked-button routerLink="/admin" title="Trocar para o Painel Administrativo do RH"
+                    style="border-color: #cbd5e1; color: #475569; font-weight: 600; font-size: 13px; height: 38px; line-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: all 0.2s ease;"
+                    onmouseover="this.style.borderColor='#003366'; this.style.color='#003366'; this.style.backgroundColor='rgba(0, 51, 102, 0.04)'"
+                    onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'; this.style.backgroundColor='transparent'">
+                    <mat-icon
+                        style="font-size: 18px; width: 18px; height: 18px; color: inherit; margin: 0;">admin_panel_settings</mat-icon>
+                    <span style="line-height: 1;">Painel de Gestão</span>
+                </a>
                 }
-                <button mat-icon-button [matMenuTriggerFor]="menuNoti" style="color: #64748b;">
+                @if (isAdmin()) {
+                <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
+                }
+                <button mat-icon-button [matMenuTriggerFor]="menuNoti"
+                    style="color: #64748b; display: flex; align-items: center; justify-content: center;">
                     <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn"
                         [matBadgeHidden]="notificacoes.length === 0">notifications</mat-icon>
                 </button>
                 <mat-menu #menuNoti="matMenu">
                     <div
-                        style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px;">
-                        Notificações Recentes</div>
+                        style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #003366;">
+                        Notificações Recentes
+                    </div>
+                    @if (notificacoes.length === 0) {
+                    <div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 13px; font-weight: 500;">
+                        Nenhuma notificação pendente.
+                    </div>
+                    }
                     @for (n of notificacoes; track n.id) {
-                    <div
-                        style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 280px; max-width: 320px; display: flex; flex-direction: column; gap: 4px;">
-                        <span style="font-weight: 600; color: #003366; font-size: 14px;">{{ n.titulo }}</span>
-                        <span style="color: #475569; font-size: 13px;">{{ n.mensagem }}</span>
+                    <div style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; width: 320px; max-width: 100%; display: flex; flex-direction: column; gap: 8px; transition: background 0.2s; overflow-x: hidden; box-sizing: border-box;"
+                        onmouseover="this.style.backgroundColor='#f8fafc'"
+                        onmouseout="this.style.backgroundColor='transparent'">
+                        <div style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
+                            <span style="font-weight: 600; color: #1e293b; font-size: 13px;">
+                                {{ n.titulo }}
+                            </span>
+                            <span style="color: #64748b; font-size: 12px; line-height: 1.4; word-break: break-word;">
+                                {{ n.mensagem }}
+                            </span>
+                        </div>
+                        <div style="text-align: left; padding-left: 2px;">
+                            <button mat-button
+                                style="font-size: 11px; font-weight: 700; color: #003366; background: transparent; border: none; padding: 0; min-width: auto; height: auto; cursor: pointer; transition: color 0.2s; text-transform: none; display: inline-flex; align-items: center; gap: 4px;"
+                                title="Limpar este alerta" (click)="marcarLida(n.id); $event.stopPropagation();"
+                                onmouseover="this.style.color='#ff9800'" onmouseout="this.style.color='#003366'">
+                                <mat-icon
+                                    style="font-size: 14px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; margin: 0; color: inherit;">done</mat-icon>
+                                Marcar como lida
+                            </button>
+                        </div>
+
                     </div>
                     }
                 </mat-menu>
-
                 <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
-
                 <button mat-icon-button (click)="logout()" title="Sair" style="color: #64748b;">
                     <mat-icon style="font-size: 22px;">logout</mat-icon>
                 </button>
             </div>
         </header>
-
-        <!-- 🎭 3. O CORAÇÃO REATIVO DO REDIRECIONAMENTO -->
         <main style="padding: 32px; overflow-y: auto; flex: 1; box-sizing: border-box;">
-
-            <!-- 🌟 A MÁGICA DO ANGULAR: Injeta a página solicitada mantendo a Sidebar intacta! -->
             <router-outlet></router-outlet>
-
         </main>
-
     </div>
 </div>

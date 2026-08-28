@@ -57,7 +57,7 @@
 
       @if (isLoadingMetrics) {
       <div class="loading-box" style="padding: 32px; text-align: center; color: #64748b;">
-        Processando relatórios e consolidações do PostgreSQL...
+        Processando relatórios e consolidações...
       </div>
       }
 
@@ -171,7 +171,6 @@
         }
       </div>
 
-      <!-- 🔍 BARRA DE PESQUISA REATIVA DO ADMINISTRADOR -->
       @if (!isLoadingCursos && listaCursosGerencial && listaCursosGerencial.length > 0 && passoAtual === 0) {
       <div style="margin: -8px 0 24px 0; width: 100%; max-width: 460px;">
         <mat-form-field appearance="outline" style="width: 100%;">
@@ -185,7 +184,7 @@
 
       @if (isLoadingCursos) {
       <div style="text-align: center; padding: 48px; color: #64748b; font-weight: 500;">
-        Processando catálogo de cursos do PostgreSQL...
+        Processando catálogo de cursos...
       </div>
       }
 
@@ -227,7 +226,7 @@
 
             <mat-card-actions
               style="padding: 0 16px 16px 16px; display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;">
-              <!-- 🌟 RETORNADO COM SEGURANÇA: Passa o objeto do curso completo para a modal colher as aulas -->
+              <!-- RETORNADO COM SEGURANÇA: Passa o objeto do curso completo para a modal colher as aulas -->
               <button mat-stroked-button style="color: #003366; border-color: #003366;"
                 (click)="abrirModalMateriais(curso.id, curso.titulo)" title="Gerenciar Documentos / PDFs">
                 <mat-icon style="margin-right: 4px; vertical-align: middle;">attach_file</mat-icon> Materiais
@@ -271,7 +270,7 @@
         }
       </div>
       }
-      <!-- 🧙‍♂️ ASSISTENTE DE CRIAÇÃO PASSO A PASSO (WIZARD) -->
+      <!-- ASSISTENTE DE CRIAÇÃO PASSO A PASSO (WIZARD) -->
       @if (passoAtual > 0) {
       <div class="wizard-container" style="width: 100%; max-width: 850px; margin: 12px auto 0 auto;">
 
@@ -496,9 +495,7 @@
         </mat-card>
         }
 
-        <!-- PASSO 5: DISTRIBUIÇÃO ORGANIZACIONAL & DIRETRIZES DO RH -->
-
-        <!-- 💼 PASSO 5: CONFIGURAÇÃO DE PÚBLICO ALVO REGULAMENTAR (INTEGRAÇÃO PROTHEUS) -->
+        <!-- PASSO 5: CONFIGURAÇÃO DE PÚBLICO ALVO REGULAMENTAR (INTEGRAÇÃO PROTHEUS) -->
         @if (passoAtual === 5) {
         <mat-card
           style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; animation: fadeIn 0.3s ease;">
@@ -565,7 +562,7 @@
               </button>
             </div>
 
-            <!-- 📋 SEÇÃO: REGRAS DE DISTRIBUIÇÃO ATIVAS NO CURSO -->
+            <!-- SEÇÃO: REGRAS DE DISTRIBUIÇÃO ATIVAS NO CURSO -->
             <h3
               style="margin: 12px 0 4px 0; color: #003366; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
               <mat-icon style="font-size: 18px; width: 18px; height: 18px;">verified</mat-icon> Públicos Vinculados
@@ -628,7 +625,7 @@
     </div>
     }
 
-    <!-- 📢 GERENCIAMENTO CENTRAL DE COMUNICADOS E ALERTAS INSTITUCIONAIS -->
+    <!-- GERENCIAMENTO CENTRAL DE COMUNICADOS E ALERTAS INSTITUCIONAIS -->
     @if (abaAtiva === 'comunicados') {
     <app-comunicados></app-comunicados>
     }

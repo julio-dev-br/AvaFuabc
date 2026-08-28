@@ -1,8 +1,7 @@
 import { Component, OnInit, inject, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router'; // 🌟 Adicionado RouterLink
-import { UserService } from '../../core/services/user.service';
+import { Router, RouterLink } from '@angular/router';
 
 // Angular Material Components para Layout Premium
 import { MatCardModule } from '@angular/material/card';
@@ -10,13 +9,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // 🌟 Adicionado MatSnackBarModule
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { AlertsService } from '../../core/services/alerts.service';
+import { UserService } from '../../core/services/user.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-perfil',
@@ -33,7 +36,8 @@ import { MatTableDataSource } from '@angular/material/table';
     MatPaginatorModule,
     MatInputModule,
     MatFormFieldModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressBarModule
   ],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css'
@@ -43,6 +47,8 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   private router = inject(Router);
   private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
+  private alerts = inject(AlertsService);
+
   private readonly apiUrl = `${environment.apiUrl}`;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -53,10 +59,10 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   isLoading = true;
   colunasTabela = ['treinamento', 'progresso', 'nota', 'status', 'acoes'];
 
-  // 🧭 CONTROLADOR DE ABAS HORIZONTAIS: Separa responsabilidades na interface
+  // Separa responsabilidades na interface
   abaPerfilAtiva: 'dados' | 'certificados' = 'dados';
 
-  // 🔒 MODELOS REATIVOS DO FORMULÁRIO DE SEGURANÇA
+  // MODELOS REATIVOS DO FORMULÁRIO DE SEGURANÇA
   senhaAtual: string = '';
   novaSenha: string = '';
   confirmarSenha: string = '';
@@ -95,6 +101,7 @@ export class PerfilComponent implements OnInit, AfterViewInit {
   }
 
   carregarHistoricoAcademico(): void {
+    this.isLoading = true;
     this.http.get<any[]>(`${this.apiUrl}/treinamentos/disponiveis`, { headers: this.getHeaders() }).subscribe({
       next: (dados: any[]) => {
         const listaMapeada = dados.map((curso: any) => {
@@ -134,7 +141,6 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Bate no novo endpoint integrado do Postgres via Prisma
   carregarDadosPerfilReal(): void {
     this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
       next: (dados) => {
@@ -151,7 +157,6 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Dispara o payload com a senha criptografada via bcrypt no NestJS
   salvarNovaSenha(): void {
     if (!this.senhaAtual.trim() || !this.novaSenha.trim() || !this.confirmarSenha.trim()) {
       this.snackBar.open('Todos os campos de senha são obrigatórios!', 'Fechar', { duration: 4000, verticalPosition: 'top' });
@@ -170,15 +175,15 @@ export class PerfilComponent implements OnInit, AfterViewInit {
 
     this.http.patch(`${this.apiUrl}/user/perfil/senha`, payload, { headers: this.getHeaders() }).subscribe({
       next: () => {
-        this.snackBar.open('Senha atualizada com sucesso no ecossistema!', 'Fechar', { duration: 3000, verticalPosition: 'top' });
-        // Limpa os campos após a gravação bem-sucedida
+        this.alerts.sucesso('Senha atualizada com sucesso no ecossistema!');
         this.senhaAtual = '';
         this.novaSenha = '';
         this.confirmarSenha = '';
       },
       error: (err: HttpErrorResponse) => {
         const msg = err.error?.message || 'Erro ao atualizar sua senha corporativa.';
-        this.snackBar.open(msg, 'Fechar', { duration: 4000, verticalPosition: 'top' });
+        // this.snackBar.open(msg, 'Fechar', { duration: 4000, verticalPosition: 'top' });
+        this.alerts.erro(msg);
       }
     });
   }

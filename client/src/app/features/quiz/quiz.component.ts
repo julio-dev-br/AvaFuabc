@@ -4,16 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
-// Importação dos serviços
-import { QuizService } from '../../core/services/quiz.service';
-import { AlertsService } from '../../core/services/alerts.service'; // 🌟 ADICIONADO SERVIÇO GLOBAL DE ALERTAS
-
 // Angular Material Components
 import { MatCardModule } from '@angular/material/card';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+// Importação dos serviços
+import { QuizService } from '../../core/services/quiz.service';
+import { AlertsService } from '../../core/services/alerts.service'; 
 
 @Component({
   selector: 'app-quiz',
@@ -25,7 +26,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
     MatRadioModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatProgressBarModule
   ],
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.css'
@@ -135,7 +137,6 @@ export class QuizComponent implements OnInit {
       }
     });
   }
-
 
   voltarParaAula(): void {
     // Busca o treinamento_id seguro ou recua para a rota base do dashboard do aluno

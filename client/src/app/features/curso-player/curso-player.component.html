@@ -1,7 +1,18 @@
 @if (isLoading) {
-<div class="player-loading"
-  style="text-align: center; padding: 48px; color: #64748b; font-weight: 500; font-size: 14px;">Carregando
-  estrutura do curso...</div>
+<div class="loading-overlay-container">
+  <div class="loading-progress-box">
+    <mat-icon style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      cloud_download
+    </mat-icon>
+    <mat-progress-bar mode="indeterminate" style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+      Sincronizando Ecossistema
+    </h3>
+    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+      Carregando estrutura do curso...
+    </p>
+  </div>
+</div>
 }
 
 @if (!isLoading && curso) {
@@ -43,16 +54,16 @@
 
       <div
         style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <!-- 🌟 CORRIGIDO: Rota sintonizada com as sub-rotas da Master Page -->
+        <!-- Rota sintonizada com as sub-rotas da Master Page -->
         <button mat-raised-button [routerLink]="['/dashboard/quiz/aula', aulaAtiva?.id]"
-          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px; border: none; cursor: pointer; border-radius: 6px;">
+          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 40px; border: none; cursor: pointer; border-radius: 6px;">
           <mat-icon style="margin-right: 8px; vertical-align: middle;">assignment</mat-icon>
           Fazer Avaliação
         </button>
 
-        <!-- 🌟 CORRIGIDO: Rota sintonizada com as sub-rotas da Master Page -->
+        <!-- Rota sintonizada com as sub-rotas da Master Page -->
         <button mat-raised-button [routerLink]="['/dashboard/forum/aula', aulaAtiva?.id]"
-          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 48px; border: none; cursor: pointer; border-radius: 6px;">
+          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 40px; border: none; cursor: pointer; border-radius: 6px;">
           <mat-icon style="margin-right: 8px; vertical-align: middle;">chat</mat-icon>
           Fórum de Dúvidas
         </button>

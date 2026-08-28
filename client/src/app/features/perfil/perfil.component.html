@@ -1,4 +1,24 @@
-<!-- 🧭 MENU DE NAVEGAÇÃO ENTRE ABAS HORIZONTAIS HARMONIZADO (Alinhado em 800px) -->
+@if (isLoading) {
+<div class="loading-overlay-container">
+  <div class="loading-progress-box">
+    <mat-icon
+      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      cloud_download
+    </mat-icon>
+    <mat-progress-bar mode="indeterminate"
+      style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+      Sincronizando Ecossistema
+    </h3>
+    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+      Buscando dados cadastrais reais no PostgreSQL...
+    </p>
+  </div>
+</div>
+}
+
+@if (!isLoading) {
+<!-- MENU DE NAVEGAÇÃO ENTRE ABAS HORIZONTAIS HARMONIZADO (Alinhado em 800px) -->
 <div
   style="background-color: #ffffff; max-width: 1200px; margin: 0 auto 24px auto; border-bottom: 1px solid #e2e8f0; display: flex; gap: 24px;">
 
@@ -20,7 +40,7 @@
 
 </div>
 
-<!-- 🔓 ABA 1: MEUS DADOS E SEGURANÇA -->
+<!-- ABA 1: MEUS DADOS E SEGURANÇA -->
 <div *ngIf="abaPerfilAtiva === 'dados'"
   style="animation: fadeIn 0.3s ease; display: flex; flex-direction: column; gap: 24px; max-width: 1200px; margin: 0 auto;">
 
@@ -95,7 +115,7 @@
 
 </div>
 
-<!-- ==================== 🏆 ABA 2: HISTÓRICO E CERTIFICADOS ==================== -->
+<!-- ==================== ABA 2: HISTÓRICO E CERTIFICADOS ==================== -->
 <div *ngIf="abaPerfilAtiva === 'certificados'"
   style="animation: fadeIn 0.3s ease; display: flex; flex-direction: column; gap: 16px; max-width: 1200px; margin: 0 auto;">
 
@@ -104,8 +124,22 @@
   </h3>
 
   @if (isLoading) {
-  <p style="text-align: center; color: #64748b; padding: 32px; font-weight: 500; font-size: 14px;">Buscando
-    registros no Postgres...</p>
+  <div class="loading-overlay-container">
+    <div class="loading-progress-box">
+      <mat-icon
+        style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+        cloud_download
+      </mat-icon>
+      <mat-progress-bar mode="indeterminate"
+        style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+      <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+        Sincronizando Ecossistema
+      </h3>
+      <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+        Carregando registros no banco...
+      </p>
+    </div>
+  </div>
   }
 
   @if (!isLoading) {
@@ -195,3 +229,4 @@
   </mat-card>
   }
 </div>
+}

@@ -1,13 +1,25 @@
 <div class="quiz-container" style="max-width: 800px; margin: 0 auto; padding: 0;">
 
-  <!-- ⏳ TELA 0: Estado de Carregamento -->
   @if (isLoading) {
-  <div style="text-align: center; padding: 48px; color: #64748b; font-size: 15px; font-weight: 500;">
-    Processando informações, por favor aguarde...
+  <div class="loading-overlay-container">
+    <div class="loading-progress-box">
+      <mat-icon
+        style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+        cloud_download
+      </mat-icon>
+      <mat-progress-bar mode="indeterminate"
+        style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+      <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+        Sincronizando Ecossistema
+      </h3>
+      <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+        Carregando registros no banco...
+      </p>
+    </div>
   </div>
   }
 
-  <!-- 📝 TELA 1: Formulário de Perguntas -->
+  <!--Formulário de Perguntas -->
   <div [style.display]="(!isLoading && quiz && !foiEnviado) ? 'block' : 'none'">
     <div style="margin-bottom: 24px;">
       <h2 style="color: #003366; font-size: 24px; font-weight: bold; margin-bottom: 4px;">{{ quiz?.titulo }}</h2>
@@ -50,7 +62,7 @@
       </button>
     </div>
   </div>
-  <!-- 🏆 TELA 2: Painel de Feedback e Notas -->
+  <!-- Painel de Feedback e Notas -->
   @if (!isLoading && foiEnviado && resultadoEnvio) {
   <mat-card [style.border]="resultadoEnvio.aprovado ? '2px solid #2e7d32' : '2px solid #c62828'"
     style="text-align: center; padding: 40px 24px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;">

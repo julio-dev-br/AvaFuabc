@@ -1,7 +1,19 @@
 @if (isLoading) {
-<div class="kanban-loading"
-  style="text-align: center; padding: 48px; color: #64748b; font-weight: 500; font-size: 14px;">Carregando quadro
-  de tarefas...
+<div class="loading-overlay-container">
+  <div class="loading-progress-box">
+    <mat-icon
+      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      cloud_download
+    </mat-icon>
+    <mat-progress-bar mode="indeterminate"
+      style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+      Sincronizando Ecossistema
+    </h3>
+    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+      Carregando quadro de tarefas...
+    </p>
+  </div>
 </div>
 }
 

@@ -2,7 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ForumService } from '../../core/services/forum.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 // Angular Material
@@ -13,6 +12,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { ForumService } from '../../core/services/forum.service';
 
 @Component({
   selector: 'app-forum',
@@ -26,7 +28,8 @@ import { MatListModule } from '@angular/material/list';
     MatInputModule,
     MatFormFieldModule,
     MatToolbarModule,
-    MatListModule
+    MatListModule,
+    MatProgressBarModule
   ],
   templateUrl: './forum.component.html',
   styleUrl: './forum.component.css'
