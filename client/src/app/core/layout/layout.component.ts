@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-layout',
@@ -25,7 +26,8 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatTooltipModule 
   ],
   templateUrl: './layout.component.html'
 })
@@ -48,6 +50,9 @@ export class LayoutComponent implements OnInit {
     email: '',
     avatarUrl: 'assets/default-avatar.png'
   };
+
+  sidebarColapsada: boolean = false;
+  menuMobileAberto: boolean = false;
 
   ngOnInit(): void {
     this.carregarDadosPerfilReal();
@@ -131,6 +136,18 @@ export class LayoutComponent implements OnInit {
       next: (dados: any[]) => this.notificacoes = dados,
       error: (err) => console.error('Erro ao carregar notificações no layout:', err)
     });
+  }
+
+  // Método que será chamado ao clicar no ícone de Hambúrguer / Setinha
+  alternarSidebar(): void {
+    // Se for Desktop, colapsa/recolhe a barra lateral
+    if (window.innerWidth > 1024) {
+      this.sidebarColapsada = !this.sidebarColapsada;
+    } else {
+      // Se for Mobile, abre e fecha o menu flutuante por completo
+      this.menuMobileAberto = !this.menuMobileAberto;
+    }
+    console.log(`=== 🧭 SIDEBAR STATUS: Colapsada: ${this.sidebarColapsada} | Mobile Aberto: ${this.menuMobileAberto} ===`);
   }
 
   isAdmin(): boolean {

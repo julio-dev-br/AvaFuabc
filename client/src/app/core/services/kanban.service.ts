@@ -31,7 +31,17 @@ export class KanbanService {
     return this.http.patch(`${this.apiUrl}/cards/${cardId}/mover`, { colunaId, ordem }, { headers: this.getHeaders() });
   }
 
-  // 💼 ROTA DO GESTOR: Salva no Postgres a nova coluna do card arrastado usando PATCH legítimo!
+  // GATILHO HTTP PUT: Atualiza o título e a descrição de um card específico no Postgres via Prisma
+  atualizarCard(cardId: number, dados: { titulo: string; descricao?: string }): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/cards/${cardId}`, dados, { headers: this.getHeaders() });
+  }
+
+  // GATILHO HTTP DELETE: Remove fisicamente um cartão do quadro de estudos definitivamente
+  excluirCard(cardId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/cards/${cardId}`, { headers: this.getHeaders() });
+  }
+
+  // ROTA DO GESTOR: Salva no Postgres a nova coluna do card arrastado usando PATCH legítimo!
   atualizarEstagioCardAdmin(cardId: number, colunaId: number, ordem: number = 1): Observable<any> {
     const token = localStorage.getItem('accessToken');
     const headers = new HttpHeaders({
@@ -45,8 +55,7 @@ export class KanbanService {
       ordem: Number(ordem) 
     };
 
-    // ✅ CORRIGIDO: Usa o método .patch(), que aceita a URL, o payload no meio e as opções de headers no final!
+    // CORRIGIDO: Usa o método .patch(), que aceita a URL, o payload no meio e as opções de headers no final!
     return this.http.patch<any>(`${this.apiUrl}/admin/mover-card/${cardId}`, payload, { headers });
   }
-
 }

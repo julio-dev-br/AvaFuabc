@@ -6,7 +6,7 @@ import type { MoverCardDTO } from './dtos/mover-card.dto';
 
 @Injectable()
 export class KanbanService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // 1. ROTA DO ALUNO: Puxa o quadro isolando rigorosamente apenas as tarefas pessoais (Ignora cards de cursos do Admin)
   async obterQuadro(userId: number) {
@@ -15,7 +15,7 @@ export class KanbanService {
       where: { usuario_id: userId },
       include: {
         cards: {
-          // 🌟 A VACINA DE ISOLAMENTO: Filtra para o Aluno ver APENAS os cards normais dele!
+          // Filtra para o Aluno ver APENAS os cards normais dele!
           where: { treinamento_id: null },
           orderBy: { ordem: 'asc' },
         },
@@ -25,7 +25,6 @@ export class KanbanService {
 
     // Se o array de colunas vier vazio, inicializa o quadro pessoal padrão do aluno
     if (colunas.length === 0) {
-      console.log(`=== 📋 KANBAN ALUNO: INICIALIZANDO QUADRO PESSOAL PARA O USUÁRIO ID ${userId} ===`);
 
       await this.prisma.kanbanColuna.createMany({
         data: [
@@ -40,7 +39,7 @@ export class KanbanService {
         where: { usuario_id: userId },
         include: {
           cards: {
-            where: { treinamento_id: null }, // 🌟 Mantém o isolamento
+            where: { treinamento_id: null },
             orderBy: { ordem: 'asc' },
           },
         },
@@ -51,8 +50,6 @@ export class KanbanService {
     return colunas;
   }
 
-
-  // 2. Cria uma nova coluna no quadro (A Fazer, Em Andamento...)
   // 2. Cria uma nova coluna (Adaptada para aceitar a cor personalizada do Admin)
   async criarColuna(userId: number, dto: { titulo: string; cor?: string }) {
     const colunasContagem = await this.prisma.kanbanColuna.count({
@@ -117,23 +114,22 @@ export class KanbanService {
     });
   }
 
-    // 💼 EXCLUSIVO DO GESTOR: Move o card da esteira de cursos ignorando travas de aluno comum
-  // 💼 EXCLUSIVO DO GESTOR: Altera ou inicializa o card do curso no Kanban avançado de forma física
+  // 5. EXCLUSIVO DO GESTOR: Altera ou inicializa o card do curso no Kanban avançado de forma física
   async moverCardAdmin(cardIdOuTreinamentoId: number, dto: { colunaId: number; ordem: number }) {
-    
+
     // 1. Tenta localizar o card pelo ID enviado
     let card = await this.prisma.kanbanCard.findUnique({
       where: { id: Number(cardIdOuTreinamentoId) }
     });
 
-    // 2. 🌟 A REAÇÃO INTELIGENTE: Se não achou pelo ID do card, busca se existe algum card amarrado a esse ID como Treinamento!
+    // 2. Se não achou pelo ID do card, busca se existe algum card amarrado a esse ID como Treinamento!
     if (!card) {
       card = await this.prisma.kanbanCard.findFirst({
         where: { treinamento_id: Number(cardIdOuTreinamentoId) }
       });
     }
 
-    // 3. 🚀 UPSERT REAL NO POSTGRESQL: Se o card existir, atualiza. Se não existir (curso órfão antigo), cria um novo na hora!
+    // 3. Se o card existir, atualiza. Se não existir (curso órfão antigo), cria um novo na hora!
     if (card) {
       return this.prisma.kanbanCard.update({
         where: { id: card.id },
@@ -152,9 +148,6 @@ export class KanbanService {
       if (!treinamento) {
         throw new NotFoundException('Treinamento/Projeto base não localizado no sistema.');
       }
-
-      console.log(`=== 🛠️ KANBAN ADMIN: GERANDO CARD REATIVO PARA O CURSO ANTIGO "${treinamento.titulo}" ===`);
-
       // Cria a linha física do cartão espelho vinculada ao curso no Postgres
       return this.prisma.kanbanCard.create({
         data: {
@@ -168,5 +161,33 @@ export class KanbanService {
     }
   }
 
+  async atualizarCardReal(id: number, dados: { titulo: string; descricao?: string }) {
+    // Verifica se o card de fato existe antes de rodar a query
+    const cardExistente = await this.prisma.kanbanCard.findUnique({ where: { id } });
+    if (!cardExistente) {
+      throw new NotFoundException('Tarefa não encontrada no ecossistema.');
+    }
+
+    return this.prisma.kanbanCard.update({
+      where: { id },
+      data: {
+        titulo: dados.titulo,
+        descricao: dados.descricao, // Salva string ou limpa se vier vazio
+      },
+    });
+  }
+
+  async excluirCardReal(id: number) {
+    const cardExistente = await this.prisma.kanbanCard.findUnique({ where: { id } });
+    if (!cardExistente) {
+      throw new NotFoundException('Tarefa não encontrada para exclusão.');
+    }
+
+    await this.prisma.kanbanCard.delete({
+      where: { id },
+    });
+
+    return { message: 'Tarefa removida com sucesso do banco de dados!' };
+  }
 
 }

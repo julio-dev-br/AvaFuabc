@@ -25,7 +25,7 @@ export class QuizService {
   obterQuizPorAula(aulaId: number): Observable<any> {
     const token = localStorage.getItem('accessToken') || '';
 
-    // 🌟 A MARRETA DA URL: Se o Guard do NestJS buscar o token na rota, ele vai achar aqui!
+    // Se o Guard do NestJS buscar o token na rota, ele vai achar aqui!
     const urlComToken = `${this.apiUrl}/aula/${aulaId}?token=${token}&accessToken=${token}&access_token=${token}`;
 
     return this.http.get<any>(urlComToken, { headers: this.getHeaders() });
@@ -42,7 +42,6 @@ export class QuizService {
     // Dispara a requisição POST enviando o objeto envelopado para a API do NestJS
     return this.http.post<any>(`${environment.apiUrl}/quizzes/${quizId}/responder`, payload, { headers });
   }
-
 
   // Criação do Quiz Completo (Painel do Administrador)
   criarQuizCompleto(payload: any): Observable<any> {

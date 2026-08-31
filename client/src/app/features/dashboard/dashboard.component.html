@@ -11,7 +11,7 @@
       Sincronizando Ecossistema
     </h3>
     <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
-      Buscando dados cadastrais reais no PostgreSQL...
+      Carregando dados do banco...
     </p>
   </div>
 </div>
@@ -20,17 +20,19 @@
 @if (!isLoading) {
 <!-- ======================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
 <div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
-  <div style="margin-bottom: 24px;">
-    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus
-      Treinamentos Disponíveis</h2>
-    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Cursos liberados de acordo com sua empresa,
-      unidade hospitalar ou cargo.</p>
+
+  <!-- CABEÇALHO RESPONSIVO -->
+  <div style="margin-bottom: 24px; padding: 0 4px;">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus Treinamentos
+      Disponíveis</h2>
+    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">Cursos liberados de acordo com sua
+      empresa, unidade hospitalar ou cargo.</p>
   </div>
 
-  <!-- BARRA DE PESQUISA REATIVA -->
+  <!-- BARRA DE PESQUISA REATIVA E ELÁSTICA -->
   @if (!isLoading && treinamentos.length > 0) {
-  <div style="margin: 0 0 24px 0; width: 100%; max-width: 460px;">
-    <mat-form-field appearance="outline" style="width: 100%;">
+  <div style="margin: 0 0 24px 0; width: 100%; max-width: 460px; padding: 0 4px;">
+    <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
       <mat-label>Pesquisar treinamento pelo título...</mat-label>
       <input matInput [(ngModel)]="filtroTexto" (input)="paginaAtual = 1"
         placeholder="Ex: Integração, NR-10, Prevenção...">
@@ -39,35 +41,46 @@
   </div>
   }
 
-  <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS -->
+  <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS AUTOMÁTICO (3x2, 2x2, 1xN) -->
   @if (!isLoading && treinamentos.length > 0) {
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding: 4px;">
     @for (curso of treinamentosExibidos; track curso.id) {
     <mat-card
-      style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between;">
-      <mat-card-header style="padding: 16px 16px 0 16px;">
+      style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between; background: #ffffff;">
+
+      <!-- Cabeçalho com flex-wrap para evitar esmagamento em telas menores -->
+      <mat-card-header style="padding: 16px 16px 0 16px; display: flex; align-items: flex-start;">
         <div class="course-icon-area"
-          style="background-color: rgba(0, 51, 102, 0.05); padding: 8px; border-radius: 6px; color: #003366; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
+          style="background-color: rgba(0, 51, 102, 0.05); padding: 8px; border-radius: 6px; color: #003366; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           <mat-icon class="course-icon">school</mat-icon>
         </div>
-        <mat-card-title style="color: #003366; font-size: 15px !important; font-weight: 700; line-height: 1.2;">
-          {{ curso.titulo }}
-        </mat-card-title>
-        <mat-card-subtitle style="font-size: 12px; color: #64748b; margin-top: 4px;">Carga Horária: {{
-          curso.carga_horaria }}h</mat-card-subtitle>
+        <div style="flex: 1; min-width: 0;">
+          <mat-card-title
+            style="color: #003366; font-size: 15px !important; font-weight: 700; line-height: 1.3; margin: 0; word-break: break-word;">
+            {{ curso.titulo }}
+          </mat-card-title>
+          <mat-card-subtitle style="font-size: 12px; color: #64748b; margin-top: 4px; display: block;">Carga Horária: {{
+            curso.carga_horaria }}h</mat-card-subtitle>
+        </div>
       </mat-card-header>
-      <mat-card-content style="padding: 16px !important; color: #475569; font-size: 13px; flex: 1; line-height: 1.5;">
-        <p style="margin: 0;">{{ curso.descricao || 'Treinamento de qualificação institucional.' }}</p>
+
+      <mat-card-content
+        style="padding: 16px !important; color: #475569; font-size: 13px; flex: 1; line-height: 1.5; margin-top: 8px;">
+        <p style="margin: 0; word-break: break-word;">{{ curso.descricao || 'Treinamento de qualificação institucional.'
+          }}</p>
       </mat-card-content>
+
+      <!-- Ações adaptáveis com wrap automático -->
       <mat-card-actions class="course-actions"
-        style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;">
+        style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
         @if (curso.obrigatorio) {
         <span class="required-badge"
-          style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Obrigatório</span>
+          style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; flex-shrink: 0;">Obrigatório</span>
+        } @else {
+        <div></div>
         }
-        <span style="flex: 1 1 auto;"></span>
         <button mat-flat-button color="primary"
-          style="background-color: #003366 !important; font-weight: 600; font-size: 13px; border-radius: 6px;"
+          style="background-color: #003366 !important; font-weight: 600; font-size: 13px; border-radius: 6px; height: 36px; padding: 0 16px;"
           (click)="acessarCurso(curso.id)">
           Acessar Curso
         </button>
@@ -76,22 +89,25 @@
     }
   </div>
 
-  <!-- CONTROLES EXECUTIVOS DE PAGINAÇÃO MATEMÁTICA REAL INJETADOS -->
+  <!-- CONTROLES EXECUTIVOS DE PAGINAÇÃO: Totalmente Responsivos com Flexbox Adaptável -->
   @if (totalPaginas > 1) {
   <div
-    style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+    style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px; padding: 16px 4px 0 4px; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
     <button mat-stroked-button [disabled]="paginaAtual === 1" (click)="paginaAnterior()"
-      style="border-color: #003366; color: #003366;">
-      <mat-icon style="vertical-align: middle; margin-right: 4px;">chevron_left</mat-icon>Anterior
+      style="border-color: #003366; color: #003366; min-width: auto; padding: 0 12px; height: 36px;">
+      <mat-icon style="vertical-align: middle; margin: 0;">chevron_left</mat-icon>
+      <span style="margin-left: 4px; font-size: 13px; font-weight: 600;">Anterior</span>
     </button>
 
-    <span style="font-size: 13px; color: #475569; font-weight: 500;">
+    <span
+      style="font-size: 13px; color: #475569; font-weight: 500; text-align: center; white-space: nowrap; padding: 0 8px;">
       Página <strong style="color: #003366;">{{ paginaAtual }}</strong> de {{ totalPaginas }}
     </span>
 
     <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()"
-      style="border-color: #003366; color: #003366;">
-      Próxima<mat-icon style="vertical-align: middle; margin-left: 4px;">chevron_right</mat-icon>
+      style="border-color: #003366; color: #003366; min-width: auto; padding: 0 12px; height: 36px;">
+      <span style="margin-right: 4px; font-size: 13px; font-weight: 600;">Próxima</span>
+      <mat-icon style="vertical-align: middle; margin: 0;">chevron_right</mat-icon>
     </button>
   </div>
   }
@@ -100,28 +116,28 @@
   <!-- Fallback de nenhum curso disponível -->
   @if (!isLoading && treinamentos.length === 0) {
   <div class="empty-state"
-    style="text-align: center; padding: 48px; color: #888888; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px;">
-    <mat-icon class="empty-icon" style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8;">info</mat-icon>
-    <p style="font-size: 15px; margin-top: 8px; font-weight: 500;">Nenhum treinamento localizado ou liberado para
-      o seu perfil atual.</p>
+    style="text-align: center; padding: 48px 16px; color: #888888; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px;">
+    <mat-icon class="empty-icon"
+      style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8; margin: 0 auto;">info</mat-icon>
+    <p style="font-size: 15px; margin-top: 12px; font-weight: 500; padding: 0 10px;">Nenhum treinamento localizado ou
+      liberado para o seu perfil atual.</p>
   </div>
   }
 </div>
-
 <!-- ==================== ABA 2: CENTRAL DE ENGAJAMENTO (GAMIFICAÇÃO) ==================== -->
 <div *ngIf="abaAtiva === 'progresso'" style="animation: fadeIn 0.3s ease;">
-  <div style="margin-bottom: 24px;">
-    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu
-      Desempenho & Conquistas</h2>
-    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Acompanhe suas insígnias e veja a sua posição
-      no pódio da Fundação ABC.</p>
+  <div style="margin-bottom: 24px; padding: 0 4px;">
+    <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu Desempenho &
+      Conquistas</h2>
+    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">Acompanhe suas insígnias e veja a
+      sua posição no pódio da Fundação ABC.</p>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 4px;">
 
-    <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS) -->
+    <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS COMPACTAS) -->
     <mat-card
-      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
+      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; box-sizing: border-box;">
       <h3
         style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
         <mat-icon style="color: #ff9800;">military_tech</mat-icon> Minhas Conquistas
@@ -129,25 +145,25 @@
       <div style="display: flex; flex-direction: column; gap: 12px;">
         @for (m of minhasMedalhas; track m.id) {
         <div
-          style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9; background-color: #f8fafc;"
+          style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9; background-color: #f8fafc; box-sizing: border-box; flex-wrap: wrap;"
           [style.opacity]="m.conquistada ? 1 : 0.4">
           <mat-icon [style.color]="m.conquistada ? m.cor : '#94a3b8'"
-            style="font-size: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+            style="font-size: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
             {{ m.icone }}
           </mat-icon>
-          <div style="display: flex; flex-direction: column;">
-            <span style="font-weight: 600; font-size: 13px;" [style.color]="m.conquistada ? '#1e293b' : '#64748b'">{{
-              m.titulo }}</span>
-            <span style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ m.desc }}</span>
+          <div style="display: flex; flex-direction: column; flex: 1; min-width: 180px;">
+            <span style="font-weight: 600; font-size: 13px; word-break: break-word;"
+              [style.color]="m.conquistada ? '#1e293b' : '#64748b'">{{ m.titulo }}</span>
+            <span style="font-size: 11px; color: #64748b; margin-top: 2px; word-break: break-word;">{{ m.desc }}</span>
           </div>
         </div>
         }
       </div>
     </mat-card>
 
-    <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS -->
+    <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS RESPONSIVO -->
     <mat-card
-      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important;">
+      style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; box-sizing: border-box;">
       <h3
         style="color: #003366; font-weight: bold; margin: 0 0 16px 0; font-size: 15px; display: flex; align-items: center; gap: 6px;">
         <mat-icon style="color: #ff9800;">emoji_events</mat-icon> Ranking de Acertos (Top 5)
@@ -155,15 +171,17 @@
       <div style="display: flex; flex-direction: column; gap: 8px;">
         @for (aluno of rankingAlunos; track aluno.nome; let idx = $index) {
         <div
-          style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 6px;"
+          style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 6px; gap: 8px; box-sizing: border-box;"
           [style.background-color]="aluno.isMe ? '#e6f0fa' : '#f8fafc'"
           [style.border-left]="aluno.isMe ? '4px solid #003366' : '1px solid #e2e8f0'">
-          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
-            <span style="font-weight: bold; width: 18px; color: #64748b;">{{ idx + 1 }}º</span>
-            <span [style.font-weight]="aluno.isMe ? 'bold' : 'normal'" style="color: #334155;">{{ aluno.nome
-              }}</span>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; min-width: 0; flex: 1;">
+            <span style="font-weight: bold; width: 18px; color: #64748b; flex-shrink: 0;">{{ idx + 1 }}º</span>
+            <span [style.font-weight]="aluno.isMe ? 'bold' : 'normal'"
+              style="color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">{{
+              aluno.nome }}</span>
           </div>
-          <span style="font-weight: bold; font-size: 13px; color: #003366;">{{ aluno.pontuacao }} pts</span>
+          <span style="font-weight: bold; font-size: 13px; color: #003366; flex-shrink: 0; white-space: nowrap;">{{
+            aluno.pontuacao }} pts</span>
         </div>
         }
       </div>
@@ -175,17 +193,17 @@
 <!-- =========================== ABA 3: SEU KANBAN PRIVADO DE ESTUDOS ==================== -->
 <div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
   <div
-    style="background-color: white; padding: 32px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
+    style="background-color: white; padding: 24px 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01); box-sizing: border-box;">
     <div
-      style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
-      <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
-      <h2 style="margin: 0; font-size: 18px; color: #003366; font-weight: 700;">Quadro Kanban de Tarefas Pessoais
-      </h2>
+      style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; flex-wrap: wrap;">
+      <mat-icon
+        style="color: #003366; font-size: 24px; width: 24px; height: 24px; flex-shrink: 0;">assignment</mat-icon>
+      <h2 style="margin: 0; font-size: 18px; color: #003366; font-weight: 700;">Quadro Kanban de Tarefas Pessoais</h2>
     </div>
-    <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5;">
-      Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou
-      leituras regulamentares você executará hoje.
+    <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5; word-break: break-word;">
+      Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou leituras
+      regulamentares você executará hoje.
     </p>
   </div>
 </div>
-}
+} <!-- Fim do @if (!isLoading) -->

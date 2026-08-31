@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, ParseIntPipe, UseGuards, Delete, Put } from '@nestjs/common';
 import { KanbanService } from './kanban.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -39,16 +39,28 @@ export class KanbanController {
     return this.kanbanService.moverCard(user.id, cardId, body);
   }
 
-  // 💼 ROTA DO GESTOR: PATCH /kanban/admin/mover-card/:id
-  // 💼 ROTA DO GESTOR: PATCH /notificacoes/../admin/mover-card/:id
+  //  PATCH /notificacoes/../admin/mover-card/:id
   @Patch('admin/mover-card/:id')
   async moverCardAdmin(
     @Param('id', ParseIntPipe) cardId: number,
     @Body() corpo: { colunaId: number; ordem: number },
   ) {
-    // ✅ CORRIGIDO: Agora chama o motor exclusivo do administrador livre de travas de segurança de aluno!
+    // Agora chama o motor exclusivo do administrador livre de travas de segurança de aluno!
     return this.kanbanService.moverCardAdmin(cardId, corpo);
   }
 
+  @Put('cards/:id')
+  async atualizarCard(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dados: { titulo: string; descricao?: string },
+  ) {
+    return this.kanbanService.atualizarCardReal(id, dados);
+  }
+
+  // ENDPOINT DE EXCLUSÃO DEFINITIVA DO CARD VIA PRISMA
+  @Delete('cards/:id')
+  async excluirCard(@Param('id', ParseIntPipe) id: number) {
+    return this.kanbanService.excluirCardReal(id);
+  }
 
 }

@@ -1,4 +1,4 @@
-<!-- 📋 HEADER CORPORATIVO DO PAINEL -->
+<!-- HEADER CORPORATIVO DO PAINEL -->
 <div style="padding: 24px 24px 0 24px; max-width: 1600px; margin: 0 auto; animation: fadeIn 0.3s ease;">
   <div style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center;">
     <div>
@@ -20,11 +20,11 @@
     <mat-progress-spinner diameter="45" mode="indeterminate"></mat-progress-spinner>
   </div>
 } @else {
-  <!-- 🌟 ADICIONADO cdkDropListGroup: Conecta todas as colunas para aceitarem cards umas das outras -->
+  <!-- cdkDropListGroup: Conecta todas as colunas para aceitarem cards umas das outras -->
   <div cdkDropListGroup 
        style="padding: 24px; max-width: 1600px; margin: 0 auto; display: flex; gap: 20px; overflow-x: auto; align-items: flex-start; background: #f8fafc; min-height: 70vh; animation: fadeIn 0.3s ease;">
     
-    <!-- 🎛️ LOOP DAS COLUNAS (Cada uma vira uma cdkDropList) -->
+    <!-- LOOP DAS COLUNAS (Cada uma vira uma cdkDropList) -->
     <div *ngFor="let coluna of colunasKanbanAdmin" 
          cdkDropList
          [cdkDropListData]="coluna.cards"
@@ -35,7 +35,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px;">
         <span style="font-weight: 700; color: #334155; font-size: 14px; display: flex; align-items: center; gap: 8px;">
           <span [style.background]="coluna.cor" style="width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px rgba(0,0,0,0.1);"></span>
-          {{ coluna.titulo }}
+          {{ coluna.titulo }} 
         </span>
         <span style="background: #cbd5e1; color: #475569; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
           {{ coluna.cards.length }}
@@ -75,15 +75,12 @@
             </div>
           </div>
         </mat-card>
-
         <!-- MENSAGEM SE A COLUNA ESTIVER VAZIA -->
         <div *ngIf="coluna.cards.length === 0" 
              style="text-align: center; color: #94a3b8; font-size: 12px; padding: 24px 10px; border: 2px dashed #cbd5e1; border-radius: 8px; margin: 4px 0;">
           Nenhum projeto neste estágio
         </div>
-
       </div>
-
     </div>
   </div>
 }

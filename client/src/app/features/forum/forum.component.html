@@ -1,7 +1,25 @@
+@if (isLoading) {
+<div class="loading-overlay-container">
+    <div class="loading-progress-box">
+        <mat-icon
+            style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+            cloud_download
+        </mat-icon>
+        <mat-progress-bar mode="indeterminate"
+            style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+        <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+            Sincronizando Ecossistema
+        </h3>
+        <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+            Carregando discussões...
+        </p>
+    </div>
+</div>
+}
+
+@if (!isLoading) {
 <div class="forum-grid"
     style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; height: calc(100vh - 140px);">
-
-    <!-- COLUNA DA ESQUERDA: LISTA DE DÚVIDAS -->
     <div class="topics-sidebar"
         style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
         <div class="sidebar-header"
@@ -13,34 +31,12 @@
                 Nova Dúvida
             </button>
         </div>
-
-        @if (isLoading) {
-        <div class="loading-overlay-container">
-            <div class="loading-progress-box">
-                <mat-icon
-                    style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
-                    cloud_download
-                </mat-icon>
-                <mat-progress-bar mode="indeterminate"
-                    style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
-                <h3
-                    style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
-                    Sincronizando Ecossistema
-                </h3>
-                <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
-                    Carregando discussões...
-                </p>
-            </div>
-        </div>
-        }
-
         @if (!isLoading && topicos.length === 0) {
         <div class="empty-forum-state"
             style="text-align: center; padding: 32px; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 500; background: #f8fafc;">
             Nenhuma dúvida postada nesta aula ainda. Seja o primeiro!
         </div>
         }
-
         <mat-action-list style="padding: 0;">
             @for (t of topicos; track t.id) {
             <button mat-list-item (click)="abrirTopico(t.id)" [class.topico-ativo-item]="topicoAtivo?.id === t.id"
@@ -56,7 +52,6 @@
         </mat-action-list>
     </div>
 
-    <!-- COLUNA DA DIREITA: DETALHES OU NOVO FORMULÁRIO -->
     <div class="content-view-panel"
         style="background-color: #ffffff; padding: 24px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.01);">
 
@@ -85,7 +80,6 @@
         </div>
         }
 
-        <!-- CENÁRIO B: VISUALIZANDO TÓPICO SELECIONADO E SUAS RESPOSTAS -->
         @if (topicoAtivo && !exibindoFormularioCriacao) {
         <div class="main-question-block"
             style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 32px;">
@@ -153,3 +147,4 @@
 
     </div>
 </div>
+}
