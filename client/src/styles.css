@@ -165,7 +165,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   /* 5000ms casa com a duration do seu service */
 }
 
-
 @keyframes loadingShimmer {
   0% {
     background-position: 200% 0;

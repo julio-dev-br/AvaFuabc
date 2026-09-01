@@ -74,7 +74,7 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     empresa: '',
     unidade: '',
     cargo: '',
-    avatarUrl: 'assets/default-avatar.png'
+    avatarUrl: 'assets/default-avatar.jpg'
   };
 
   ngOnInit(): void {

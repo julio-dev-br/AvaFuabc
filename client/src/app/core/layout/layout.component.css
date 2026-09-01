@@ -1,115 +1,38 @@
-/* 🧭 ANIMAÇÃO E TRANSIÇÃO DA SIDEBAR SAAS */
 .sidebar-container {
-    width: 260px;
-    /* Largura padrão Desktop */
-    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 240px;
+    /* Alinhado milimetricamente com o seu recuo sênior de ontem */
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
-
-/* 🌟 CLASSE ATIVA: Quando recolhida, a sidebar encolhe para o tamanho dos ícones */
-.sidebar-container.colapsada {
-    width: 78px;
+@media (max-width: 1024px) {
+    .sidebar-container {
+        position: fixed !important;
+        left: -240px !important;
+        width: 240px !important;
+        height: 100vh !important;
+        z-index: 200 !important;
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    .sidebar-container.aberta-mobile {
+        left: 0 !important;
+    }
+    .esconder-no-mobile {
+        display: none !important;
+    }
 }
-
-/* 📦 CONTEÚDO PRINCIPAL: Se ajusta automaticamente ao tamanho da sidebar */
-.main-layout-wrapper {
-    margin-left: 260px;
-    transition: margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-.main-layout-wrapper.colapsada {
-    margin-left: 78px;
-}
-
-/* 🧭 AJUSTES DINÂMICOS DE PREENCHIMENTO DO LAYOUT */
-.main-layout-wrapper {
-    padding-left: 260px !important;
-    transition: padding-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-}
-
-.main-layout-wrapper.colapsada {
-    padding-left: 78px !important;
-}
-
-/* Garante o comportamento correto de sumir e aparecer em transições */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateX(-5px);
     }
-
     to {
         opacity: 1;
         transform: translateX(0);
-    }
-}
-
-/* ==========================================================================
-   🚨 VACINAÇÃO SAAS: CONTROLE SEGURO DE RESPONSIVIDADE (MOBILE & TABLET)
-   ========================================================================== */
-
-/* 📱 CAPTURA TELAS ATÉ 1024PX (TABLETS E SMARTPHONES) */
-@media (max-width: 1024px) {
-
-    /* 🧭 1. GAVETA MOBILE: Joga a sidebar para fora da tela (lateral esquerda) */
-    .sidebar-container {
-        position: fixed !important;
-        left: -260px !important;
-        top: 0;
-        height: 100vh !important;
-        width: 260px !important;
-        z-index: 200 !important;
-        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.08) !important;
-    }
-
-    /* 🌟 CLASSE ATIVA: Quando o menu hambúrguer é clicado, ela desliza para dentro */
-    .sidebar-container.aberta-mobile {
-        left: 0 !important;
-    }
-
-    /* 📦 2. RECUO ZERO: O conteúdo principal ocupa 100% da tela física do celular */
-    .main-layout-wrapper,
-    .main-layout-wrapper.colapsada {
-        padding-left: 0 !important;
-        margin-left: 0 !important;
-    }
-
-    /* ❌ 3. OCULTAÇÃO CIRÚRGICA: Limpa o Breadcrumb longo e o Logout duplicado no mobile */
-    .esconder-no-mobile {
-        display: none !important;
-    }
-}
-
-
-@media (max-width: 768px) {
-    .esconder-no-mobile {
-        display: none !important;
-    }
-}
-
-/* 📱 RESPONSIVIDADE MOBILE (Breakpoints Cirúrgicos) */
-@media (max-width: 1024px) {
-    .sidebar-container {
-        position: fixed;
-        left: -260px;
-        /* Esconde a sidebar para fora da tela no tablet/celular */
-        z-index: 100;
-        height: 100vh;
-    }
-
-    .sidebar-container.aberta-mobile {
-        left: 0;
-        /* Menu hambúrguer faz ela deslizar para dentro */
-    }
-
-    .main-layout-wrapper,
-    .main-layout-wrapper.colapsada {
-        margin-left: 0 !important;
-        /* O conteúdo ocupa 100% da tela no celular */
     }
 }

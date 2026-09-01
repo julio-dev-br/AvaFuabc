@@ -1,11 +1,7 @@
 <div
     style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
-
-    <!-- 🧭 SIDEBAR SAAS COM CLASSES DINÂMICAS REATIVAS -->
     <aside class="sidebar-container" [class.colapsada]="sidebarColapsada" [class.aberta-mobile]="menuMobileAberto"
         style="background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; padding: 24px 16px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 150; position: fixed; height: 100vh;">
-
-        <!-- BLOCO DA LOGO DA FUNDAÇÃO ABC -->
         <div
             style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px; min-height: 40px; overflow: hidden;">
             <div
@@ -13,8 +9,6 @@
                 <img src="assets/logo-simbolo.png" alt="Logo FUABC"
                     style="width: 100%; height: 100%; object-fit: contain;">
             </div>
-
-            <!-- Sumir com o texto caso a sidebar esteja recolhida -->
             @if (!sidebarColapsada) {
             <div style="animation: fadeIn 0.2s ease-out;">
                 <h2
@@ -26,12 +20,7 @@
             </div>
             }
         </div>
-
-        <!-- MENU DE NAVEGAÇÃO INTERNA -->
-        <!-- MENU DE NAVEGAÇÃO INTERNA COM MAT-TOOLTIP INTELIGENTE -->
         <nav style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-
-            <!-- Link 1: Meus Cursos -->
             <a mat-button routerLink="/dashboard/cursos" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Meus Cursos' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
@@ -39,8 +28,6 @@
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Meus Cursos</span> }
             </a>
-
-            <!-- Link 2: Meu Progresso -->
             <a mat-button routerLink="/dashboard/progresso" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Meu Progresso' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
@@ -48,8 +35,6 @@
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Meu Progresso</span> }
             </a>
-
-            <!-- Link 3: Quadro de Estudos -->
             <a mat-button routerLink="/dashboard/kanban" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Quadro de Estudos' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
@@ -58,19 +43,32 @@
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Quadro de Estudos</span>
                 }
             </a>
+            <!-- 🌟 PAINEL DE GESTÃO DO ADMIN DESTACADO (Cor inline removida para o CSS governar o Hover) -->
+            @if (isAdmin()) {
+            <a mat-button routerLink="/admin" routerLinkActive="active-admin-sidebar-link" class="mClasse"
+                class="admin-sidebar-btn-premium" [matTooltip]="sidebarColapsada ? 'Painel de Gestão Admin' : ''"
+                matTooltipPosition="right"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; cursor: pointer; text-decoration: none; overflow: hidden; margin-top: 12px;">
+
+                <mat-icon style="flex-shrink: 0; color: inherit; color: #003366;">admin_panel_settings</mat-icon>
+
+                @if (!sidebarColapsada) {
+                <span
+                    style="font-weight: 700; font-size: 13px; color: #003366; animation: fadeIn 0.2s ease-out; text-transform: uppercase; letter-spacing: 0.3px; transition: color 0.2s;">
+                    Painel de Gestão
+                </span>
+                }
+            </a>
+            }
         </nav>
-
-
-        <!-- RODAPÉ DA SIDEBAR: DADOS DO ALUNO E AVATAR DO JULIO -->
         <div
             style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden;">
             <div [matMenuTriggerFor]="userMenu"
                 style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s; min-height: 52px;"
                 onmouseover="this.style.backgroundColor='#f8fafc'"
                 onmouseout="this.style.backgroundColor='transparent'">
-                <img [src]="usuario.avatarUrl || 'assets/default-avatar.png'" alt="Avatar"
+                <img [src]="usuario.avatarUrl || 'assets/default-avatar.jpg'" alt="Avatar"
                     style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #003366; flex-shrink: 0;">
-
                 @if (!sidebarColapsada) {
                 <div
                     style="flex: 1; min-width: 0; display: flex; flex-direction: column; animation: fadeIn 0.2s ease-out;">
@@ -83,7 +81,6 @@
                 <mat-icon style="font-size: 18px; color: #64748b; flex-shrink: 0;">expand_less</mat-icon>
                 }
             </div>
-            <!-- MENU SUSPENSO DO USUÁRIO (Preenchido perfeitamente) -->
             <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
                 <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 200px;">
                     <p style="margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8;">Logado como</p>
@@ -104,20 +101,12 @@
             </mat-menu>
         </div>
     </aside>
-
-    <!-- 🌟 WRAPPER MESTRE DO CONTEÚDO PRINCIPAL: Classe dinâmica empurra a tela de acordo com a Sidebar -->
-    <!-- 🌟 GRID ELÁSTICO: Chaveia dinamicamente o preenchimento entre 240px e 78px na velocidade do clique -->
     <div class="main-layout-wrapper" [class.colapsada]="sidebarColapsada"
         [style.padding-left]="sidebarColapsada ? '78px' : '240px'"
         style="flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; transition: padding-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);">
-        <!-- 🧼 HEADER UNIFICADO COMPARTILHADO RESPONSIVO -->
         <header
             style="height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; z-index: 40; flex-shrink: 0; gap: 16px;">
-
-            <!-- Lado Esquerdo: 🎛️ BOTÃO SETA MINIMALISTA DE COLAPSO + Trilha Breadcrumb -->
             <div style="display: flex; align-items: center; gap: 16px;">
-
-                <!-- 🛠️ BOTÃO SETA DA VINCI: Muda o desenho do ícone indicando reatividade pura -->
                 <button mat-icon-button (click)="alternarSidebar()" title="Alternar Menu Lateral"
                     style="color: #003366; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; cursor: pointer; border-radius: 50%; width: 32px; height: 32px; transition: all 0.2s;"
                     onmouseover="this.style.backgroundColor='#003366'; this.style.color='#ffffff'"
@@ -127,8 +116,6 @@
                         {{ sidebarColapsada ? 'chevron_right' : 'chevron_left' }}
                     </mat-icon>
                 </button>
-
-                <!-- 🧭 COMPONENTE BREADCRUMB REATIVO -->
                 <div style="display: flex; flex-direction: column; gap: 2px;">
                     <div
                         style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500;">
@@ -149,31 +136,12 @@
                     </div>
                 </div>
             </div>
-
-
-            <!-- Lado Direito: Painel de Gestão Admin e Sino de Notificações -->
             <div style="display: flex; align-items: center; gap: 16px;">
-                @if (isAdmin()) {
-                <a mat-stroked-button routerLink="/admin" title="Trocar para o Painel Administrativo do RH"
-                    style="border-color: #cbd5e1; color: #475569; font-weight: 600; font-size: 13px; height: 38px; line-height: 36px; padding: 0 14px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; transition: all 0.2s ease;"
-                    onmouseover="this.style.borderColor='#003366'; this.style.color='#003366'; this.style.backgroundColor='rgba(0, 51, 102, 0.04)'"
-                    onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#475569'; this.style.backgroundColor='transparent'">
-                    <mat-icon
-                        style="font-size: 18px; width: 18px; height: 18px; color: inherit; margin: 0;">admin_panel_settings</mat-icon>
-                    <span style="line-height: 1;">Painel de Gestão</span>
-                </a>
-                }
-                @if (isAdmin()) {
-                <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
-                }
-
-                <!-- SINO DE NOTIFICAÇÕES MASTER REATIVO -->
                 <button mat-icon-button [matMenuTriggerFor]="menuNoti"
                     style="color: #64748b; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer;">
                     <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn"
                         [matBadgeHidden]="notificacoes.length === 0">notifications</mat-icon>
                 </button>
-
                 <mat-menu #menuNoti="matMenu">
                     <div
                         style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #003366;">
@@ -209,24 +177,15 @@
                     </div>
                     }
                 </mat-menu>
-
-                <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div>
-
-                <!-- BOTÃO DE LOGOUT MINIMALISTA -->
+                <!-- <div style="width: 1px; height: 24px; background-color: #e2e8f0;"></div> -->
                 <button mat-icon-button (click)="logout()" title="Sair"
                     style="color: #64748b; background: transparent; border: none; cursor: pointer;">
                     <mat-icon style="font-size: 22px;">logout</mat-icon>
                 </button>
             </div>
         </header>
-
-
-
-
-        <!-- CONTEÚDO DINÂMICO PRINCIPAL (ROUTER-OUTLET RESPONSIVO) -->
         <main style="padding: 32px; overflow-y: auto; flex: 1; box-sizing: border-box; background-color: #f8fafc;">
             <router-outlet></router-outlet>
         </main>
-
-    </div> <!-- 🌟 Fim do .main-layout-wrapper -->
-</div> <!-- Fim da div global de flexbox -->
+    </div>
+</div>

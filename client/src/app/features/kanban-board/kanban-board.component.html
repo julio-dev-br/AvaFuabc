@@ -18,10 +18,21 @@
 }
 
 @if (!isLoading) {
+  
+<div style="margin-bottom: 20px; padding: 10 4px;">
+  <h2
+    style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
+    <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
+    Quadro Kanban de Tarefas Pessoais
+  </h2>
+  <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
+    Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou leituras
+    regulamentares você executará hoje.
+  </p>
+</div>
+
 <div class="kanban-board" cdkDropListGroup style="padding: 10px;">
   @for (coluna of colunas; track coluna.id) {
-
-  <!-- COLUNA DO KANBAN COM BORDA SUPERIOR DINÂMICA DO BANCO DE DADOS -->
   <div class="kanban-column" [style.border-top]="'4px solid ' + (coluna.cor || '#003366')"
     style="border-top-left-radius: 4px; border-top-right-radius: 4px;">
     <h3 class="column-title" style="padding-top: 10px;">{{ coluna.titulo }}</h3>
@@ -65,7 +76,7 @@
               {{ card.titulo }}
             </span>
 
-            <!-- BOTÃO DOS TRÊS PONTINHOS (Contraste Calibrado para Evitar Camuflagem) -->
+            <!-- BOTÃO DOS TRÊS PONTINHOS -->
             <button mat-icon-button [matMenuTriggerFor]="cardMenu"
               style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; margin-top: -4px; margin-right: -6px; background: transparent; border: none; cursor: pointer;"
               (click)="$event.stopPropagation();">
@@ -110,26 +121,21 @@
     <div class="column-footer">
       @if (colunaIdSendoAdicionada === coluna.id) {
       <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-
-        <!-- Input do Título Principal -->
         <mat-form-field appearance="outline" class="full-width compact-form">
           <input matInput [(ngModel)]="novoCardTitulo" placeholder="Título da tarefa..."
             (keyup.enter)="adicionarCard(coluna.id)">
         </mat-form-field>
 
-        <!-- 🌟 NOVO: Textarea Reativo Opcional da Descrição no ato do cadastro -->
         <mat-form-field appearance="outline" class="full-width compact-form">
           <textarea matInput [(ngModel)]="novoCardDescricao" placeholder="Descrição opcional..." rows="2"></textarea>
         </mat-form-field>
 
-        <!-- Botões Simétricos Reativos de Ação -->
         <div class="action-buttons" style="display: flex; gap: 8px; justify-content: flex-end;">
           <button mat-flat-button color="primary" size="small" style="font-size: 12px; height: 32px;"
             (click)="adicionarCard(coluna.id)">Salvar</button>
           <button mat-button size="small" style="font-size: 12px; height: 32px;"
             (click)="colunaIdSendoAdicionada = null">Cancelar</button>
         </div>
-
       </div>
       } @else {
       <button mat-button class="add-card-btn" (click)="mostrarInputNovoCard(coluna.id)">

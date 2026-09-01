@@ -27,7 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatIconModule,
     MatMenuModule,
     MatBadgeModule,
-    MatTooltipModule 
+    MatTooltipModule
   ],
   templateUrl: './layout.component.html'
 })
@@ -39,7 +39,9 @@ export class LayoutComponent implements OnInit {
 
   private readonly apiUrl = `${environment.apiUrl}`;
 
-  // Propriedade reativa que guardará os pedaços do nosso Breadcrumb
+  protected readonly window = window;
+
+  // Propriade reativa que guardará os pedaços do nosso Breadcrumb
   breadcrumbs: Array<{ texto: string, url: string }> = [];
 
   notificacoes: any[] = [];
@@ -48,7 +50,7 @@ export class LayoutComponent implements OnInit {
   usuario: any = {
     nome: 'Carregando...',
     email: '',
-    avatarUrl: 'assets/default-avatar.png'
+    avatarUrl: 'assets/default-avatar.jpg'
   };
 
   sidebarColapsada: boolean = false;

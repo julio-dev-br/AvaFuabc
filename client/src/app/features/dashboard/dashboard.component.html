@@ -16,7 +16,6 @@
   </div>
 </div>
 }
-
 @if (!isLoading) {
 <!-- ======================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
 <div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
@@ -189,21 +188,8 @@
 
   </div>
 </div>
+<!-- ==================== ABA 3: CENTRAL DE KANBAN ==================== -->
+<div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease; display: flex; flex-direction: column; gap: 24px; width: 100%; box-sizing: border-box;">
 
-<!-- =========================== ABA 3: SEU KANBAN PRIVADO DE ESTUDOS ==================== -->
-<div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
-  <div
-    style="background-color: white; padding: 24px 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01); box-sizing: border-box;">
-    <div
-      style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; flex-wrap: wrap;">
-      <mat-icon
-        style="color: #003366; font-size: 24px; width: 24px; height: 24px; flex-shrink: 0;">assignment</mat-icon>
-      <h2 style="margin: 0; font-size: 18px; color: #003366; font-weight: 700;">Quadro Kanban de Tarefas Pessoais</h2>
-    </div>
-    <p style="margin: 0; color: #64748b; font-size: 14px; line-height: 1.5; word-break: break-word;">
-      Organize sua rotina de estudos de forma 100% isolada e confidencial. Planeje quais revisões, apostilas ou leituras
-      regulamentares você executará hoje.
-    </p>
-  </div>
 </div>
 } <!-- Fim do @if (!isLoading) -->
