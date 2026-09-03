@@ -11,30 +11,30 @@ import { AdminDashboardComponent } from './features/admin-dashboard/admin-dashbo
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // Rota inicial pública redireciona para o Login
+  // Rota inicial pública redireciona para o Login corporativo
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
-  // Quem entra aqui herda a Sidebar e o Header automaticamente!
+  // 🌟 O GRANDE TRUQUE: O LayoutComponent agora envelopa a casca TANTO do Aluno quanto do Admin!
   { 
-    path: 'dashboard', 
+    path: '', 
     component: LayoutComponent, 
     canActivate: [authGuard],
     children: [
-      // Injetadas dinamicamente dentro do <router-outlet> do painel central
-      { path: '', redirectTo: 'cursos', pathMatch: 'full' },
-      { path: 'cursos', component: DashboardComponent },
-      { path: 'progresso', component: DashboardComponent },
-      { path: 'kanban', component: KanbanBoardComponent },
-      { path: 'curso/:id', component: CursoPlayerComponent },
-      { path: 'quiz/aula/:id', component: QuizComponent },
-      { path: 'forum/aula/:id', component: ForumComponent },
-      { path: 'perfil', component: PerfilComponent }
+      // 🎓 Sub-rotas do Ecossistema do Aluno
+      { path: 'dashboard', redirectTo: 'dashboard/cursos', pathMatch: 'full' },
+      { path: 'dashboard/cursos', component: DashboardComponent },
+      { path: 'dashboard/progresso', component: DashboardComponent },
+      { path: 'dashboard/kanban', component: KanbanBoardComponent },
+      { path: 'dashboard/curso/:id', component: CursoPlayerComponent },
+      { path: 'dashboard/quiz/aula/:id', component: QuizComponent },
+      { path: 'dashboard/forum/aula/:id', component: ForumComponent },
+      { path: 'dashboard/perfil', component: PerfilComponent },
+
+      // 🛡️ Sub-rota do Painel de Gestão (Agora rodando protegido dentro do Layout Mestre!)
+      { path: 'admin', component: AdminDashboardComponent }
     ]
   },
-
-  // Painel Administrativo do RH isolado do escopo do aluno
-  { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
   
   // Fallback de segurança para caminhos inexistentes
   { path: '**', redirectTo: 'login' }

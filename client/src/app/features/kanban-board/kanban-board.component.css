@@ -1,19 +1,15 @@
-/* ==========================================================================
-   🛹 GRID ELÁSTICO DO KANBAN BOARD (DESKTOP PADRÃO)
-   ========================================================================== */
 .kanban-board {
   display: flex;
   gap: 20px;
   padding: 16px;
   align-items: flex-start;
   width: 100%;
-  height: calc(100vh - 130px); /* Ajustado milimetricamente para respeitar o <main> master */
+  height: calc(100vh - 130px);
   overflow-x: auto;
   background-color: #f8fafc;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
 }
-
 .kanban-column {
   width: 290px;
   flex-shrink: 0;
@@ -25,7 +21,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
-
 .column-title {
   padding: 14px 16px 8px 16px;
   margin: 0;
@@ -33,43 +28,35 @@
   font-weight: 700;
   color: #1e293b;
 }
-
-/* Área de cards interna vertical com rolagem própria */
 .card-list {
   padding: 4px 12px;
   overflow-y: auto;
   flex-grow: 1;
   min-height: 80px;
 }
-
-/* 🌟 TRAVA DE SEGURANÇA: Impede qualquer rolagem ou scroll interno nos cartões ativos */
 .kanban-card {
   margin-bottom: 10px;
   border-radius: 6px;
   cursor: grab;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
   background-color: #ffffff;
-  overflow: hidden !important; /* ✨ O XEQUE-MATE: Garante que nada vaza ou cria barras internas */
+  overflow: hidden !important;
   box-sizing: border-box;
 }
-
 .kanban-card:active {
   cursor: grabbing;
 }
-
 .card-title {
   font-size: 14px;
   font-weight: 600;
   color: #334155;
 }
-
 .card-desc {
   font-size: 12px;
   color: #64748b;
   margin-top: 6px;
   margin-bottom: 0;
 }
-
 .empty-column-placeholder {
   text-align: center;
   padding: 16px;
@@ -80,24 +67,19 @@
   margin-bottom: 10px;
   background: rgba(248, 250, 252, 0.5);
 }
-
-/* 🎭 BLINDAGEM DO CARD FANTASMA (O preview que flutua durante o arrasto) */
 .cdk-drag-preview {
   box-shadow: 0 5px 15px rgba(0, 51, 102, 0.15) !important;
   border-radius: 6px;
   background-color: #ffffff;
-  overflow: hidden !important; /* ✨ Impede o scroll horizontal de nascer no card flutuante */
+  overflow: hidden !important;
   box-sizing: border-box;
 }
-
 .cdk-drag-placeholder {
   opacity: 0.2;
 }
-
 .column-footer {
   padding: 12px;
 }
-
 .add-card-btn {
   width: 100%;
   text-align: left;
@@ -105,41 +87,66 @@
   font-size: 13px;
   font-weight: 600;
 }
-
 .add-card-btn:hover {
   background-color: rgba(0, 51, 102, 0.04) !important;
 }
-
 .full-width {
   width: 100%;
 }
-
 .compact-form ::ng-deep .mat-mdc-text-field-wrapper {
   background-color: #ffffff !important;
 }
-
 .action-buttons {
   display: flex;
   gap: 8px;
   margin-top: 4px;
 }
-
 .kanban-toolbar {
   background-color: #003366 !important;
   color: #ffffff;
 }
-
 .toolbar-title {
   margin-left: 16px;
   font-size: 18px;
 }
-
 .kanban-loading {
   text-align: center;
   padding: 64px;
   font-size: 18px;
   color: #666666;
 }
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 1024px) {
+  .kanban-board {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding: 12px 4px !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kanban-column {
+    width: 82vw !important;
+    max-width: 310px !important;
+    flex: 0 0 auto !important;
+    scroll-snap-align: center !important;
+    max-height: calc(100vh - 180px) !important;
+  }
+  .card-list {
+    max-height: calc(100vh - 320px) !important;
+  }
+}
+
 
 /* ==========================================================================
    📱 🚀 INTERAÇÃO MOBILE: Transforma o quadro em um Slider por colunas suaves
@@ -149,16 +156,19 @@
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
-    scroll-snap-type: x mandatory !important; /* Efeito imã reativo */
+    scroll-snap-type: x mandatory !important;
+    /* Efeito imã reativo */
     padding: 12px 8px !important;
     gap: 16px !important;
   }
 
   .kanban-column {
     width: auto !important;
-    flex: 0 0 82vw !important; /* Cada coluna ocupa 82% do visor do smartphone */
+    flex: 0 0 82vw !important;
+    /* Cada coluna ocupa 82% do visor do smartphone */
     max-width: 300px !important;
-    scroll-snap-align: center !important; /* Centraliza no arrasto do dedo */
+    scroll-snap-align: center !important;
+    /* Centraliza no arrasto do dedo */
     height: 100% !important;
   }
 }

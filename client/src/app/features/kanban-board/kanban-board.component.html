@@ -18,7 +18,6 @@
 }
 
 @if (!isLoading) {
-  
 <div style="margin-bottom: 20px; padding: 10 4px;">
   <h2
     style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
@@ -31,120 +30,122 @@
   </p>
 </div>
 
-<div class="kanban-board" cdkDropListGroup style="padding: 10px;">
-  @for (coluna of colunas; track coluna.id) {
-  <div class="kanban-column" [style.border-top]="'4px solid ' + (coluna.cor || '#003366')"
-    style="border-top-left-radius: 4px; border-top-right-radius: 4px;">
-    <h3 class="column-title" style="padding-top: 10px;">{{ coluna.titulo }}</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 4px;">
+  <div class="kanban-board" cdkDropListGroup style="padding: 10px;">
+    @for (coluna of colunas; track coluna.id) {
+    <div class="kanban-column" [style.border-top]="'4px solid ' + (coluna.cor || '#003366')"
+      style="border-top-left-radius: 4px; border-top-right-radius: 4px;">
+      <h3 class="column-title" style="padding-top: 10px;">{{ coluna.titulo }}</h3>
 
-    <!-- Zona onde os cartões podem cair -->
-    <div class="card-list" cdkDropList [cdkDropListData]="coluna.cards"
-      (cdkDropListDropped)="onCardDrop($event, coluna.id)">
+      <!-- Zona onde os cartões podem cair -->
+      <div class="card-list" cdkDropList [cdkDropListData]="coluna.cards"
+        (cdkDropListDropped)="onCardDrop($event, coluna.id)">
 
-      <!-- LOOP DE CARTÕES DO KANBAN COM MUDANÇA DE ESTADO INLINE CORRIGIDO -->
-      @for (card of coluna.cards; track card.id) {
-      <mat-card class="kanban-card" cdkDrag [cdkDragDisabled]="cardIdSendoEditado === card.id"
-        style="position: relative; margin-bottom: 10px; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;">
-        <mat-card-content style="padding: 12px 14px;">
+        <!-- LOOP DE CARTÕES DO KANBAN COM MUDANÇA DE ESTADO INLINE CORRIGIDO -->
+        @for (card of coluna.cards; track card.id) {
+        <mat-card class="kanban-card" cdkDrag [cdkDragDisabled]="cardIdSendoEditado === card.id"
+          style="position: relative; margin-bottom: 10px; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;">
+          <mat-card-content style="padding: 12px 14px;">
 
-          <!-- MODO DE EDIÇÃO ATIVO INLINE -->
-          @if (cardIdSendoEditado === card.id) {
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
-              <input matInput [(ngModel)]="tituloEdicaoInput" placeholder="Título da tarefa..."
-                (keyup.enter)="salvarEdicaoCardReal(card.id, coluna.id)">
-            </mat-form-field>
+            <!-- MODO DE EDIÇÃO ATIVO INLINE -->
+            @if (cardIdSendoEditado === card.id) {
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                <input matInput [(ngModel)]="tituloEdicaoInput" placeholder="Título da tarefa..."
+                  (keyup.enter)="salvarEdicaoCardReal(card.id, coluna.id)">
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
-              <textarea matInput [(ngModel)]="descricaoEdicaoInput" placeholder="Descrição opcional..."
-                rows="2"></textarea>
-            </mat-form-field>
+              <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                <textarea matInput [(ngModel)]="descricaoEdicaoInput" placeholder="Descrição opcional..."
+                  rows="2"></textarea>
+              </mat-form-field>
 
-            <div style="display: flex; gap: 8px; justify-content: flex-end;">
-              <button mat-flat-button color="primary" size="small" style="font-size: 12px; height: 32px;"
-                (click)="salvarEdicaoCardReal(card.id, coluna.id)">Salvar</button>
-              <button mat-button size="small" style="font-size: 12px; height: 32px;"
-                (click)="cancelarEdicaoInline()">Cancelar</button>
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button mat-flat-button color="primary" size="small" style="font-size: 12px; height: 32px;"
+                  (click)="salvarEdicaoCardReal(card.id, coluna.id)">Salvar</button>
+                <button mat-button size="small" style="font-size: 12px; height: 32px;"
+                  (click)="cancelarEdicaoInline()">Cancelar</button>
+              </div>
             </div>
-          </div>
-          } @else {
-          <!-- MODO DE VISUALIZAÇÃO PADRÃO SINTONIZADO NO ESCOPO CORRETO -->
-          <div class="card-header-area"
-            style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
-            <span class="card-title"
-              style="font-size: 14px; font-weight: 600; color: #1e293b; flex: 1; word-break: break-word;">
-              {{ card.titulo }}
-            </span>
+            } @else {
+            <!-- MODO DE VISUALIZAÇÃO PADRÃO SINTONIZADO NO ESCOPO CORRETO -->
+            <div class="card-header-area"
+              style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+              <span class="card-title"
+                style="font-size: 14px; font-weight: 600; color: #1e293b; flex: 1; word-break: break-word;">
+                {{ card.titulo }}
+              </span>
 
-            <!-- BOTÃO DOS TRÊS PONTINHOS -->
-            <button mat-icon-button [matMenuTriggerFor]="cardMenu"
-              style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; margin-top: -4px; margin-right: -6px; background: transparent; border: none; cursor: pointer;"
-              (click)="$event.stopPropagation();">
-              <mat-icon
-                style="font-size: 20px; width: 20px; height: 20px; color: #475569 !important; display: flex; align-items: center; justify-content: center; margin: 0;">more_vert</mat-icon>
-            </button>
-            <mat-menu #cardMenu="matMenu" xPosition="before">
-              <button mat-menu-item (click)="ativarEdicaoInline(card)">
-                <mat-icon style="color: #003366; font-size: 20px;">edit</mat-icon>
-                <span style="font-size: 13px; font-weight: 500; color: #334155;">Editar Tarefa</span>
+              <!-- BOTÃO DOS TRÊS PONTINHOS -->
+              <button mat-icon-button [matMenuTriggerFor]="cardMenu"
+                style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; margin-top: -4px; margin-right: -6px; background: transparent; border: none; cursor: pointer;"
+                (click)="$event.stopPropagation();">
+                <mat-icon
+                  style="font-size: 20px; width: 20px; height: 20px; color: #475569 !important; display: flex; align-items: center; justify-content: center; margin: 0;">more_vert</mat-icon>
               </button>
+              <mat-menu #cardMenu="matMenu" xPosition="before">
+                <button mat-menu-item (click)="ativarEdicaoInline(card)">
+                  <mat-icon style="color: #003366; font-size: 20px;">edit</mat-icon>
+                  <span style="font-size: 13px; font-weight: 500; color: #334155;">Editar Tarefa</span>
+                </button>
 
-              <div style="height: 1px; background-color: #f1f5f9; margin: 4px 0;"></div>
+                <div style="height: 1px; background-color: #f1f5f9; margin: 4px 0;"></div>
 
-              <button mat-menu-item (click)="deletarCardReal(card.id, coluna.id)" style="color: #dc2626;">
-                <mat-icon style="color: #dc2626; font-size: 20px;">delete_outline</mat-icon>
-                <span style="font-size: 13px; font-weight: 600;">Excluir Tarefa</span>
-              </button>
-            </mat-menu>
+                <button mat-menu-item (click)="deletarCardReal(card.id, coluna.id)" style="color: #dc2626;">
+                  <mat-icon style="color: #dc2626; font-size: 20px;">delete_outline</mat-icon>
+                  <span style="font-size: 13px; font-weight: 600;">Excluir Tarefa</span>
+                </button>
+              </mat-menu>
+            </div>
+
+            @if (card.descricao) {
+            <p class="card-desc"
+              style="margin: 6px 0 0 0; color: #64748b; font-size: 12px; line-height: 1.4; word-break: break-word;">
+              {{ card.descricao }}
+            </p>
+            }
+            }
+
+          </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- Fallback caso a coluna fique sem cartões -->
+        @if (coluna.cards.length === 0) {
+        <div class="empty-column-placeholder">Nenhuma tarefa</div>
+        }
+
+      </div> <!-- Fim da .card-list -->
+
+      <!-- Área de criação de cartões rápidos (Rodapé da Coluna Otimizado com Descrição) -->
+      <div class="column-footer">
+        @if (colunaIdSendoAdicionada === coluna.id) {
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+          <mat-form-field appearance="outline" class="full-width compact-form">
+            <input matInput [(ngModel)]="novoCardTitulo" placeholder="Título da tarefa..."
+              (keyup.enter)="adicionarCard(coluna.id)">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width compact-form">
+            <textarea matInput [(ngModel)]="novoCardDescricao" placeholder="Descrição opcional..." rows="2"></textarea>
+          </mat-form-field>
+
+          <div class="action-buttons" style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button mat-flat-button color="primary" size="small" style="font-size: 12px; height: 32px;"
+              (click)="adicionarCard(coluna.id)">Salvar</button>
+            <button mat-button size="small" style="font-size: 12px; height: 32px;"
+              (click)="colunaIdSendoAdicionada = null">Cancelar</button>
           </div>
-
-          @if (card.descricao) {
-          <p class="card-desc"
-            style="margin: 6px 0 0 0; color: #64748b; font-size: 12px; line-height: 1.4; word-break: break-word;">
-            {{ card.descricao }}
-          </p>
-          }
-          }
-
-        </mat-card-content>
-      </mat-card>
-      }
-
-      <!-- Fallback caso a coluna fique sem cartões -->
-      @if (coluna.cards.length === 0) {
-      <div class="empty-column-placeholder">Nenhuma tarefa</div>
-      }
-
-    </div> <!-- Fim da .card-list -->
-
-    <!-- Área de criação de cartões rápidos (Rodapé da Coluna Otimizado com Descrição) -->
-    <div class="column-footer">
-      @if (colunaIdSendoAdicionada === coluna.id) {
-      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-        <mat-form-field appearance="outline" class="full-width compact-form">
-          <input matInput [(ngModel)]="novoCardTitulo" placeholder="Título da tarefa..."
-            (keyup.enter)="adicionarCard(coluna.id)">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width compact-form">
-          <textarea matInput [(ngModel)]="novoCardDescricao" placeholder="Descrição opcional..." rows="2"></textarea>
-        </mat-form-field>
-
-        <div class="action-buttons" style="display: flex; gap: 8px; justify-content: flex-end;">
-          <button mat-flat-button color="primary" size="small" style="font-size: 12px; height: 32px;"
-            (click)="adicionarCard(coluna.id)">Salvar</button>
-          <button mat-button size="small" style="font-size: 12px; height: 32px;"
-            (click)="colunaIdSendoAdicionada = null">Cancelar</button>
         </div>
+        } @else {
+        <button mat-button class="add-card-btn" (click)="mostrarInputNovoCard(coluna.id)">
+          <mat-icon>add</mat-icon> Adicionar Tarefa
+        </button>
+        }
       </div>
-      } @else {
-      <button mat-button class="add-card-btn" (click)="mostrarInputNovoCard(coluna.id)">
-        <mat-icon>add</mat-icon> Adicionar Tarefa
-      </button>
-      }
-    </div>
 
-  </div> <!-- Fim da .kanban-column -->
-  }
-</div> <!-- Fim da .kanban-board -->
+    </div> <!-- Fim da .kanban-column -->
+    }
+  </div> <!-- Fim da .kanban-board -->
+</div>
 }

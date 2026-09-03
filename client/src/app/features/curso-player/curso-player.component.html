@@ -14,15 +14,12 @@
   </div>
 </div>
 }
-
 @if (!isLoading && curso) {
-<div class="player-grid" style="display: grid; grid-template-columns: 1fr 340px; gap: 24px;">
-  <!-- 1. COLUNA DA ESQUERDA: Player de Vídeo Real e Detalhes da Aula Ativa -->
-  <div class="video-section">
+<div class="player-grid-container">
+  <div class="video-section-wrapper">
     @if (aulaAtiva) {
     <div class="video-wrapper"
       style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-
       @if (aulaAtiva?.video_url && (aulaAtiva.video_url.includes('youtube.com') ||
       aulaAtiva.video_url.includes('youtu.be') || aulaAtiva.video_url.includes('embed'))) {
       <iframe [id]="'player-' + aulaAtiva.id"
@@ -32,55 +29,39 @@
         allowfullscreen>
       </iframe>
       } @else if (aulaAtiva?.video_url) {
-      <!-- Se for um link de MP4 direto ou CDN -->
       <video style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"
         [src]="aulaAtiva.video_url" controls controlsList="nodownload" autoplay>
       </video>
       } @else {
-      <!-- Fallback caso a aula não possua link gravado -->
-      <div
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #888;">
-        <mat-icon style="margin-right: 8px;">error_outline</mat-icon> Link de vídeo indisponível para esta aula.
+      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: #888; padding: 16px; box-sizing: border-box; text-align: center;">
+        <mat-icon style="margin-right: 8px; flex-shrink: 0;">error_outline</mat-icon> Link de vídeo indisponível para esta aula.
       </div>
       }
-
     </div>
-
-    <div class="aula-detalhes" style="margin-top: 24px;">
-      <h2 class="aula-titulo" style="color: #003366; font-size: 24px; font-weight: bold; margin-bottom: 8px;">{{
-        aulaAtiva.titulo }}</h2>
-      <p class="aula-descricao" style="color: #555555; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">{{
-        aulaAtiva.descricao || 'Sem descrição para esta aula.' }}</p>
-
-      <div
-        style="margin-bottom: 32px; border-top: 1px solid #e0e0e0; padding-top: 24px; display: flex; gap: 10px; flex-wrap: wrap;">
-        <!-- Rota sintonizada com as sub-rotas da Master Page -->
+    <div class="aula-detalhes" style="margin-top: 24px; padding: 0 4px;">
+      <h2 class="aula-titulo" style="color: #003366; font-size: 22px; font-weight: bold; margin-bottom: 8px; word-break: break-word; line-height: 1.3;">{{ aulaAtiva.titulo }}</h2>
+      <p class="aula-descricao" style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 24px; word-break: break-word;">{{ aulaAtiva.descricao || 'Sem descrição para esta aula.' }}</p>
+      <div style="margin-bottom: 32px; border-top: 1px solid #e2e8f0; padding-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
         <button mat-raised-button [routerLink]="['/dashboard/quiz/aula', aulaAtiva?.id]"
-          style="background-color: #ff9800; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 40px; border: none; cursor: pointer; border-radius: 6px;">
-          <mat-icon style="margin-right: 8px; vertical-align: middle;">assignment</mat-icon>
+          style="background-color: #ff9800; color: #ffffff; padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px;">
+          <mat-icon style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px;">assignment</mat-icon>
           Fazer Avaliação
         </button>
-
-        <!-- Rota sintonizada com as sub-rotas da Master Page -->
         <button mat-raised-button [routerLink]="['/dashboard/forum/aula', aulaAtiva?.id]"
-          style="background-color: #003366; color: #ffffff; padding: 12px 24px; font-size: 15px; font-weight: 500; height: 40px; border: none; cursor: pointer; border-radius: 6px;">
-          <mat-icon style="margin-right: 8px; vertical-align: middle;">chat</mat-icon>
+          style="background-color: #003366; color: #ffffff; padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px;">
+          <mat-icon style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px;">chat</mat-icon>
           Fórum de Dúvidas
         </button>
       </div>
-
-      <!-- SEÇÃO DE MATERIAIS DE APOIO DA AULA -->
       @if (aulaAtiva?.materiais && aulaAtiva?.materiais.length > 0) {
-      <div style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h3
-          style="margin: 0 0 12px 0; color: #003366; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-          <mat-icon style="color: #003366;">library_books</mat-icon> Materials de Apoio Disponíveis
+      <div style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+        <h3 style="margin: 0 0 12px 0; color: #003366; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+          <mat-icon style="color: #003366;">library_books</mat-icon> Materiais de Apoio Disponíveis
         </h3>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%;">
           @for (material of aulaAtiva.materiais; track material.id) {
           <a mat-stroked-button [href]="configurarUrlMaterial(material.url)" target="_blank"
-            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 40px; text-decoration: none;">
+            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 38px; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             <mat-icon style="margin-right: 4px; vertical-align: middle;">
               {{ material.tipo === 'LINK' ? 'link' : 'file_download' }}
             </mat-icon>
@@ -92,41 +73,35 @@
       }
     </div>
     } @else {
-    <div class="no-lesson" style="text-align: center; padding: 64px; color: #888888; font-size: 16px;">
-      <mat-icon
-        style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; color: #b0bec5;">ondemand_video</mat-icon>
+    <div class="no-lesson" style="text-align: center; padding: 64px 16px; color: #888888; font-size: 16px; box-sizing: border-box;">
+      <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; color: #b0bec5; margin: 0 auto 12px auto;">ondemand_video</mat-icon>
       <p>Selecione uma aula na barra lateral para iniciar o treinamento.</p>
     </div>
     }
   </div>
-  <!-- 2. COLUNA DA DIREITA: Barra Lateral com Módulos e Aulas (Accordion) -->
   <div class="sidebar-section">
-    <h3 class="sidebar-title"
-      style="color: #003366; font-weight: 700; font-size: 15px; margin: 0 0 16px 0; padding-left: 4px;">
+    <h3 class="sidebar-title" style="color: #003366; font-weight: 700; font-size: 15px; margin: 0 0 16px 0; padding-left: 4px;">
       Conteúdo Programático
     </h3>
-
     <mat-accordion multi="true">
       @for (modulo of curso.modulos; track modulo.id; let first = $first) {
       <mat-expansion-panel [expanded]="first" class="modulo-panel"
-        style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px !important; box-shadow: none !important;">
+        style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px !important; box-shadow: none !important; background: #ffffff;">
         <mat-expansion-panel-header style="height: 48px;">
-          <mat-panel-title class="modulo-titulo" style="color: #003366; font-weight: 600; font-size: 14px;">
+          <mat-panel-title class="modulo-titulo" style="color: #003366; font-weight: 600; font-size: 14px; word-break: break-word;">
             {{ modulo.titulo }}
           </mat-panel-title>
         </mat-expansion-panel-header>
-
         <mat-action-list style="padding: 0;">
           @for (aula of modulo?.aulas; track aula.id) {
           <button mat-list-item (click)="selecionarAula(aula)" [class.aula-ativa-item]="aulaAtiva?.id === aula.id"
             class="aula-list-button"
-            style="border-radius: 6px; margin: 4px 0; transition: all 0.2s; border: none; cursor: pointer; text-align: left; width: 100%;">
+            style="border-radius: 6px; margin: 4px 0; transition: all 0.2s; border: none; cursor: pointer; text-align: left; width: 100%; box-sizing: border-box; display: flex; align-items: center;">
             <mat-icon matListItemIcon class="aula-status-icon"
-              style="color: #64748b; margin-right: 8px; font-size: 20px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">
+              style="color: #64748b; margin-right: 8px; font-size: 20px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0;">
               play_circle_outline
             </mat-icon>
-            <span class="aula-item-titulo" style="font-size: 13px; font-weight: 500; vertical-align: middle;">{{
-              aula?.titulo }}</span>
+            <span class="aula-item-titulo" style="font-size: 13px; font-weight: 500; vertical-align: middle; white-space: normal; line-height: 1.3; word-break: break-word; display: inline-block;">{{ aula?.titulo }}</span>
           </button>
           }
         </mat-action-list>
@@ -134,6 +109,5 @@
       }
     </mat-accordion>
   </div>
-
-</div> <!-- Fim da player-grid -->
-} <!-- Fim do @if (!isLoading && curso) -->
+</div> 
+}

@@ -156,8 +156,68 @@
   background-color: #e6f0fa !important;
 }
 
-.aula-ativa-item .sidebar-icon, 
+.aula-ativa-item .sidebar-icon,
 .aula-ativa-item .aula-item-titulo {
   color: #003366 !important;
   font-weight: bold;
+}
+
+/* ==========================================================================
+   🎬 GRID ELÁSTICO DO CURSO PLAYER (DESKTOP PADRÃO)
+   ========================================================================== */
+.player-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  /* Vídeo toma o espaço e menu trava em 340px */
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.video-section-wrapper {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-section {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilização da aula ativa na lista */
+.aula-ativa-item {
+  background-color: rgba(0, 51, 102, 0.06) !important;
+}
+
+.aula-ativa-item .aula-status-icon {
+  color: #003366 !important;
+}
+
+.aula-ativa-item .aula-item-titulo {
+  color: #003366 !important;
+  font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   📱 🚀 EQUALIZADOR MOBILE: Desfaz o grid lateral e joga o menu para a base
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .player-grid-container {
+    display: flex !important;
+    flex-direction: column !important;
+    /* Vídeo no topo e menu embaixo */
+    gap: 20px !important;
+  }
+
+  .sidebar-section {
+    width: 100% !important;
+    margin-top: 12px;
+  }
+
+  .sidebar-title {
+    padding-left: 0 !important;
+    font-size: 14px !important;
+  }
 }

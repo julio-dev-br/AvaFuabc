@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AdminTabService } from '../services/admin-tab.service';
 
 @Component({
   selector: 'app-layout',
@@ -35,6 +36,8 @@ export class LayoutComponent implements OnInit {
   private http = inject(HttpClient);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
+  public tabService = inject(AdminTabService);
+
   private router = inject(Router);
 
   private readonly apiUrl = `${environment.apiUrl}`;
@@ -140,6 +143,9 @@ export class LayoutComponent implements OnInit {
     });
   }
 
+  estaNoPainelAdmin(): boolean {
+    return this.router.url.includes('/admin');
+  }
   // Método que será chamado ao clicar no ícone de Hambúrguer / Setinha
   alternarSidebar(): void {
     // Se for Desktop, colapsa/recolhe a barra lateral

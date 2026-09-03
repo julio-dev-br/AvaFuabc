@@ -23,7 +23,8 @@
 /* 🌟 DESIGN EXCLUSIVO: Destaca respostas de Tutores/Gerentes */
 /* 🌟 ESTILO DO BOTÃO DO FÓRUM QUANDO ESTIVER ATIVO (COM TEXTO DIGITADO) */
 .submit-reply-btn:not([disabled]) {
-  background-color: #003366 !important; /* Azul escuro corporativo */
+  background-color: #003366 !important;
+  /* Azul escuro corporativo */
   color: #ffffff !important;
   cursor: pointer;
   height: 40px;
@@ -34,12 +35,68 @@
 
 /* 🌟 ESTILO DO BOTÃO DO FÓRUM QUANDO ESTIVER INATIVO (CAMPO VAZIO) */
 .submit-reply-btn[disabled] {
-  background-color: #b3cce6 !important; /* Azul bem clarinho e suave */
-  color: #6688aa !important;            /* Texto em azul acinzentado discreto */
-  cursor: not-allowed !important;        /* Cursor de bloqueio */
+  background-color: #b3cce6 !important;
+  /* Azul bem clarinho e suave */
+  color: #6688aa !important;
+  /* Texto em azul acinzentado discreto */
+  cursor: not-allowed !important;
+  /* Cursor de bloqueio */
   height: 40px;
   padding: 0 24px;
   font-weight: 500;
-  opacity: 0.7;                          /* Efeito leve de transparência */
+  opacity: 0.7;
+  /* Efeito leve de transparência */
 }
 
+/* ==========================================================================
+   🗣️ GRID ELÁSTICO DO FÓRUM DE DISCUSSÕES (DESKTOP PADRÃO)
+   ========================================================================== */
+.forum-grid-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  /* Sidebar em 300px fixos e o feed elástico */
+  gap: 24px;
+  width: 100%;
+  height: calc(100vh - 130px);
+  /* Ajuste perfeito com o <main> master */
+  box-sizing: border-box;
+}
+
+/* Destaque para o tópico ativo na lista */
+.topico-ativo-item {
+  background-color: rgba(0, 51, 102, 0.05) !important;
+  border-color: #003366 !important;
+}
+
+/* Card customizado para quando o tutor/professor responder */
+.tutor-reply-card {
+  border-left: 4px solid #137333 !important;
+  background-color: #f6fbf7 !important;
+}
+
+/* ==========================================================================
+   📱 🚀 EQUALIZADOR MOBILE: Empilha o feed verticalmente no celular
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .forum-grid-container {
+    display: flex !important;
+    flex-direction: column !important;
+    /* Lista em cima e respostas embaixo */
+    height: auto !important;
+    /* Remove o travamento de altura no smartphone */
+    gap: 16px !important;
+  }
+
+  .topics-sidebar {
+    width: 100% !important;
+    max-height: 280px !important;
+    /* Limita a altura da lista no topo para não sufocar */
+  }
+
+  .content-view-panel {
+    width: 100% !important;
+    overflow-y: visible !important;
+    /* Rola junto com a página global do celular */
+    padding: 16px !important;
+  }
+}

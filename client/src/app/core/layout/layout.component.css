@@ -1,38 +1,64 @@
 .sidebar-container {
-    width: 240px;
-    /* Alinhado milimetricamente com o seu recuo sênior de ontem */
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
+  z-index: 150;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+.sidebar-container.colapsada {
+  width: 78px !important;
+}
+.main-layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100% !important; 
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  transition: padding-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+.main-layout-wrapper:not(.colapsada) {
+  padding-left: 240px !important;
+}
+.main-layout-wrapper.colapsada {
+  padding-left: 78px !important;
 }
 @media (max-width: 1024px) {
-    .sidebar-container {
-        position: fixed !important;
-        left: -240px !important;
-        width: 240px !important;
-        height: 100vh !important;
-        z-index: 200 !important;
-        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15) !important;
-    }
-    .sidebar-container.aberta-mobile {
-        left: 0 !important;
-    }
-    .esconder-no-mobile {
-        display: none !important;
-    }
+  .main-layout-wrapper,
+  .main-layout-wrapper.colapsada {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .sidebar-container {
+    position: fixed !important;
+    left: -240px !important;
+    width: 240px !important;
+    height: 100vh !important;
+    z-index: 200 !important;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15) !important;
+  }
+  .sidebar-container.aberta-mobile {
+    left: 0 !important;
+  }
+  
+  .esconder-no-mobile {
+    display: none !important;
+  }
 }
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateX(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

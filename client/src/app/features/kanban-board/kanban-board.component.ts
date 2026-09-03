@@ -58,7 +58,6 @@ export class KanbanBoardComponent implements OnInit {
   tituloEdicaoInput: string = '';
   descricaoEdicaoInput: string = '';
 
-
   ngOnInit(): void {
     this.carregarQuadro();
   }
@@ -144,7 +143,7 @@ export class KanbanBoardComponent implements OnInit {
           coluna.cards.push(novoCard); // Alimenta a grade reativamente
         }
         
-        this.alerts.sucesso('Tarefa adicionada ao seu quadro! 🚀');
+        this.alerts.sucesso('Tarefa adicionada ao seu quadro!');
 
         this.novoCardTitulo = '';
         this.novoCardDescricao = ''; 
@@ -157,7 +156,6 @@ export class KanbanBoardComponent implements OnInit {
     });
   }
 
-  // Carrega os textos nos inputs para o clique na tela
   ativarEdicaoInline(card: any): void {
     this.cardIdSendoEditado = card.id;
     this.tituloEdicaoInput = card.titulo;
@@ -170,18 +168,15 @@ export class KanbanBoardComponent implements OnInit {
     this.descricaoEdicaoInput = '';
   }
 
-  // DISPARA A ATUALIZAÇÃO REATIVA VIA SERVIÇO NO NESTJS/POSTGRES
   salvarEdicaoCardReal(cardId: number, colunaId: number): void {
     if (!this.tituloEdicaoInput.trim()) {
       this.alerts.erro('O título da tarefa não pode ficar vazio!');
       return;
     }
-
     const payload = {
       titulo: this.tituloEdicaoInput.trim(),
       descricao: this.descricaoEdicaoInput.trim()
     };
-
     this.kanbanService.atualizarCard(cardId, payload).subscribe({
       next: (cardAtualizado) => {
         const coluna = this.colunas.find(c => c.id === colunaId);
@@ -201,13 +196,11 @@ export class KanbanBoardComponent implements OnInit {
     });
   }
 
-  // DISPARA A DELEÇÃO COM ABRE-E-FECHA DA JANELA ATRATIVA CORPORATIVA
   deletarCardReal(cardId: number, colunaId: number): void {
-    // Abre a modal atrativa centralizada na tela
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        titulo: 'Excluir Tarefa 🗑️',
+        titulo: 'Excluir Tarefa',
         mensagem: 'Deseja realmente remover esta tarefa permanentemente do seu quadro de estudos? Esta ação não pode ser desfeita.'
       }
     });
@@ -220,7 +213,6 @@ export class KanbanBoardComponent implements OnInit {
     });
   }
 
-  // Método de suporte isolado que limpa a linha no Postgres e na tela
   private executarExclusaoFisica(cardId: number, colunaId: number): void {
     this.kanbanService.excluirCard(cardId).subscribe({
       next: () => {
@@ -228,7 +220,7 @@ export class KanbanBoardComponent implements OnInit {
         if (coluna) {
           coluna.cards = coluna.cards.filter((c: any) => c.id !== cardId);
         }
-        this.alerts.sucesso('Tarefa removida do seu quadro! 🗑️'); // Seu pop-up verde lindo do topo direito!
+        this.alerts.sucesso('Tarefa removida do seu quadro!'); // Seu pop-up verde lindo do topo direito!
       },
       error: (err) => {
         console.error('Erro ao excluir card no Postgres:', err);

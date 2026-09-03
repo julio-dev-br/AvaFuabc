@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -28,11 +28,11 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 // Componentes de Gráficos (Chart.js)
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from 'chart.js';
-
 import { ControleUsuariosComponent } from '../user/user.component';
 import { ModalMateriaisComponent } from './modal-materiais.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { MatPaginator } from '@angular/material/paginator';
+import { AdminTabService } from '../../core/services/admin-tab.service';
 
 Chart.register(...registerables);
 
@@ -40,23 +40,55 @@ Chart.register(...registerables);
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterLink, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatSelectModule, MatCheckboxModule, MatIconModule, MatSnackBarModule,
-    MatToolbarModule, MatRadioModule, BaseChartDirective, ControleUsuariosComponent, MatDialogModule,
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatToolbarModule,
+    MatRadioModule,
+    BaseChartDirective,
+    ControleUsuariosComponent,
+    MatDialogModule,
     MatTableModule,
-    MatPaginatorModule, ComunicadosComponent, ProjetosKanbanComponent
+    MatPaginatorModule,
+    ComunicadosComponent,
+    ProjetosKanbanComponent,
+    ModalMateriaisComponent
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
+
   private treinamentoService = inject(TreinamentoService);
   private quizService = inject(QuizService);
-  private snackBar = inject(MatSnackBar);
+  public snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private alerts = inject(AlertsService);
-  private notificationService = inject(NotificationService);
+  public notificationService = inject(NotificationService);
+  private tabService = inject(AdminTabService);
   private router = inject(Router);
+
+  constructor() {
+    effect(() => {
+      const abaAtual = this.tabService.abaAtiva();
+
+      if (abaAtual === 'cadastro') {
+        this.carregarCatalogoGerencial();
+      }
+
+      if (abaAtual === 'projetos') {
+        this.carregarProjetosKanbanAdmin();
+      }
+    });
+  }
 
   // Estados do Controle de Usuários (Aba 'usuarios')
   userDataSource = new MatTableDataSource<any>([]);
@@ -76,7 +108,7 @@ export class AdminDashboardComponent implements OnInit {
   isEnviandoComunicado = false;
 
   // Controladores do Menu e Assistente (Wizard)
-  abaAtiva = 'bi';
+  // abaAtiva = 'bi';
   passoAtual = 0; // Começa na listagem gerencial
 
   // Chaves de Persistência Física
@@ -131,14 +163,32 @@ export class AdminDashboardComponent implements OnInit {
 
   // BI
   public pieChartType: ChartType = 'pie';
-  public pieChartOptions: ChartConfiguration['options'] = { responsive: true,maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
-  public pieChartData: ChartData<'pie', number[], string | string[]> = { labels: ['Concluídos', 'Em Andamento'], datasets: [{ data: [], backgroundColor: ['#2e7d32', '#ff9800'] }] };
+  public pieChartOptions: ChartConfiguration['options'] = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
+  public pieChartData: ChartData<'pie', number[], string | string[]> = { labels: ['Concluídos', 'Em Andamento'], datasets: [{ data: [], backgroundColor: ['#10b981', '#f59e0b'] }] };
 
   public barChartType: ChartType = 'bar';
-  public barChartOptions: ChartConfiguration['options'] = { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true } } };
-  public barChartData: ChartData<'bar'> = { labels: [], datasets: [{ data: [], label: 'Matrículas', backgroundColor: '#003366' }] };
+  public barChartOptions: ChartConfiguration['options'] = {
+    responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: '#f1f5f9' }
+      },
+      y: {
+        grid: { display: false }
+      }
+    },
 
-    //  CONFIGURAÇÃO DO GRÁFICO DE ADESÃO MENSAL (LINHA)
+    datasets: {
+      bar: {
+        maxBarThickness: 24,
+        borderRadius: 4
+      }
+    }
+  };
+  public barChartData: ChartData<'bar'> = { labels: [], datasets: [{ data: [], label: 'Matrículas', backgroundColor: '#0284c7' }] };
+
+  //  CONFIGURAÇÃO DO GRÁFICO DE ADESÃO MENSAL (LINHA)
   public lineChartType: ChartType = 'line';
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -157,8 +207,10 @@ export class AdminDashboardComponent implements OnInit {
         // ✅ CORRIGIDO: Array populado com números simulados para o TypeScript compilar
         data: [20, 30, 21, 10, 10, 5, 3, 6],
         label: 'Novos Alunos Matriculados',
-        borderColor: '#2563eb', // Azul institucional
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        // Atualize no seu lineChartData:
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.04)',
+
         fill: true,
         tension: 0.3 // Deixa a linha suave/curvada estilo Trello
       }
@@ -184,31 +236,18 @@ export class AdminDashboardComponent implements OnInit {
         // ✅ CORRIGIDO: Array populado com percentuais reais simulados para o gráfico subir
         data: [20, 30, 21, 10, 10, 5, 3, 6],
         label: 'Percentual de Conclusão',
-        backgroundColor: ['#2e7d32', '#ff9800'] // Cores variadas para UX elegante
+        backgroundColor: ['#4f46e5', '#06b6d4', '#0284c7', '#003366']// Cores variadas para UX elegante
       }
     ]
   };
 
   ngOnInit(): void {
-    // 📊 FOCO EXCLUSIVO: O boot inicial agora carrega apenas o painel de BI com os dados novos
+    // O boot inicial agora carrega apenas o painel de BI com os dados novos
     this.carregarDadosBI();
 
-    // 💼 Mantém os dicionários e a esteira de projetos carregando em background
+    // Mantém os dicionários e a esteira de projetos carregando em background
     this.carregarDicionariosRH();
     this.carregarProjetosKanbanAdmin();
-  }
-
-  mudarAba(aba: string): void {
-    this.abaAtiva = aba;
-    
-    // ✅ PERFEITO: O catálogo gerencial só vai rodar na rede quando o RH de fato clicar na aba de Cadastro!
-    if (aba === 'cadastro') {
-      this.carregarCatalogoGerencial();
-    }
-
-    if (aba === 'projetos') {
-      this.carregarProjetosKanbanAdmin();
-    }
   }
 
   get cursosGerenciaisExibidos(): any[] {
@@ -235,6 +274,14 @@ export class AdminDashboardComponent implements OnInit {
       curso.titulo?.toLowerCase().includes(busca)
     );
     return Math.ceil(filtrados.length / this.itensPorPaginaAdmin) || 1;
+  }
+
+  get abaAtiva(): string {
+    return this.tabService.abaAtiva();
+  }
+
+  mudarAba(aba: string): void {
+    this.tabService.mudarAba(aba);
   }
 
   proximaPaginaAdmin(): void {
@@ -276,7 +323,7 @@ export class AdminDashboardComponent implements OnInit {
 
   carregarDadosBI(): void {
     this.isLoadingMetrics = true;
-    
+
     this.treinamentoService.obterMetricasAnaliticas().subscribe({
       next: (res: any) => {
 
@@ -302,7 +349,7 @@ export class AdminDashboardComponent implements OnInit {
         // 4. 📈 NOVO GRÁFICO DE LINHA (Indexado com [0] - CORRIGIDO!)
         if (this.lineChartData && this.lineChartData.datasets && this.lineChartData.datasets[0]) {
           const volumeCursos = res.cards ? Number(res.cards.totalTreinamentos) * 5 : 40;
-          
+
           this.lineChartData.datasets[0].data = [
             Math.round(volumeCursos * 0.2),
             Math.round(volumeCursos * 0.4),
@@ -321,12 +368,12 @@ export class AdminDashboardComponent implements OnInit {
           const notaBase = Number(taxaReal);
 
           this.unidadeBarChartData.labels = ['Hospital Mário Covas', 'CHM Santo André', 'Ame Mauá', 'Fundação ABC'];
-          
+
           this.unidadeBarChartData.datasets[0].data = [
-            Math.min(notaBase + 5, 100), 
-            Math.max(notaBase - 10, 0),  
-            Math.min(notaBase + 2, 100), 
-            notaBase                     
+            Math.min(notaBase + 5, 100),
+            Math.max(notaBase - 10, 0),
+            Math.min(notaBase + 2, 100),
+            notaBase
           ];
         }
 
