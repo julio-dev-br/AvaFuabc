@@ -18,7 +18,7 @@
             <div style="animation: fadeIn 0.2s ease-out;">
                 <h2
                     style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; line-height: 1.2;">
-                    @if (estaNoPainelAdmin())  { Painel de Gestão }
+                    @if (estaNoPainelAdmin()) { Painel de Gestão }
                     @if (!estaNoPainelAdmin()) { Portal do Aluno }
                 </h2>
                 <span style="font-size: 11px; color: #003366; font-weight: 700; letter-spacing: 0.2px;">Fundação do
@@ -63,49 +63,45 @@
             }
             }
             @if (estaNoPainelAdmin()) {
-            <button mat-button (click)="tabService.mudarAba('bi')"
-                [class.active-saas-link]="tabService.abaAtiva() === 'bi'"
+            <a mat-button routerLink="/admin/bi" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Dashboard' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">insights</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Dashboard BI</span> }
-            </button>
-            <button mat-button (click)="tabService.mudarAba('cadastro')"
-                [class.active-saas-link]="tabService.abaAtiva() === 'cadastro'"
+            </a>
+            <a mat-button routerLink="/admin/cadastro" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Gerenciar Cursos' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">add_to_photos</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Treinamentos</span> }
-            </button>
-            <button mat-button (click)="tabService.mudarAba('usuarios')"
-                [class.active-saas-link]="tabService.abaAtiva() === 'usuarios'"
-                [matTooltip]="sidebarColapsada ? 'Colaboradores' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+            </a>
+            <a mat-button routerLink="/admin/usuarios" routerLinkActive="active-saas-link"
+                [matTooltip]="sidebarColapsada ? 'Usuários' : ''" matTooltipPosition="right"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">group</mat-icon>
                 @if (!sidebarColapsada) { <span
-                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Colaboradores</span> }
-            </button>
-            <button mat-button (click)="tabService.mudarAba('comunicados')"
-                [class.active-saas-link]="tabService.abaAtiva() === 'comunicados'"
+                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Usuários</span> }
+            </a>
+            <a mat-button routerLink="/admin/comunicados" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Comunicados' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">campaign</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Comunicados</span> }
-            </button>
-            <button mat-button (click)="tabService.mudarAba('projetos')"
-                [class.active-saas-link]="tabService.abaAtiva() === 'projetos'"
-                [matTooltip]="sidebarColapsada ? 'Projetos' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+            </a>
+            <a mat-button routerLink="/admin/projetos" routerLinkActive="active-saas-link"
+                (click)="tabService.mudarAba('projetos')" [matTooltip]="sidebarColapsada ? 'Projetos' : ''"
+                matTooltipPosition="right"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">dashboard</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Projetos</span> }
-            </button>
+            </a>
             <a mat-button routerLink="/dashboard/cursos" class="admin-sidebar-btn-premium"
                 [matTooltip]="sidebarColapsada ? 'Voltar para Área do Aluno' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; cursor: pointer; text-decoration: none; overflow: hidden; margin-top: 12px;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; cursor: pointer; text-decoration: none; overflow: hidden; margin-top: 12px; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0; color: inherit;">school</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">Área do
@@ -121,7 +117,6 @@
                 onmouseout="this.style.backgroundColor='transparent'">
                 <img [src]="usuario.avatarUrl || 'assets/default-avatar.png'" alt="Avatar"
                     style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #003366; flex-shrink: 0;">
-
                 @if (!sidebarColapsada) {
                 <div
                     style="flex: 1; min-width: 0; display: flex; flex-direction: column; animation: fadeIn 0.2s ease-out;">
@@ -133,7 +128,6 @@
                 <mat-icon style="font-size: 18px; color: #64748b; flex-shrink: 0;">expand_less</mat-icon>
                 }
             </div>
-
             <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
                 <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 200px;">
                     <p style="margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8;">Logado como</p>
@@ -168,7 +162,6 @@
                         {{ (window.innerWidth <= 1024) ? 'menu' : (sidebarColapsada ? 'chevron_right' : 'chevron_left' )
                             }} </mat-icon>
                 </button>
-
                 <div class="esconder-no-mobile" style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
                     <div
                         style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500; white-space: nowrap;">
@@ -185,14 +178,12 @@
                     </div>
                 </div>
             </div>
-
             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                 <button mat-icon-button [matMenuTriggerFor]="menuNoti"
                     style="color: #64748b; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; width: 36px; height: 36px;">
                     <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn"
                         [matBadgeHidden]="notificacoes.length === 0">notifications</mat-icon>
                 </button>
-
                 <mat-menu #menuNoti="matMenu">
                     <div
                         style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #003366;">

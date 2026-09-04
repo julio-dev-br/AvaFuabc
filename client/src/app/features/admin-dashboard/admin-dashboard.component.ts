@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, ViewChild, effect } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -68,6 +69,7 @@ Chart.register(...registerables);
 export class AdminDashboardComponent implements OnInit {
 
   private treinamentoService = inject(TreinamentoService);
+  private route = inject(ActivatedRoute);
   private quizService = inject(QuizService);
   public snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
@@ -77,13 +79,21 @@ export class AdminDashboardComponent implements OnInit {
   private router = inject(Router);
 
   constructor() {
+    // 🧭 PONTE 1: Escuta a URL. Quando o usuário digita na barra ou dá F5, sincroniza o layout interno!
+    this.route.data.subscribe(data => {
+      if (data && data['aba']) {
+        // Altera o estado interno silenciosamente se a URL mudar por fora
+        this.tabService.abaAtiva.set(data['aba']);
+      }
+    });
+
+    // 🔄 PONTE 2: Mantém o effect reativo ativo para efetuar as cargas de background
     effect(() => {
       const abaAtual = this.tabService.abaAtiva();
 
       if (abaAtual === 'cadastro') {
         this.carregarCatalogoGerencial();
       }
-
       if (abaAtual === 'projetos') {
         this.carregarProjetosKanbanAdmin();
       }
@@ -269,7 +279,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   get totalPaginasAdmin(): number {
-    const busca = this.filtroTextoAdmin.toLowerCase().trim(); // ✅ CORRIGIDO PARA MAIÚSCULO
+    const busca = this.filtroTextoAdmin.toLowerCase().trim();
     const filtrados = this.listaCursosGerencial.filter(curso =>
       curso.titulo?.toLowerCase().includes(busca)
     );
@@ -282,6 +292,7 @@ export class AdminDashboardComponent implements OnInit {
 
   mudarAba(aba: string): void {
     this.tabService.mudarAba(aba);
+    this.router.navigate([`/admin/${aba}`]);
   }
 
   proximaPaginaAdmin(): void {
@@ -301,13 +312,8 @@ export class AdminDashboardComponent implements OnInit {
     this.treinamentoService.obterTreinamentosGerencial().subscribe({
       next: (dados) => {
         this.listaCursosGerencial = dados;
-
-        // Reseta o filtro de texto exato do seu HTML
         this.filtroTextoAdmin = '';
-
-        // Garante que o novo curso (que entra no topo) apareça de primeira na tela!
         this.paginaAtualAdmin = 1;
-
         this.isLoadingCursos = false;
       },
       error: () => this.isLoadingCursos = false
@@ -326,30 +332,19 @@ export class AdminDashboardComponent implements OnInit {
 
     this.treinamentoService.obterMetricasAnaliticas().subscribe({
       next: (res: any) => {
-
-        // 1. Alimenta os Cards Superiores de KPI de forma direta
         if (res.cards) {
           this.cardsMetricas = res.cards;
         }
-
-        // 2. 🍕 GRÁFICO DE PIZZA (Indexado com)
         if (res.graficoPizza && res.graficoPizza.dados && this.pieChartData && this.pieChartData.datasets && this.pieChartData.datasets[0]) {
           this.pieChartData.datasets[0].data = res.graficoPizza.dados;
           this.pieChartData.labels = res.graficoPizza.labels || ['Concluídos', 'Em Andamento'];
         }
-
-        // 3. 📊 GRÁFICO DE BARRAS HORIZONTAL (Indexado com [0] - CORRIGIDO!)
         if (res.graficoBarras && res.graficoBarras.dados && this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
           this.barChartData.labels = res.graficoBarras.labels || [];
           this.barChartData.datasets[0].data = res.graficoBarras.dados;
         }
-
-        // ================= 🌟 MÁGICA FRONT-END: MONTA OS NOVOS GRÁFICOS AUTÔNOMOS =================
-
-        // 4. 📈 NOVO GRÁFICO DE LINHA (Indexado com [0] - CORRIGIDO!)
         if (this.lineChartData && this.lineChartData.datasets && this.lineChartData.datasets[0]) {
           const volumeCursos = res.cards ? Number(res.cards.totalTreinamentos) * 5 : 40;
-
           this.lineChartData.datasets[0].data = [
             Math.round(volumeCursos * 0.2),
             Math.round(volumeCursos * 0.4),
@@ -361,14 +356,10 @@ export class AdminDashboardComponent implements OnInit {
             volumeCursos
           ];
         }
-
-        // 5. 🏥 NOVO GRÁFICO DE BARRAS VERTICAIS (Indexado com [0] - CORRIGIDO!)
         if (this.unidadeBarChartData && this.unidadeBarChartData.datasets && this.unidadeBarChartData.datasets[0]) {
           let taxaReal = res.cards ? String(res.cards.taxaConformidadeGeral).replace('%', '') : '85';
           const notaBase = Number(taxaReal);
-
           this.unidadeBarChartData.labels = ['Hospital Mário Covas', 'CHM Santo André', 'Ame Mauá', 'Fundação ABC'];
-
           this.unidadeBarChartData.datasets[0].data = [
             Math.min(notaBase + 5, 100),
             Math.max(notaBase - 10, 0),
@@ -376,7 +367,6 @@ export class AdminDashboardComponent implements OnInit {
             notaBase
           ];
         }
-
         this.isLoadingMetrics = false;
       },
       error: (err) => {
@@ -423,28 +413,18 @@ export class AdminDashboardComponent implements OnInit {
     const urlCrua = url.trim();
 
     try {
-      // 1. Isola os últimos 11 caracteres que formam o ID legítimo
       const idVideoPuro = urlCrua.slice(-11);
-
-      // 2. Concatena exatamente na sintaxe de sucesso do player
       const urlFinal = 'https://youtube.com' + idVideoPuro.trim();
-
-      // Se o código rodar sem quebras, devolve a URL Perfeita aqui e encerra a função!
       return urlFinal;
-
     } catch (error) {
       console.error('Erro na conversão automática da URL do YouTube:', error);
     }
-
-    // Fora do bloco. Só será executado se o try falhar e der erro de processamento!
     return urlCrua;
   }
 
   salvarAula(): void {
     if (!this.aula.titulo.trim() || !this.aula.videoUrl.trim() || !this.idModuloCriado) return;
-
     const urlPadronizada = this.formatarLinkYouTube(this.aula.videoUrl);
-
     const payload = {
       moduloId: Number(this.idModuloCriado),
       titulo: this.aula.titulo,
@@ -583,10 +563,9 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
-    // Abre a modal injetando o ID e o Título do curso para o escopo interno dela
     this.dialog.open(ModalMateriaisComponent, {
       width: '500px',
-      disableClose: false, // Permite fechar clicando fora
+      disableClose: false,
       data: { id: cursoId, titulo: cursoTitulo }
     });
   }

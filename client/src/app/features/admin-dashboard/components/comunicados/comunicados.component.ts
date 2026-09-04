@@ -2,17 +2,17 @@ import { Component, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// Angular Material
+// Angular Material Module Imports
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon'; // 🌟 TRAVADO: Caminho unificado correto
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
-// Serviços
+// Serviços Globais do Core
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AlertsService } from '../../../../core/services/alerts.service';
 
@@ -38,7 +38,7 @@ export class ComunicadosComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private alerts = inject(AlertsService);
 
-  // 📢 FORMULÁRIO REATIVO
+  // 📢 FORMULÁRIO REATIVO SINTONIZADO COM O TEMPLATE SAAS
   comunicadoForm = {
     escopo: 'GERAL' as 'GERAL' | 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO',
     referenciaId: null as number | null,
@@ -47,16 +47,20 @@ export class ComunicadosComponent implements OnInit {
   };
   isEnviandoComunicado = false;
 
-  // 📊 TABELA E AUDITORIA
+  // 📊 TABELA E AUDITORIA OPERACIONAL
   historicoComunicados = new MatTableDataSource<any>([]);
   colunasComunicados: string[] = ['data', 'titulo', 'mensagem'];
-  
-  @ViewChild('comunicadosPaginator') comunicadosPaginator!: MatPaginator;
 
-  // Mocks Temporários do Protheus (Ajuste os caminhos se preferir centralizar)
-  mockEmpresas = [ { id: 1, nome: 'Fundação ABC - Matriz' }, { id: 2, nome: 'Central de Convênios' } ];
-  mockUnidades = [ { id: 10, nome: 'Hospital Mário Covas' }, { id: 11, nome: 'CHM Santo André' } ];
-  mockDepartamentos = [ { id: 100, nome: 'Enfermagem' }, { id: 101, nome: 'Recursos Humanos' } ];
+  @ViewChild('comunicadosPaginator') set content(paginator: MatPaginator) {
+    if (paginator) {
+      this.historicoComunicados.paginator = paginator;
+    }
+  }
+
+  // Mocks Temporários do Protheus de RH (Fundação ABC)
+  mockEmpresas = [{ id: 1, nome: 'Fundação ABC - Matriz' }, { id: 2, nome: 'Central de Convênios' }];
+  mockUnidades = [{ id: 10, nome: 'Hospital Mário Covas' }, { id: 11, nome: 'CHM Santo André' }];
+  mockDepartamentos = [{ id: 100, nome: 'Enfermagem' }, { id: 101, nome: 'Recursos Humanos' }];
 
   ngOnInit(): void {
     this.carregarHistoricoComunicados();
@@ -66,9 +70,9 @@ export class ComunicadosComponent implements OnInit {
     this.notificationService.obterHistoricoAdmin().subscribe({
       next: (dados) => {
         this.historicoComunicados.data = dados;
-        setTimeout(() => {
-          this.historicoComunicados.paginator = this.comunicadosPaginator;
-        });
+      },
+      error: () => {
+        console.error('Erro ao buscar logs de auditoria de comunicados.');
       }
     });
   }

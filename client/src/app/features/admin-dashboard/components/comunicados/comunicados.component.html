@@ -1,147 +1,147 @@
 <div
-    style="padding: 24px; max-width: 1400px; margin: 0 auto; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; animation: fadeIn 0.3s ease;">
-    <div style="flex: 1; min-width: 380px;">
+    style="padding: 24px; max-width: 1400px; margin: 0 auto; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; animation: fadeIn 0.3s ease; box-sizing: border-box; width: 100%;">
+    <div style="flex: 1; min-width: 380px; box-sizing: border-box;">
         <mat-card
-            style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; height: 100%;">
+            style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden; height: 100%; background: #ffffff;">
+            <div
+                style="background: #ffffff; padding: 24px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px;">
+                <div
+                    style="background-color: #eff6ff; color: #003366; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0;">
+                    <mat-icon
+                        style="font-size: 22px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;">campaign</mat-icon>
+                </div>
 
-            <!-- CABEÇALHO CORPORATIVO -->
-            <div style="background: linear-gradient(135deg, #1e3a8a 0%, #0d1b3e 100%); padding: 20px; color: #ffffff;">
-                <h2
-                    style="margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
-                    <mat-icon style="font-size: 20px; width: 20px; height: 20px;">campaign</mat-icon> Transmitir Alerta
-                </h2>
-                <p style="margin: 4px 0 0 0; color: #ffffff; font-size: 12px;">
-                    Notifique colaboradores em massa via Protheus.
-                </p>
+                <div style="display: flex; flex-direction: column;">
+                    <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #003366; letter-spacing: -0.3px;">
+                        Transmitir Alerta em Massa
+                    </h2>
+                    <p style="margin: 2px 0 0 0; color: #64748b; font-size: 12px; font-weight: 500; line-height: 1.4;">
+                        Dispare comunicados regulatórios via Protheus para a Fundação ABC.
+                    </p>
+                </div>
             </div>
-
-            <!-- CORPO DO FORMULÁRIO -->
-            <mat-card-content style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
-
-                <!-- SELECTOR DE ESCOPO -->
-                <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -0.5em;">
+            <mat-card-content
+                style="padding: 24px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+                <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Enviar Comunicado Para:</mat-label>
                     <mat-select [(ngModel)]="comunicadoForm.escopo"
                         (selectionChange)="comunicadoForm.referenciaId = null">
                         <mat-option value="GERAL">📢 Todos os Colaboradores (Geral)</mat-option>
                         <mat-option value="EMPRESA">🏢 Por Empresa / CNPJ</mat-option>
-                        <mat-option value="UNIDADE">🏥 Por Unidade / Contrato</mat-option>
+                        <mat-option value="UNIDADE">🏥 Por Unidade / Hospital</mat-option>
                         <mat-option value="DEPARTAMENTO">📂 Por Departamento / Setor</mat-option>
                     </mat-select>
                 </mat-form-field>
-
-                <!-- SELECTOR DINÂMICO CONDICIONAL -->
                 @if (comunicadoForm.escopo !== 'GERAL') {
-                <mat-form-field appearance="outline"
-                    style="width: 100%; margin-bottom: -0.5em; animation: fadeIn 0.2s ease;">
-                    <mat-label>Selecione o Alvo do Protheus</mat-label>
+                <mat-form-field appearance="outline" style="width: 100%; animation: fadeIn 0.2s ease;"
+                    class="compact-form">
+                    <mat-label>Selecione o Alvo Específico</mat-label>
                     <mat-select [(ngModel)]="comunicadoForm.referenciaId">
                         @if (comunicadoForm.escopo === 'EMPRESA') {
-                        <mat-option *ngFor="let emp of mockEmpresas" [value]="emp.id">{{ emp.nome }}</mat-option>
+                        @for (emp of mockEmpresas; track emp.id) {
+                        <mat-option [value]="emp.id">{{ emp.nome }}</mat-option>
+                        }
                         }
                         @if (comunicadoForm.escopo === 'UNIDADE') {
-                        <mat-option *ngFor="let uni of mockUnidades" [value]="uni.id">{{ uni.nome }}</mat-option>
+                        @for (uni of mockUnidades; track uni.id) {
+                        <mat-option [value]="uni.id">{{ uni.nome }}</mat-option>
+                        }
                         }
                         @if (comunicadoForm.escopo === 'DEPARTAMENTO') {
-                        <mat-option *ngFor="let dep of mockDepartamentos" [value]="dep.id">{{ dep.nome }}</mat-option>
+                        @for (dep of mockDepartamentos; track dep.id) {
+                        <mat-option [value]="dep.id">{{ dep.nome }}</mat-option>
+                        }
                         }
                     </mat-select>
                 </mat-form-field>
                 }
-
-                <!-- TÍTULO -->
-                <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -0.5em;">
+                <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Título do Alerta</mat-label>
-                    <input matInput [(ngModel)]="comunicadoForm.titulo" placeholder="Ex: Importante: Reciclagem NR-32"
-                        maxlength="100">
+                    <input matInput [(ngModel)]="comunicadoForm.titulo"
+                        placeholder="Ex: Importante: Reciclagem Obrigatória NR-32" maxlength="100">
                     <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">title</mat-icon>
                 </mat-form-field>
-
-                <!-- MENSAGEM -->
-                <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Conteúdo da Mensagem</mat-label>
-                    <textarea matInput [(ngModel)]="comunicadoForm.mensagem" rows="4"
-                        placeholder="Digite o texto oficial da Fundação ABC..." maxlength="500"></textarea>
+                    <textarea matInput [(ngModel)]="comunicadoForm.mensagem" rows="5"
+                        placeholder="Digite o texto oficial..." maxlength="500"></textarea>
                     <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">chat</mat-icon>
                 </mat-form-field>
-
             </mat-card-content>
-
-            <!-- BOTÃO DE DISPARO -->
+            <!-- Rodapé de Ações com Efeito de Opacidade Azul Suave no Estado Desabilitado -->
             <mat-card-actions
-                style="padding: 12px 20px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0;">
-                <button mat-raised-button
-                    style="background: linear-gradient(135deg, #1e3a8a 0%, #0d1b3e 100%); color: #ffffff; width: 100%; height: 40px; font-weight: bold; border-radius: 6px;"
+                style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0; box-sizing: border-box; width: 100%;">
+                <button mat-raised-button [style.background]="isEnviandoComunicado || !comunicadoForm.titulo.trim() || !comunicadoForm.mensagem.trim() 
+                        ? 'rgba(0, 51, 102, 0.35)' 
+                        : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'" [style.color]="isEnviandoComunicado || !comunicadoForm.titulo.trim() || !comunicadoForm.mensagem.trim() 
+                        ? 'rgba(255, 255, 255, 0.6)' 
+                        : '#ffffff'"
+                    style="width: 100%; height: 42px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.05); transition: all 0.3s ease;"
                     [disabled]="isEnviandoComunicado || !comunicadoForm.titulo.trim() || !comunicadoForm.mensagem.trim()"
                     (click)="dispararAlertaInstitucional()">
-                    <mat-icon>rocket_launch</mat-icon>
-                    {{ isEnviandoComunicado ? 'Transmitindo...' : 'Disparar Alerta Geral' }}
+                    <mat-icon style="font-size: 20px; width: 20px; height: 20px;">rocket_launch</mat-icon>
+                    {{ isEnviandoComunicado ? 'Transmitindo Alerta...' : (comunicadoForm.escopo === 'GERAL' ? 'Disparar
+                    Alerta Geral' : 'Transmitir Alerta Filtrado') }}
                 </button>
             </mat-card-actions>
         </mat-card>
     </div>
-
-    <!-- ================= 📋 BLOCO DIREITO: HISTÓRICO DE AUDITORIA (60%) ================= -->
-    <div style="flex: 1.5; min-width: 500px;">
+    <div style="flex: 1.5; min-width: 500px; box-sizing: border-box;">
         <mat-card
-            style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
-
-            <!-- CABEÇALHO DA TABELA -->
+            style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff; height: 100%;">
             <div
-                style="background: #f8fafc; padding: 18px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                style="background: #f8fafc; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <h3
-                    style="margin: 0; color: #1e293b; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px;">
-                    <mat-icon style="color: #64748b;">history</mat-icon> Registro de Envios Institucionais
+                    style="margin: 0; color: #003366; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px;">
+                    <mat-icon style="color: #64748b; font-size: 20px; width: 20px; height: 20px;">history</mat-icon>
+                    Registro de Envios Institucionais
                 </h3>
                 <span
-                    style="background: #e2e8f0; color: #475569; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 20px;">Auditoria
-                    ativa</span>
+                    style="background: #e2e8f0; color: #003366; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px;">
+                    Auditoria Ativa
+                </span>
             </div>
-
-            <!-- TABELA MATERIAL DESIGN -->
-            <div style="overflow-x: auto;">
-                <table mat-table [dataSource]="historicoComunicados" class="mat-elevation-z0" style="width: 100%;">
-
-                    <!-- Coluna Data -->
+            <div style="overflow-x: auto; width: 100%; box-sizing: border-box;">
+                <table mat-table [dataSource]="historicoComunicados" class="mat-elevation-z0"
+                    style="width: 100%; background: transparent;">
                     <ng-container matColumnDef="data">
                         <th mat-header-cell *matHeaderCellDef
-                            style="padding: 12px 16px; font-weight: 600; color: #475569; width: 140px;"> Envio </th>
-                        <td mat-cell *matCellDef="let row" style="padding: 12px 16px; color: #64748b; font-size: 13px;">
-                            {{
-                            row.created_at | date:'dd/MM HH:mm' }} </td>
+                            style="padding: 14px 20px; font-weight: 700; color: #475569; width: 140px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
+                            Horário </th>
+                        <td mat-cell *matCellDef="let row"
+                            style="padding: 14px 20px; color: #64748b; font-size: 13px; font-weight: 500;">
+                            {{ row.created_at | date:'dd/MM HH:mm' }}
+                        </td>
                     </ng-container>
-
-                    <!-- Coluna Título -->
                     <ng-container matColumnDef="titulo">
                         <th mat-header-cell *matHeaderCellDef
-                            style="padding: 12px 16px; font-weight: 600; color: #475569; width: 220px;"> Assunto /
-                            Título
-                        </th>
+                            style="padding: 14px 20px; font-weight: 700; color: #475569; width: 220px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
+                            Assunto / Título </th>
                         <td mat-cell *matCellDef="let row"
-                            style="padding: 12px 16px; font-weight: 700; color: #1e293b; font-size: 13px;"> {{
-                            row.titulo }}
+                            style="padding: 14px 20px; font-weight: 700; color: #003366; font-size: 13px; word-break: break-word;">
+                            {{ row.titulo }}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="mensagem">
+                        <th mat-header-cell *matHeaderCellDef
+                            style="padding: 14px 20px; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
+                            Mensagem Transmitida </th>
+                        <td mat-cell *matCellDef="let row"
+                            style="padding: 14px 20px; color: #475569; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                            [title]="row.mensagem">
+                            {{ row.mensagem }}
                         </td>
                     </ng-container>
 
-                    <!-- Coluna Mensagem -->
-                    <ng-container matColumnDef="mensagem">
-                        <th mat-header-cell *matHeaderCellDef
-                            style="padding: 12px 16px; font-weight: 600; color: #475569;">
-                            Mensagem Transmitida </th>
-                        <td mat-cell *matCellDef="let row"
-                            style="padding: 12px 16px; color: #475569; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                            [title]="row.mensagem"> {{ row.mensagem }} </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="colunasComunicados" style="background: #f1f5f9; height: 44px;">
-                    </tr>
+                    <tr mat-header-row *matHeaderRowDef="colunasComunicados"
+                        style="background: #f8fafc; height: 46px; border-bottom: 1px solid #e2e8f0;"></tr>
                     <tr mat-row *matRowDef="let row; columns: colunasComunicados;"
-                        style="border-bottom: 1px solid #f1f5f9; height: 48px;" class="linha-tabela-comunicado"></tr>
+                        style="border-bottom: 1px solid #f1f5f9; height: 52px; transition: background 0.2s;"
+                        class="linha-tabela-comunicado"></tr>
                 </table>
             </div>
-            <!-- PAGINADOR INTEGRADO NO CORPO -->
             <mat-paginator #comunicadosPaginator [pageSize]="5" showFirstLastButtons
-                style="background: #ffffff; border-top: 1px solid #e2e8f0;"></mat-paginator>
+                style="background: #ffffff; border-top: 1px solid #e2e8f0; font-size: 13px; color: #475569;"></mat-paginator>
         </mat-card>
     </div>
 </div>

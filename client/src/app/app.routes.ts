@@ -11,31 +11,29 @@ import { AdminDashboardComponent } from './features/admin-dashboard/admin-dashbo
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  // Rota inicial pública redireciona para o Login corporativo
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-
-  // 🌟 O GRANDE TRUQUE: O LayoutComponent agora envelopa a casca TANTO do Aluno quanto do Admin!
-  { 
-    path: '', 
-    component: LayoutComponent, 
+  {
+    path: '',
+    component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      // 🎓 Sub-rotas do Ecossistema do Aluno
       { path: 'dashboard', redirectTo: 'dashboard/cursos', pathMatch: 'full' },
-      { path: 'dashboard/cursos', component: DashboardComponent },
-      { path: 'dashboard/progresso', component: DashboardComponent },
-      { path: 'dashboard/kanban', component: KanbanBoardComponent },
-      { path: 'dashboard/curso/:id', component: CursoPlayerComponent },
-      { path: 'dashboard/quiz/aula/:id', component: QuizComponent },
-      { path: 'dashboard/forum/aula/:id', component: ForumComponent },
-      { path: 'dashboard/perfil', component: PerfilComponent },
+      { path: 'dashboard/cursos', component: DashboardComponent, data: { breadcrumb: 'Treinamentos', scope: 'aluno' } },
+      { path: 'dashboard/progresso', component: DashboardComponent, data: { breadcrumb: 'Meu Progresso', scope: 'aluno' } },
+      { path: 'dashboard/kanban', component: KanbanBoardComponent, data: { breadcrumb: 'Trilhas Especiais', scope: 'aluno' } },
+      { path: 'dashboard/curso/:id', component: CursoPlayerComponent, data: { breadcrumb: 'Player', scope: 'aluno' } },
+      { path: 'dashboard/quiz/aula/:id', component: QuizComponent, data: { breadcrumb: 'Avaliação Regulamentar', scope: 'aluno' } },
+      { path: 'dashboard/forum/aula/:id', component: ForumComponent, data: { breadcrumb: 'Fórum Técnico', scope: 'aluno' } },
+      { path: 'dashboard/perfil', component: PerfilComponent, data: { breadcrumb: 'Meu Perfil', scope: 'aluno' } },
 
-      // 🛡️ Sub-rota do Painel de Gestão (Agora rodando protegido dentro do Layout Mestre!)
-      { path: 'admin', component: AdminDashboardComponent }
+      { path: 'admin', redirectTo: 'admin/bi', pathMatch: 'full' },
+      { path: 'admin/bi', component: AdminDashboardComponent, data: { breadcrumb: 'Dashboard de BI', scope: 'admin', aba: 'bi' } },
+      { path: 'admin/cadastro', component: AdminDashboardComponent, data: { breadcrumb: 'Fábrica de Conteúdos', scope: 'admin', aba: 'cadastro' } },
+      { path: 'admin/comunicados', component: AdminDashboardComponent, data: { breadcrumb: 'Gestão de Comunicados', scope: 'admin', aba: 'comunicados' } },
+      { path: 'admin/usuarios', component: AdminDashboardComponent, data: { breadcrumb: 'Perfis de Acesso', scope: 'admin', aba: 'usuarios' } },
+      { path: 'admin/projetos', component: AdminDashboardComponent, data: { breadcrumb: 'Projetos Kanban', scope: 'admin', aba: 'projetos' } }
     ]
   },
-  
-  // Fallback de segurança para caminhos inexistentes
   { path: '**', redirectTo: 'login' }
 ];
