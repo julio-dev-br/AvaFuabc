@@ -12,6 +12,8 @@ import { KanbanModule } from './kanban/kanban.module';
 import { NotificacoesService } from './motificacoes/motificacoes.service';
 import { NotificacoesController } from './motificacoes/notificacoes.controller';
 import { MateriaisModule } from './materiais/materiais.module';
+import { GeminiModule } from './gemini/gemini.module'; 
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -25,7 +27,9 @@ import { MateriaisModule } from './materiais/materiais.module';
     CertificadosModule,
     ForumModule,
     KanbanModule,
-    MateriaisModule,   // 📦 Gerencia internamente o MateriaisController e MateriaisService
+    MateriaisModule,
+    GeminiModule,
+    ChatModule,   // 📦 Gerencia internamente o MateriaisController e MateriaisService
   ],
   // ✅ CORRIGIDO: Removidos TreinamentoController e MateriaisController daqui
   controllers: [UserController, NotificacoesController],

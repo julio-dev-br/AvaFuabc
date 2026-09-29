@@ -200,6 +200,170 @@
   font-weight: 700 !important;
 }
 
+/* 🌟 CONTAINER FLUTUANTE DA JANELA */
+.aluno-chat-wrapper {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999; /* Garante que fique por cima de qualquer player ou painel lateral */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.btn-chat-flutuante {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.2s ease;
+}
+
+.btn-chat-flutuante:hover {
+  transform: scale(1.05);
+}
+
+/* CAIXA DO CHAT EXPANDIDA */
+.janela-chat-aluno-card {
+  width: 330px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  background: #ffffff;
+}
+
+/* CABEÇALHO SUPORTE */
+.aluno-chat-header {
+  background: #003366; /* Azul Corporativo da Fundação ABC */
+  color: #ffffff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-titulos h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.header-titulos p {
+  margin: 0;
+  font-size: 11px;
+  color: #10b981; /* Verde Online */
+  font-weight: 500;
+}
+
+/* CORPO DAS MENSAGENS COM SCROLL */
+.aluno-chat-body-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg-boas-vindas-box {
+  background: #f0f4f8;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 4px solid #003366;
+}
+
+.txt-boas-vindas {
+  margin: 0;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+/* ALINHAMENTOS DOS BALÕES (ALUNO X TUTOR) */
+.linha-msg-aluno-box {
+  display: flex;
+  width: 100%;
+}
+
+.balao-msg-aluno {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.texto-msg-p {
+  margin: 0 0 3px 0;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.hora-carimbo-p {
+  font-size: 9px;
+  display: block;
+  text-align: right;
+  opacity: 0.6;
+}
+
+/* Aluno fala (Lado Direito - Azul) */
+.linha-msg-aluno-box.lado-direito {
+  justify-content: flex-end;
+}
+.linha-msg-aluno-box.lado-direito .balao-msg-aluno {
+  background: #003366;
+  color: #ffffff;
+  border-top-right-radius: 2px;
+}
+
+/* Tutor responde (Lado Esquerdo - Branco) */
+.linha-msg-aluno-box.lado-esquerdo {
+  justify-content: flex-start;
+}
+.linha-msg-aluno-box.lado-esquerdo .balao-msg-aluno {
+  background: #ffffff;
+  color: #1e293b;
+  border-top-left-radius: 2px;
+  border: 1px solid #e2e8f0;
+}
+
+/* BARRA DE INPUT INFERIOR */
+.aluno-chat-footer {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+  gap: 8px;
+}
+
+.input-aluno-chat-text {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 18px;
+  padding: 0 14px;
+  font-size: 13px;
+  outline: none;
+}
+
+.input-aluno-chat-text:focus {
+  border-color: #003366;
+}
+
+/* Barra de rolagem fina */
+.aluno-chat-body-messages::-webkit-scrollbar {
+  width: 4px;
+}
+.aluno-chat-body-messages::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 2px;
+}
+
+
 /* ==========================================================================
    📱 🚀 EQUALIZADOR MOBILE: Desfaz o grid lateral e joga o menu para a base
    ========================================================================== */

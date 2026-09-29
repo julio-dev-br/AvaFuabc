@@ -32,7 +32,9 @@ export const routes: Routes = [
       { path: 'admin/cadastro', component: AdminDashboardComponent, data: { breadcrumb: 'Fábrica de Conteúdos', scope: 'admin', aba: 'cadastro' } },
       { path: 'admin/comunicados', component: AdminDashboardComponent, data: { breadcrumb: 'Gestão de Comunicados', scope: 'admin', aba: 'comunicados' } },
       { path: 'admin/usuarios', component: AdminDashboardComponent, data: { breadcrumb: 'Perfis de Acesso', scope: 'admin', aba: 'usuarios' } },
-      { path: 'admin/projetos', component: AdminDashboardComponent, data: { breadcrumb: 'Projetos Kanban', scope: 'admin', aba: 'projetos' } }
+      { path: 'admin/projetos', component: AdminDashboardComponent, data: { breadcrumb: 'Projetos Kanban', scope: 'admin', aba: 'projetos' } },
+      
+      { path: 'admin/chat', component: AdminDashboardComponent, data: { breadcrumb: 'Chat Central (RH)', scope: 'admin', aba: 'chat' } }
     ]
   },
   { path: '**', redirectTo: 'login' }

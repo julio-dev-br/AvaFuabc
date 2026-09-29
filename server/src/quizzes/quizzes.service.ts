@@ -216,4 +216,51 @@ export class QuizzesService {
       throw error;
     }
   }
+
+  // 🌟 NOVO: Método dedicado a persistir o Quiz gerado de forma reativa pela Inteligência Artificial
+  async salvarQuizGeradoPorIA(data: {
+    aulaId: number;
+    titulo: string;
+    notaMinima?: number;
+    tentativas?: number;
+    perguntas: any[];
+  }) {
+    try {
+      console.log(`🧩 Processando inserção do Quiz de IA para a Aula ID [${data.aulaId}]...`);
+
+      return await this.prisma.quiz.create({
+        data: {
+          aula_id: Number(data.aulaId),
+          titulo: data.titulo || 'Avaliação de Conformidade Regulamentar',
+          nota_minima: data.notaMinima ? Number(data.notaMinima) : 7.0,
+          tentativas: data.tentativas ? Number(data.tentativas) : 3,
+          perguntas: {
+            // Varre o array de perguntas geradas pelo motor simulado do Gemini
+            create: data.perguntas.map((p) => ({
+              pergunta: p.enunciado, // Conecta a propriedade 'enunciado' reativa do front
+              ordem: p.ordem || undefined,
+              alternativas: {
+                // Transforma as 4 propriedades nominais de IA em registros relacionais
+                create: [
+                  { descricao: p.alternativaA, correta: p.respostaCorreta === 'A' },
+                  { descricao: p.alternativaB, correta: p.respostaCorreta === 'B' },
+                  { descricao: p.alternativaC, correta: p.respostaCorreta === 'C' },
+                  { descricao: p.alternativaD, correta: p.respostaCorreta === 'D' },
+                ],
+              },
+            })),
+          },
+        },
+        include: {
+          perguntas: {
+            include: { alternativas: true },
+          },
+        },
+      });
+    } catch (error: any) {
+      console.error('🚨 ERRO AO PERSISTIR O QUIZ DA IA NO PRISMA:', error);
+      throw new BadRequestException('Falha interna ao persistir o banco relacional de perguntas.');
+    }
+  }
+
 }

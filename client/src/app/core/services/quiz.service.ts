@@ -49,4 +49,22 @@ export class QuizService {
     const urlComToken = `${this.apiUrl}/admin/criar?token=${token}`;
     return this.http.post<any>(urlComToken, payload, { headers: this.getHeaders() });
   }
+
+  // 🌟 NOVO: Envia as questões geradas reativamente pela IA para serem gravadas pelo Prisma no Postgres
+  salvarQuizGeradoPorIA(payload: {
+    aulaId: number;
+    titulo: string;
+    notaMinima?: number;
+    tentativas?: number;
+    perguntas: any[];
+  }): Observable<any> {
+    const token = localStorage.getItem('accessToken') || '';
+
+    // Mantém o mesmo padrão de blindagem de rota passando o token na Query String
+    const urlComToken = `${this.apiUrl}/admin/criar-gerado-ia?token=${token}`;
+
+    // Dispara o POST enviando os cabeçalhos triplificados e o payload estruturado
+    return this.http.post<any>(urlComToken, payload, { headers: this.getHeaders() });
+  }
+
 }

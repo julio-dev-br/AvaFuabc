@@ -25,6 +25,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatProgressBarModule } from '@angular/material/progress-bar'; 
 
 // Componentes de Gráficos (Chart.js)
 import { BaseChartDirective } from 'ng2-charts';
@@ -34,6 +35,10 @@ import { ModalMateriaisComponent } from './modal-materiais.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { AdminTabService } from '../../core/services/admin-tab.service';
+import { LayoutService } from '../../core/services/layout.service';
+import { GeminiService } from '../../core/services/gemini.service';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { ChatApiService } from '../../core/services/chat.service';
 
 Chart.register(...registerables);
 
@@ -61,7 +66,9 @@ Chart.register(...registerables);
     MatPaginatorModule,
     ComunicadosComponent,
     ProjetosKanbanComponent,
-    ModalMateriaisComponent
+    ModalMateriaisComponent,
+    MatExpansionModule,
+    MatProgressBarModule 
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
@@ -76,6 +83,10 @@ export class AdminDashboardComponent implements OnInit {
   private alerts = inject(AlertsService);
   public notificationService = inject(NotificationService);
   private tabService = inject(AdminTabService);
+  private layoutService = inject(LayoutService);
+  private geminiService = inject(GeminiService); // Injeção sênior isolada
+  public textoBaseIA = '';                      // Controla o input da caixa de IA
+  private chatApiService = inject(ChatApiService);
   private router = inject(Router);
 
   constructor() {
@@ -90,15 +101,23 @@ export class AdminDashboardComponent implements OnInit {
     // 🔄 PONTE 2: Mantém o effect reativo ativo para efetuar as cargas de background
     effect(() => {
       const abaAtual = this.tabService.abaAtiva();
-
       if (abaAtual === 'cadastro') {
         this.carregarCatalogoGerencial();
       }
       if (abaAtual === 'projetos') {
         this.carregarProjetosKanbanAdmin();
       }
+      if (abaAtual === 'chat') {
+        this.carregarPainelSuporteRH();
+      }
     });
   }
+
+  listaSalasChat: any[] = [];
+  salaChatSelecionada: any = null;
+  historicoMensagensChat: any[] = [];
+  novaMensagemTutorText = '';
+  isLoadingChats = false;
 
   // Estados do Controle de Usuários (Aba 'usuarios')
   userDataSource = new MatTableDataSource<any>([]);
@@ -177,6 +196,7 @@ export class AdminDashboardComponent implements OnInit {
   public pieChartData: ChartData<'pie', number[], string | string[]> = { labels: ['Concluídos', 'Em Andamento'], datasets: [{ data: [], backgroundColor: ['#10b981', '#f59e0b'] }] };
 
   public barChartType: ChartType = 'bar';
+
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
     scales: {
@@ -261,7 +281,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   get cursosGerenciaisExibidos(): any[] {
-    const busca = this.filtroTextoAdmin.toLowerCase().trim(); // ✅ CORRIGIDO PARA MAIÚSCULO
+    const busca = this.filtroTextoAdmin.toLowerCase().trim();
 
     const filtrados = this.listaCursosGerencial.filter(curso =>
       curso.titulo?.toLowerCase().includes(busca)
@@ -300,13 +320,11 @@ export class AdminDashboardComponent implements OnInit {
       this.paginaAtualAdmin++;
     }
   }
-
   paginaAnteriorAdmin(): void {
     if (this.paginaAtualAdmin > 1) {
       this.paginaAtualAdmin--;
     }
   }
-
   carregarCatalogoGerencial(): void {
     this.isLoadingCursos = true;
     this.treinamentoService.obterTreinamentosGerencial().subscribe({
@@ -319,14 +337,12 @@ export class AdminDashboardComponent implements OnInit {
       error: () => this.isLoadingCursos = false
     });
   }
-
   selecionarCursoParaGerenciar(curso: any): void {
     this.cursoSelecionadoParaGerenciar = curso;
     this.idCursoCriado = Number(curso.id);
     this.curso.titulo = curso.titulo;
     this.passoAtual = 2;
   }
-
   carregarDadosBI(): void {
     this.isLoadingMetrics = true;
 
@@ -375,7 +391,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
   salvarCursoBase(): void {
     if (!this.curso.titulo.trim()) return;
     const payload = { titulo: this.curso.titulo, descricao: this.curso.descricao, carga_horaria: this.curso.cargaHoraria, obrigatorio: this.curso.obrigatorio };
@@ -388,7 +403,6 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
-
   salvarModulo(): void {
     if (!this.modulo.titulo.trim() || !this.idCursoCriado) return;
 
@@ -407,7 +421,6 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
-
   formatarLinkYouTube(url: string): string {
     if (!url || !url.trim()) return '';
     const urlCrua = url.trim();
@@ -421,7 +434,6 @@ export class AdminDashboardComponent implements OnInit {
     }
     return urlCrua;
   }
-
   salvarAula(): void {
     if (!this.aula.titulo.trim() || !this.aula.videoUrl.trim() || !this.idModuloCriado) return;
     const urlPadronizada = this.formatarLinkYouTube(this.aula.videoUrl);
@@ -447,14 +459,12 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
-
   adicionarQuestaoMemoria(): void {
     if (!this.novaQuestao.enunciado.trim() || !this.novaQuestao.respostaCorreta) return;
     this.perguntasQuiz.push({ ...this.novaQuestao });
     this.novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
     this.alerts.sucesso('Questão adicionada ao banco temporário!');
   }
-
   salvarQuizCompleto(): void {
     if (!this.idAulaCriada) {
       this.alerts.erro('Erro: Cadastre pelo menos uma videoaula no Passo 3 antes de gerar o Quiz.');
@@ -497,7 +507,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
   private obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: number | null): string {
     if (!id) return '';
 
@@ -508,7 +517,6 @@ export class AdminDashboardComponent implements OnInit {
 
     return this.mockUsuarios.find(u => u.id === id)?.nome || `Usuário ID: ${id}`;
   }
-
   salvarVinculoPublico(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum curso base ativo para vincular o público.');
@@ -551,7 +559,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
   finalizarEsteiraTreinamento(): void {
     this.alerts.sucesso('Parabéns! Esteira de treinamento publicada e integrada com sucesso!');
 
@@ -561,7 +568,6 @@ export class AdminDashboardComponent implements OnInit {
     this.idCursoCriado = null;
     this.listaVinculosAtivos = [];
   }
-
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
     this.dialog.open(ModalMateriaisComponent, {
       width: '500px',
@@ -569,18 +575,150 @@ export class AdminDashboardComponent implements OnInit {
       data: { id: cursoId, titulo: cursoTitulo }
     });
   }
+  gerarQuizPorInteligenciaArtificial(): void {
+    if (!this.textoBaseIA || !this.textoBaseIA.trim()) return;
 
-  carregarProjetosKanbanAdmin(): void {
-    // this.abaAtiva = 'projetos'; 
+    // O loadingInterceptor de concorrência já liga o showLoader() aqui na rede de forma automática!
+    this.geminiService.gerarQuestoesAutomaticas(this.textoBaseIA).subscribe({
+      next: (questoesGeradas: any[]) => {
+        if (questoesGeradas && questoesGeradas.length > 0) {
+          // Concatena ou substitui o array reativo do seu quiz com as perguntas cuspidas pela IA
+          this.perguntasQuiz = [...this.perguntasQuiz, ...questoesGeradas];
+
+          // Dá o feedback de sucesso total corporativo para o RH
+          this.alerts.sucesso(`Mágica concluída! ${questoesGeradas.length} questões regulamentares injetadas com sucesso via Google Gemini!`);
+          this.textoBaseIA = ''; // Limpa a caixa de texto base
+        }
+      },
+      error: (err) => {
+        console.error('Falha na geração automática por IA:', err);
+        this.alerts.erro('Não foi possível processar a Inteligência Artificial. Verifique os logs do servidor.');
+      }
+    });
   }
-
   logoutAdmin(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);
   }
-
+  carregarProjetosKanbanAdmin(): void {
+    // this.abaAtiva = 'projetos'; 
+  }
   carregarDicionariosRH(): void {
     // IMPLEMENTAR AQUI
+  }
+  salvarQuizDoWizard(): void {
+    if (!this.idAulaCriada) {
+      this.alerts.erro('Erro: Cadastre pelo menos uma videoaula no Passo 3 antes de consolidar o Quiz.');
+      return;
+    }
+
+    if (!this.perguntasQuiz || this.perguntasQuiz.length === 0) {
+      this.alerts.erro('Por favor, gere as questões por Inteligência Artificial antes de avançar.');
+      return;
+    }
+
+    // Monta o payload no contrato exato que o novo endpoint admin/criar-gerado-ia espera receber
+    const payloadFinal = {
+      aulaId: Number(this.idAulaCriada),
+      titulo: this.quizTitulo.trim() || `Avaliação de Conformidade Regulamentar`,
+      notaMinima: Number(this.quizNotaMinima || 7),
+      tentativas: 3,
+      perguntas: this.perguntasQuiz // Consome as 5 perguntas da nossa simulação do Gemini
+    };
+
+    // Dispara a requisição HTTP contra a rota blindada do NestJS
+    this.quizService.salvarQuizGeradoPorIA(payloadFinal).subscribe({
+      next: (response) => {
+        this.alerts.sucesso('Banco de questões de IA consolidado com sucesso no Postgres! 🏆');
+
+        // Limpa a esteira reativa local para os próximos cadastros
+        this.quizTitulo = '';
+        this.perguntasQuiz = [];
+
+        // Avança o gestor reativamente para o Passo 5 (Vínculo de Público-Alvo do RH)
+        this.passoAtual = 5;
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('🚨 Falha na persistência relacional do Quiz da IA:', err);
+        this.alerts.erro('Não foi possível gravar as questões. Verifique o console do servidor.');
+      }
+    });
+  }
+
+  // 🚪 AÇÃO 1: Carrega a listagem de todas as salas abertas no Postgres
+  carregarPainelSuporteRH(): void {
+    this.isLoadingChats = true;
+    this.chatApiService.listarSalasAtivasDoRH().subscribe({
+      next: (salas) => {
+        this.listaSalasChat = salas;
+        this.isLoadingChats = false;
+      },
+      error: (err) => {
+        console.error('🚨 Erro ao buscar salas do chat:', err);
+        this.isLoadingChats = false;
+      }
+    });
+  }
+
+  // 🚪 AÇÃO 2: Selecionar um aluno na lista e entrar na sala de WebSocket correspondente
+  selecionarSalaSuporte(sala: any): void {
+    this.salaChatSelecionada = sala;
+    this.historicoMensagensChat = [];
+
+    // Injeta o ID fixo do gestor/tutor (pode puxar do AuthService) e o nome para o JoinRoom
+    const tutorId = 1;
+
+
+    // Liga a fiação do WebSocket e entra no canal exclusivo daquela sala
+    this.chatApiService.entrarNaSala(sala.usuario_id, sala.user?.name || 'Aluno');
+
+    // Escuta reativamente a carga inicial do histórico de mensagens antigas da sala
+    this.chatApiService.dadosSala.subscribe((dados: any) => {
+      if (dados && dados.salaId === sala.id) {
+        this.historicoMensagensChat = dados.historico || [];
+        this.rolarChatParaOFinal();
+      }
+    });
+
+    // Escuta novas mensagens pingando em tempo real enviadas pelo aluno
+    this.chatApiService.novaMensagem.subscribe((mensagem: any) => {
+      if (mensagem && mensagem.sala_id === sala.id) {
+        // Blinda contra duplicidade na esteira reativa
+        const jaExiste = this.historicoMensagensChat.some(m => m.id === mensagem.id);
+        if (!jaExiste) {
+          this.historicoMensagensChat.push(mensagem);
+          this.rolarChatParaOFinal();
+        }
+      }
+    });
+  }
+
+  // 💬 AÇÃO 3: Dispara o texto digitado pelo tutor do RH na rede
+  enviarMensagemDoTutor(): void {
+    if (!this.novaMensagemTutorText.trim() || !this.salaChatSelecionada) return;
+
+    const tutorId = 1; // Substitua pelo ID dinâmico do usuário logado se preferir
+    const conteudo = this.novaMensagemTutorText.trim();
+
+    // Emite o evento instantâneo via Socket.io marcando is_tutor = true
+    this.chatApiService.enviarMensagemInstantanea(
+      this.salaChatSelecionada.id,
+      tutorId,
+      conteudo,
+      true // isTutor
+    );
+
+    this.novaMensagemTutorText = ''; // Limpa a caixa de texto reativa
+  }
+
+  // UX Premium: Mantém o scroll da conversa sempre fixado na última mensagem enviada
+  private rolarChatParaOFinal(): void {
+    setTimeout(() => {
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
   }
 
   tratarErro(err: HttpErrorResponse): void { console.error(err); }

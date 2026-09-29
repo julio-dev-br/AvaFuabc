@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core'; 
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TreinamentoService } from '../../core/services/treinamento.service';
@@ -11,9 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-
-
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ChatApiService } from '../../core/services/chat.service';
 
 @Component({
   selector: 'app-curso-player',
@@ -26,7 +27,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     MatIconModule,
     MatButtonModule,
     MatToolbarModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    FormsModule,
+    MatCardModule
   ],
   templateUrl: './curso-player.component.html',
   styleUrl: './curso-player.component.css'
@@ -35,11 +38,25 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   private treinamentoService = inject(TreinamentoService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private sanitizer = inject(DomSanitizer); 
+  private sanitizer = inject(DomSanitizer);
+  private chatApiService = inject(ChatApiService);
 
-  curso: any     = null;
+  // 🌟 A ÂNCORA DO VÍDEO: Guarda a URL segura na memória sem sofrer impacto do chat
+  videoUrlBlindada!: SafeResourceUrl;
+
+  curso: any = null;
   aulaAtiva: any = null;
-  isLoading      = true;
+  isLoading = true;
+
+  chatAberto = false;
+  salaId: number | null = null;
+  historicoMensagens: any[] = [];
+  novaMensagemText = '';
+
+  alunoLogado = {
+    id: Number(localStorage.getItem('userId') || 1), 
+    name: localStorage.getItem('userName') || 'Julio Valente (Aluno)'
+  };
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -48,10 +65,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
     }
   }
 
-  //  Limpa a memória RAM do player quando o aluno sai da tela!
   ngOnDestroy(): void {
     this.aulaAtiva = null;
     this.curso = null;
+    this.chatApiService.desconectarDoSocket();
   }
 
   carregarDadosCurso(id: number): void {
@@ -72,42 +89,85 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   }
 
   selecionarAula(aula: any): void {
-    // 🌟 RESET TÁTICO REATIVO: Derruba a aula ativa por 50ms para forçar o @if do HTML a recriar o iframe limpo
+    // RESET TÁTICO REATIVO
     this.aulaAtiva = null;
 
     setTimeout(() => {
       this.aulaAtiva = aula;
-      console.log('=== NOVA AULA SELECIONADA E ATIVADA ===', this.aulaAtiva);
+      
+      // 🌟 O XEQUE-MATE SUPREMO: Sanitiza e fixa a URL na propriedade apenas UMA vez por troca de aula!
+      if (aula && aula.video_url) {
+        this.videoUrlBlindada = this.obterVideoUrlSegura(aula.video_url);
+      }
     }, 50);
   }
 
   obterVideoUrlSegura(url: string): SafeResourceUrl {
     if (!url) return '';
-
-    // 🌟 CAPTURA DIRETA: O link do banco já está perfeito (https://www.youtube.com/embed/...)
-    // Só precisamos garantir que espaços em branco nas pontas sejam removidos, mantendo maiúsculas e minúsculas intactas!
     const urlFinalReal = String(url).trim();
-
-    console.log('=== IFRAME TARGET COMPLETO ===', urlFinalReal);
-
-    // Entrega o link perfeito e limpo para o player rodar sem travas do Sanitizer
     return this.sanitizer.bypassSecurityTrustResourceUrl(urlFinalReal);
   }
 
   configurarUrlMaterial(url: string): string {
     if (!url) return '#';
-
     const urlLimpa = url.trim();
-
-    // Se o link já começar com http (SharePoint/Nuvem), retorna ele puro
     if (urlLimpa.startsWith('http://') || urlLimpa.startsWith('https://')) {
       return urlLimpa;
     }
-
-    // Se for um arquivo físico local (ex: /uploads/...), anexa a URL base do backend NestJS
     return `${environment.apiUrl}${urlLimpa}`;
   }
 
+  alternarJanelaChat(): void {
+    this.chatAberto = !this.chatAberto;
+
+    if (this.chatAberto) {
+      this.chatApiService.entrarNaSala(this.alunoLogado.id, this.alunoLogado.name);
+
+      // Escuta o pacote de histórico inicial enviado pelo back-end NestJS
+      this.chatApiService.dadosSala.subscribe((dados: any) => {
+        if (dados) {
+          this.salaId = dados.salaId;
+          this.historicoMensagens = dados.historico || [];
+          this.rolarChatAlunoParaOFinal();
+        }
+      });
+
+      // Escuta novas mensagens pingando do broadcast do WebSocket
+      this.chatApiService.novaMensagem.subscribe((msgRecebida: any) => {
+        if (msgRecebida && msgRecebida.sala_id === this.salaId) {
+          const jaExiste = this.historicoMensagens.some(m => m.id === msgRecebida.id);
+          if (!jaExiste) {
+            this.historicoMensagens.push(msgRecebida);
+            this.rolarChatAlunoParaOFinal();
+          }
+        }
+      });
+    }
+  }
+
+  enviarMensagemDoAluno(): void {
+    if (!this.novaMensagemText.trim() || !this.salaId) return;
+
+    const conteudo = this.novaMensagemText.trim();
+    this.chatApiService.enviarMensagemInstantanea(
+      this.salaId,
+      this.alunoLogado.id,
+      conteudo,
+      false
+    );
+
+    this.novaMensagemText = '';
+  }
+
+  private rolarChatAlunoParaOFinal(): void {
+    setTimeout(() => {
+      const container = document.getElementById('aluno-chat-scroll-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
+  }
+  
   voltarDashboard(): void {
     this.router.navigate(['/dashboard']);
   }

@@ -1,3 +1,44 @@
+<!-- OVERLAY GLOBAL BLINDADO: Injetado posicionamento rígido e z-index supremo de tela cheia -->
+@if (layoutService.isLoadingGlobal()) {
+<div class="loading-overlay-container"
+    style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(4px) !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 99999 !important; pointer-events: all !important;">
+    <div class="loading-progress-box"
+        style="background: #ffffff !important; padding: 36px 32px !important; border-radius: 16px !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08) !important; text-align: center !important; width: 280px !important; z-index: 100000 !important; box-sizing: border-box;">
+        <mat-icon
+            style="color: #003366 !important; font-size: 32px !important; width: 32px !important; height: 32px !important; margin-bottom: 16px !important; animation: pulse 2s infinite; display: inline-flex !important; align-items: center !important; justify-content: center !important;">
+            cloud_download
+        </mat-icon>
+        <mat-progress-bar mode="indeterminate"
+            style="border-radius: 4px !important; height: 6px !important; margin-bottom: 16px !important; width: 100% !important; display: block !important;"></mat-progress-bar>
+        <h3
+            style="margin: 0 0 6px 0 !important; color: #003366 !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: -0.3px !important; font-family: sans-serif !important;">
+            Sincronizando Ecossistema
+        </h3>
+        <p
+            style="color: #64748b !important; font-size: 12px !important; font-weight: 500 !important; margin: 0 !important; font-family: sans-serif !important;">
+            Processando dados corporativos...
+        </p>
+    </div>
+</div>
+
+<!-- <div class="loading-overlay-container">
+  <div class="loading-progress-box">
+    <mat-icon
+      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      cloud_download
+    </mat-icon>
+    <mat-progress-bar mode="indeterminate"
+      style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+      Sincronizando Ecossistema
+    </h3>
+    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+      Carregando dados do banco...
+    </p>
+  </div>
+</div> -->
+}
+
 <div
     style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
     <aside class="sidebar-container" [class.colapsada]="sidebarColapsada" [class.aberta-mobile]="menuMobileAberto"
@@ -90,6 +131,13 @@
                 <mat-icon style="flex-shrink: 0;">campaign</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Comunicados</span> }
+            </a>
+            <a mat-button routerLink="/admin/chat" routerLinkActive="active-saas-link"
+                [matTooltip]="sidebarColapsada ? 'Comunicados' : ''" matTooltipPosition="right"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                <mat-icon style="flex-shrink: 0;">headset_mic</mat-icon>
+                @if (!sidebarColapsada) { <span
+                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Chat Central (RH)</span> }
             </a>
             <a mat-button routerLink="/admin/projetos" routerLinkActive="active-saas-link"
                 (click)="tabService.mudarAba('projetos')" [matTooltip]="sidebarColapsada ? 'Projetos' : ''"

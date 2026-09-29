@@ -33,6 +33,9 @@ model User {
   topicos_forum   TopicoForum[]
   respostas_forum RespostaForum[]
   kanban_colunas  KanbanColuna[]
+
+  salas_chat     SalaChat[]
+  mensagens_chat MensagemChat[]
 }
 
 model Treinamento {
@@ -268,4 +271,32 @@ model KanbanCard {
   // Relacionamentos
   coluna      KanbanColuna @relation(fields: [coluna_id], references: [id], onDelete: Cascade)
   treinamento Treinamento? @relation(fields: [treinamento_id], references: [id], onDelete: SetNull) // SetNull impede que apagar o card apague o curso
+}
+
+// 🌟 NOVO: Controla a sala de bate-papo em tempo real entre o aluno e o suporte/RH
+model SalaChat {
+  id         Int      @id @default(autoincrement())
+  usuario_id Int      // O aluno dono do chat
+  titulo     String   // Ex: "Suporte NR-32 - Julio"
+  aberto     Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relacionamentos
+  user      User           @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  mensagens MensagemChat[]
+}
+
+// 🌟 NOVO: Armazena o histórico de mensagens trocadas instantaneamente via Socket.io
+model MensagemChat {
+  id         Int      @id @default(autoincrement())
+  sala_id    Int
+  usuario_id Int      // Quem enviou a mensagem (pode ser o aluno ou o tutor do RH)
+  conteudo   String   // O texto digitado
+  is_tutor   Boolean  @default(false) // Destaca se a mensagem veio do RH/Suporte
+  created_at DateTime @default(now())
+
+  // Relacionamentos
+  sala SalaChat @relation(fields: [sala_id], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [usuario_id], references: [id], onDelete: Cascade) // 🚀 Conecta com o User!
 }

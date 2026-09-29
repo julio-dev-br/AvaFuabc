@@ -15,6 +15,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AdminTabService } from '../services/admin-tab.service';
+import { LayoutService } from '../services/layout.service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+
 
 @Component({
   selector: 'app-layout',
@@ -28,7 +31,8 @@ import { AdminTabService } from '../services/admin-tab.service';
     MatIconModule,
     MatMenuModule,
     MatBadgeModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBarModule
   ],
   templateUrl: './layout.component.html'
 })
@@ -37,7 +41,7 @@ export class LayoutComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   public tabService = inject(AdminTabService);
-
+  public layoutService = inject(LayoutService);
   private router = inject(Router);
 
   private readonly apiUrl = `${environment.apiUrl}`;
@@ -104,7 +108,7 @@ export class LayoutComponent implements OnInit {
     });
   }
 
-  // 🌟 ADICIONE ESTE MÉTODO EXATAMENTE AQUI DENTRO DO SEU LAYOUT_COMPONENT
+  // DICIONE ESTE MÉTODO EXATAMENTE AQUI DENTRO DO SEU LAYOUT_COMPONENT
   marcarLida(id: number): void {
     this.notificationService.marcarComoLida(id).subscribe({
       next: () => {

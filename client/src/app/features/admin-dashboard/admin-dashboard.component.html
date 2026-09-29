@@ -382,36 +382,92 @@
         </div>
       </div>
       }
+
+      <!-- ==========================================================================
+           🏛️ PASSO 4: MONTAGEM DO QUIZ REATIVO REGULAMENTAR HÍBRIDO (COM INTELIGÊNCIA ARTIFICIAL)
+           ========================================================================== -->
       @if (passoAtual === 4) {
       <div
         style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; width: 100%; box-sizing: border-box;">
-        <div>
-          <h3 style="color: #003366; font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Montagem do Quiz Reativo
-            Regulamentar</h3>
-          <p style="margin: 0; color: #64748b; font-size: 13px;">Monte o questionário de validação acadêmica obrigatório
-            para a certificação do colaborador.</p>
+
+        <!-- Cabeçalho do Passo -->
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; width: 100%;">
+          <div>
+            <h3 style="color: #003366; font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Montagem do Quiz Reativo
+              Regulamentar</h3>
+            <p style="margin: 0; color: #64748b; font-size: 13px;">Monte o questionário acadêmico obrigatório para a
+              certificação ou use inteligência artificial.</p>
+          </div>
         </div>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+
+        <!-- 🌟 NOVA CENTRAL EXPANSÍVEL DE IA GEMINI (REUTILIZAÇÃO OPCIONAL INTELIGENTE) -->
+        <mat-expansion-panel
+          style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; background: #ffffff; overflow: hidden;">
+          <mat-expansion-panel-header style="height: 54px; background: #f8fafc;">
+            <mat-panel-title
+              style="display: flex; align-items: center; gap: 10px; color: #4f46e5; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
+              <mat-icon style="color: #4f46e5; animation: pulse 2s infinite;">auto_awesome</mat-icon>
+              Assistente de Geração por IA (Google Gemini)
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div style="padding: 16px 4px 8px 4px; display: flex; flex-direction: column; gap: 14px;">
+            <p style="margin: 0; color: #475569; font-size: 13px; font-weight: 500; line-height: 1.5;">
+              Cole abaixo as diretrizes, trechos de apostilas ou o resumo técnico da Norma Regulamentadora. O Gemini
+              criará automaticamente um questionário completo com 5 perguntas perfeitamente estruturadas.
+            </p>
+
+            <!-- Campo elástico para inserção da matéria da NR -->
+            <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+              <mat-label>Conteúdo Base da Norma Técnica</mat-label>
+              <textarea matInput rows="4" [(ngModel)]="textoBaseIA"
+                placeholder="Ex: Cole aqui os artigos ou resumo da NR-32 sobre riscos biológicos e uso de EPIs hospitalares..."></textarea>
+              <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">assignment_turned_in</mat-icon>
+            </mat-form-field>
+
+            <!-- Botão de Disparo com Opacidade Azul Claro Pastel Condicional -->
+            <div style="display: flex; justify-content: flex-end;">
+              <button mat-raised-button
+                [style.background]="!textoBaseIA || !textoBaseIA.trim() ? 'rgba(79, 70, 229, 0.25)' : 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)'"
+                [style.color]="!textoBaseIA || !textoBaseIA.trim() ? 'rgba(255, 255, 255, 0.6)' : '#ffffff'"
+                style="height: 38px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1); transition: all 0.3s ease;"
+                [disabled]="!textoBaseIA || !textoBaseIA.trim()" (click)="gerarQuizPorInteligenciaArtificial()">
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">auto_awesome</mat-icon>
+                Gerar 5 Questões com IA
+              </button>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Configurações Gerais do Título e Nota Mínima -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%; box-sizing: border-box; margin-top: 4px;">
           <mat-form-field appearance="outline" style="flex: 2; min-width: 240px; margin-bottom: 0;"
             class="compact-form">
             <mat-label>Título do Questionário / Avaliação</mat-label>
             <input matInput [(ngModel)]="quizTitulo" placeholder="Ex: Avaliação de Retenção de Conhecimento - NR-32">
           </mat-form-field>
+
           <mat-form-field appearance="outline" style="width: 140px; margin-bottom: 0;" class="compact-form">
             <mat-label>Nota Mínima (0 a 10)</mat-label>
             <input matInput type="number" [(ngModel)]="quizNotaMinima" min="0" max="10">
           </mat-form-field>
         </div>
+
+        <!-- 📝 CONSTRUTOR MANUAL / VISUALIZAÇÃO DE QUESTÕES INLINE -->
         <div
-          style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box; margin-top: 4px;">
+          style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box;">
           <h4
-            style="color: #003366; font-weight: 700; margin: 0 0 4px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
-            Injetar Nova Questão</h4>
+            style="color: #003366; font-weight: 700; margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
+            Injetar Nova Questão Manualmente</h4>
+
           <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
             <mat-label>Enunciado da Pergunta</mat-label>
             <input matInput [(ngModel)]="novaQuestao.enunciado"
               placeholder="Digite a pergunta regulamentar de forma clara...">
           </mat-form-field>
+
+          <!-- Grid de Alternativas -->
           <div
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; width: 100%; box-sizing: border-box;">
             <mat-form-field appearance="outline" class="compact-form" style="margin-bottom: 0; width: 100%;">
@@ -431,6 +487,8 @@
               <input matInput [(ngModel)]="novaQuestao.alternativaD" placeholder="Texto da opção D">
             </mat-form-field>
           </div>
+
+          <!-- Gabarito e Envio à Memória -->
           <div
             style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -446,22 +504,27 @@
                   style="font-weight: 600; font-size: 13px;">D</mat-radio-button>
               </mat-radio-group>
             </div>
+
             <button mat-stroked-button
               style="color: #003366; border-color: #003366; height: 36px; font-weight: 600; border-radius: 4px;"
               [disabled]="!novaQuestao.enunciado.trim() || !novaQuestao.respostaCorreta"
               (click)="adicionarQuestaoMemoria()">
               <mat-icon
                 style="font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">add</mat-icon>
-              Inserir no Banco
+              Inserir na Esteira
             </button>
           </div>
         </div>
+
+        <!-- Badge Reativo de Volume de Questões (Monitora tanto as manuais quanto as de IA) -->
         <div
           style="display: flex; align-items: center; gap: 12px; background: #f0fdf4; padding: 12px 16px; border-radius: 8px; border: 1px solid #bbf7d0; width: 100%; box-sizing: border-box;">
           <mat-icon style="color: #16a34a; font-size: 20px; width: 20px; height: 20px;">fact_check</mat-icon>
-          <span style="font-size: 13px; color: #16a34a; font-weight: 600;">Questões configuradas na esteira: <strong>{{
-              perguntasQuiz.length }}</strong> pergunta(s).</span>
+          <span style="font-size: 13px; color: #16a34a; font-weight: 600;">Questões prontas para gravação na esteira:
+            <strong>{{ perguntasQuiz.length }}</strong> pergunta(s).</span>
         </div>
+
+        <!-- Navegação da Base -->
         <div
           style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px; width: 100%; box-sizing: border-box;">
           <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
@@ -469,7 +532,7 @@
           <button mat-flat-button
             style="background-color: #003366 !important; color: white; height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;"
             [disabled]="perguntasQuiz.length === 0 || !quizTitulo.trim()" (click)="salvarQuizCompleto()">
-            Salvar e Mapear Público-Alvo
+            Salvar e Configurar Público-Alvo
           </button>
         </div>
       </div>
@@ -610,6 +673,125 @@
     <app-projetos-kanban></app-projetos-kanban>
   </div>
   }
+  <!-- 🌟 ABA DO CHAT CENTRAL EM TEMPO REAL (SUPORTE RH) -->
+  @if (abaAtiva === 'chat') {
+  <div style="width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
+
+    <div class="chat-grid-wrapper">
+
+      <!-- 🏢 COLUNA ESQUERDA: LISTAGEM DE SALAS E ALUNOS ATIVOS -->
+      <mat-card class="coluna-salas-card">
+        <mat-toolbar color="primary" class="chat-toolbar-header">
+          <mat-icon>forum</mat-icon>
+          <span class="toolbar-titulo" style="margin-left: 8px;">Atendimentos Ativos</span>
+        </mat-toolbar>
+
+        @if (isLoadingChats) {
+        <div class="loading-shimmer-box" style="padding: 20px; text-align: center;">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <p class="loading-texto" style="margin-top: 10px; color: #64748b;">Carregando canais de suporte...</p>
+        </div>
+        } @else if (listaSalasChat.length === 0) {
+        <!-- Lista de Alunos Sem Mensagens Pendentes -->
+        <div class="chat-vazio-state" style="padding: 40px; text-align: center; color: #94a3b8;">
+          <mat-icon style="transform: scale(1.5); margin-bottom: 10px;">chat_bubble_outline</mat-icon>
+          <p>Nenhum aluno abriu chamado de suporte até o momento.</p>
+        </div>
+        } @else {
+        <div class="lista-salas-scroll">
+          <div *ngFor="let sala of listaSalasChat" class="item-sala-aluno"
+            [class.sala-ativa]="salaChatSelecionada?.id === sala.id" (click)="selecionarSalaSuporte(sala)">
+
+            <div class="avatar-wrapper">
+              <img [src]="sala.user?.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar"
+                class="avatar-aluno-img">
+              <span class="status-indicator online"></span>
+            </div>
+
+            <div class="info-sala-col">
+              <h4 class="nome-aluno-titulo">{{ sala.user?.name || 'Colaborador' }}</h4>
+              <p class="email-subtexto">{{ sala.user?.email }}</p>
+              <span class="badge-modulo-tag">Suporte Geral</span>
+            </div>
+
+            <div class="meta-sala-direita">
+              <span class="contador-mensagens-badge">{{ sala._count?.mensagens || 0 }}</span>
+            </div>
+          </div>
+        </div>
+        }
+      </mat-card>
+
+      <!-- 💬 COLUNA DIREITA: JANELA DE MENSAGENS EM TEMPO REAL -->
+      <mat-card class="coluna-mensagens-card">
+
+        <!-- Estado Inicial: Nenhuma sala selecionada -->
+        @if (!salaChatSelecionada) {
+        <div class="janela-chat-bloqueada">
+          <div class="bloqueio-wrapper">
+            <mat-icon class="icon-central-suporte">headset_mic</mat-icon>
+            <h3>Central de Atendimento ao Aluno</h3>
+            <p>Selecione um colaborador na barra lateral para abrir a linha do tempo e iniciar a transmissão via
+              Socket.io.</p>
+          </div>
+        </div>
+        } @else {
+        <!-- Janela Ativa Conectada ao WebSocket -->
+        <div class="janela-chat-ativa-wrapper">
+
+          <!-- Cabeçalho da Conversa Ativa -->
+          <div class="header-conversa-ativa">
+            <div class="header-avatar-box">
+              <img [src]="salaChatSelecionada.user?.avatar_url || 'assets/images/default-avatar.png'"
+                class="avatar-header-img">
+            </div>
+            <div class="header-info-box">
+              <h3>{{ salaChatSelecionada.user?.name }}</h3>
+              <p class="status-texto-realtime">🟢 Conexão bidirecional ativa em tempo real</p>
+            </div>
+            <button mat-icon-button color="warn" matTooltip="Encerrar Chamado">
+              <mat-icon>done_all</mat-icon>
+            </button>
+          </div>
+
+          <!-- Área de Balões de Conversa com Scroll Automático -->
+          <div id="chat-messages-container" class="area-mensagens-scroll">
+            <div *ngFor="let msg of historicoMensagensChat" class="linha-mensagem-wrapper"
+              [class.alinhado-tutor]="msg.is_tutor" [class.alinhado-aluno]="!msg.is_tutor">
+
+              <div class="balao-mensagem">
+                <p class="texto-conteudo-chat">{{ msg.conteudo }}</p>
+                <span class="hora-carimbo-chat">{{ msg.created_at | date:'HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Input e Envio de Mensagens -->
+          <div class="barra-input-envio-footer">
+            <input type="text" class="input-mensagem-texto"
+              placeholder="Digite uma mensagem de suporte para o colaborador..." [(ngModel)]="novaMensagemTutorText"
+              (keyup.enter)="enviarMensagemDoTutor()">
+
+            <button mat-fab color="primary" class="btn-enviar-fab" [disabled]="!novaMensagemTutorText.trim()"
+              (click)="enviarMensagemDoTutor()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+
+        </div>
+        }
+
+      </mat-card>
+
+    </div>
+
+  </div>
+  }
+
+
+
+
+
   @if (abaAtiva === 'usuarios') {
   <div style="width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
     <app-user></app-user>
