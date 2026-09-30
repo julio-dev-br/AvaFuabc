@@ -40,8 +40,8 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   private chatApiService = inject(ChatApiService);
+  public idAulaAtualInstanciada: number | null = null;
 
-  // 🌟 A ÂNCORA DO VÍDEO: Guarda a URL segura na memória sem sofrer impacto do chat
   videoUrlBlindada!: SafeResourceUrl;
 
   curso: any = null;
@@ -54,7 +54,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   novaMensagemText = '';
 
   alunoLogado = {
-    id: Number(localStorage.getItem('userId') || 1), 
+    id: Number(localStorage.getItem('userId') || 1),
     name: localStorage.getItem('userName') || 'Julio Valente (Aluno)'
   };
 
@@ -64,7 +64,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       this.carregarDadosCurso(Number(idParam));
     }
   }
-
   ngOnDestroy(): void {
     this.aulaAtiva = null;
     this.curso = null;
@@ -87,16 +86,19 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       }
     });
   }
-
   selecionarAula(aula: any): void {
-    // RESET TÁTICO REATIVO
+    if (!aula) return;
+    if (this.idAulaAtualInstanciada === aula.id) {
+      return;
+    }
+
     this.aulaAtiva = null;
+    this.idAulaAtualInstanciada = aula.id;
 
     setTimeout(() => {
       this.aulaAtiva = aula;
-      
-      // 🌟 O XEQUE-MATE SUPREMO: Sanitiza e fixa a URL na propriedade apenas UMA vez por troca de aula!
-      if (aula && aula.video_url) {
+
+      if (aula.video_url) {
         this.videoUrlBlindada = this.obterVideoUrlSegura(aula.video_url);
       }
     }, 50);
@@ -167,7 +169,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       }
     }, 100);
   }
-  
+
   voltarDashboard(): void {
     this.router.navigate(['/dashboard']);
   }

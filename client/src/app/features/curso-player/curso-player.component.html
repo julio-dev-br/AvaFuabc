@@ -25,13 +25,16 @@
       style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
       @if (aulaAtiva?.video_url && (aulaAtiva.video_url.includes('youtube.com') ||
       aulaAtiva.video_url.includes('youtu.be') || aulaAtiva.video_url.includes('embed'))) {
-      <iframe 
-        [id]="'player-' + aulaAtiva.id"
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
-        [src]="obterVideoUrlSegura(aulaAtiva.video_url)"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
+
+        <!-- Certifique-se de que a div que envelopa o iframe use uma validação estática estável -->
+        @if (videoUrlBlindada) {
+        <iframe [id]="'player-' + idAulaAtualInstanciada"
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" [src]="videoUrlBlindada"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+        }
+
       } @else if (aulaAtiva?.video_url) {
       <video style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"
         [src]="aulaAtiva.video_url" controls controlsList="nodownload" autoplay>

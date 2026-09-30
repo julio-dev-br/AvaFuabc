@@ -156,32 +156,42 @@ model Alternativa {
 
 model QuizResponse {
   id             Int      @id @default(autoincrement())
-  usuario_id     Int?
-  pergunta_id    Int?
-  alternativa_id Int?
+  matricula_id   Int      // ➔ Amarra diretamente ao contrato da matrícula do curso
+  usuario_id     Int
+  pergunta_id    Int
+  alternativa_id Int
+  tentativa_nro  Int      @default(1) // ➔ Rastreia se foi na tentativa 1, 2 ou 3 para o RH auditar
   created_at     DateTime @default(now())
 
-  user        User?        @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
-  pergunta    Pergunta?    @relation(fields: [pergunta_id], references: [id], onDelete: Cascade)
-  alternativa Alternativa? @relation(fields: [alternativa_id], references: [id], onDelete: Cascade)
+  matricula   Matricula   @relation(fields: [matricula_id], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  pergunta    Pergunta    @relation(fields: [pergunta_id], references: [id], onDelete: Cascade)
+  alternativa Alternativa @relation(fields: [alternativa_id], references: [id], onDelete: Cascade)
 }
 
 model Matricula {
   id             Int       @id @default(autoincrement())
-  usuario_id     Int?
-  treinamento_id Int?
+  usuario_id     Int
+  treinamento_id Int
   progresso      Float?    @default(0)
-  status         String?
+  status         String?   @default("EM_ANDAMENTO") // Ex: EM_ANDAMENTO, CONCLUIDO, EXPIRADO
   nota           Float?
-  iniciado_em    DateTime?
+  iniciado_em    DateTime? @default(now())
   concluido_em   DateTime?
   validade_ate   DateTime?
 
-  user            User?           @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
-  treinamento     Treinamento?    @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  treinamento     Treinamento     @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
   progresso_aulas ProgressoAula[]
   certificados    Certificado[]
+  
+  // Relações reversas
+  respostas_quiz  QuizResponse[]  // ➔ Permite buscar todas as respostas dadas nesta matrícula
+
+  // 🛡️ BLOQUEIO SUPREMO: Impede fisicamente que o mesmo aluno tenha duas matrículas no mesmo curso!
+  @@unique([usuario_id, treinamento_id]) 
 }
+
 
 model ProgressoAula {
   id                  Int       @id @default(autoincrement())

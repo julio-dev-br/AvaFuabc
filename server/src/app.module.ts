@@ -14,26 +14,27 @@ import { NotificacoesController } from './motificacoes/notificacoes.controller';
 import { MateriaisModule } from './materiais/materiais.module';
 import { GeminiModule } from './gemini/gemini.module'; 
 import { ChatModule } from './chat/chat.module';
+// 🌟 CORRIGIDO: Nome do membro importado alterado para ProtheusMockController
+import { ProtheusMockController } from './integracao/protheus/protheus.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Abastece as variáveis .env para a aplicação toda
+      isGlobal: true, 
     }),
     AuthModule,
     MatriculaModule,
-    TreinamentoModule, // 📦 Gerencia internamente o TreinamentoController e TreinamentoService
+    TreinamentoModule, 
     QuizzesModule,
     CertificadosModule,
     ForumModule,
     KanbanModule,
     MateriaisModule,
     GeminiModule,
-    ChatModule,   // 📦 Gerencia internamente o MateriaisController e MateriaisService
+    ChatModule,   
   ],
-  // ✅ CORRIGIDO: Removidos TreinamentoController e MateriaisController daqui
-  controllers: [UserController, NotificacoesController],
-  // ✅ CORRIGIDO: Removido TreinamentoService daqui para evitar conflito com o módulo
+  // 🌟 CORRIGIDO: Injetada a classe ProtheusMockController corretamente no array
+  controllers: [UserController, NotificacoesController, ProtheusMockController],
   providers: [PrismaService, NotificacoesService],
 })
 export class AppModule {}
