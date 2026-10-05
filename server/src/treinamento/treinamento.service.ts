@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -416,5 +416,28 @@ export class TreinamentoService {
       };
     });
   }
+
+  // 🗑️ EXCLUSIVO DO GESTOR: Deleta fisicamente uma regra de público-alvo (Lixeira Vermelha)
+  async removerVinculoPublico(vinculoId: number) {
+    // 1. Verifica se a regra de fato existe na base de dados antes de tentar a query
+    const vinculoExistente = await this.prisma.treinamentoPublico.findUnique({
+      where: { id: Number(vinculoId) },
+    });
+
+    if (!vinculoExistente) {
+      throw new NotFoundException('Esta regra de vínculo organizacional não foi localizada no sistema.');
+    }
+
+    // 2. Executa a remoção física no banco relacional PostgreSQL
+    await this.prisma.treinamentoPublico.delete({
+      where: { id: Number(vinculoId) },
+    });
+
+    return {
+      success: true,
+      message: 'Vínculo de público-alvo removido com sucesso do ecossistema!'
+    };
+  }
+
 
 }

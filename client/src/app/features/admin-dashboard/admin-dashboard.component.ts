@@ -25,7 +25,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatProgressBarModule } from '@angular/material/progress-bar'; 
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // Componentes de Gráficos (Chart.js)
 import { BaseChartDirective } from 'ng2-charts';
@@ -68,7 +68,7 @@ Chart.register(...registerables);
     ProjetosKanbanComponent,
     ModalMateriaisComponent,
     MatExpansionModule,
-    MatProgressBarModule 
+    MatProgressBarModule
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
@@ -77,28 +77,19 @@ export class AdminDashboardComponent implements OnInit {
 
   private treinamentoService = inject(TreinamentoService);
   private route = inject(ActivatedRoute);
+  private tabService = inject(AdminTabService);
   private quizService = inject(QuizService);
   public snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private alerts = inject(AlertsService);
   public notificationService = inject(NotificationService);
-  private tabService = inject(AdminTabService);
   private layoutService = inject(LayoutService);
-  private geminiService = inject(GeminiService); // Injeção sênior isolada
-  public textoBaseIA = '';                      // Controla o input da caixa de IA
+  private geminiService = inject(GeminiService);
+  public textoBaseIA = '';
   private chatApiService = inject(ChatApiService);
   private router = inject(Router);
 
   constructor() {
-    // 🧭 PONTE 1: Escuta a URL. Quando o usuário digita na barra ou dá F5, sincroniza o layout interno!
-    this.route.data.subscribe(data => {
-      if (data && data['aba']) {
-        // Altera o estado interno silenciosamente se a URL mudar por fora
-        this.tabService.abaAtiva.set(data['aba']);
-      }
-    });
-
-    // 🔄 PONTE 2: Mantém o effect reativo ativo para efetuar as cargas de background
     effect(() => {
       const abaAtual = this.tabService.abaAtiva();
       if (abaAtual === 'cadastro') {
@@ -112,6 +103,24 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
+  ngOnInit(): void {
+    this.route.data.subscribe(data => {
+      if (data && data['aba']) {
+        this.tabService.abaAtiva.set(data['aba']);
+      }
+    });
+
+    this.carregarDadosBI();
+    this.carregarDicionariosRH();
+    this.carregarProjetosKanbanAdmin();
+  }
+
+  vinculoRH = { empresa_id: '', unidade_id: '', departamento_id: '', cargo_id: '' };
+  listaDepartamentos: any[] = [];
+  listaEmpresas: any[] = [];
+  listaUnidades: any[] = [];
+  listaCargos: any[] = [];
 
   listaSalasChat: any[] = [];
   salaChatSelecionada: any = null;
@@ -156,13 +165,6 @@ export class AdminDashboardComponent implements OnInit {
   perguntasQuiz: any[] = [];
   novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
 
-  // Modelos de Vínculo Organizacional (Passo 5 - ERP)
-  vinculoRH = { empresa_id: null, unidade_id: null, departamento_id: null, cargo_id: null };
-  listaEmpresas: any[] = [];
-  listaUnidades: any[] = [];
-  listaDepartamentos: any[] = [];
-  listaCargos: any[] = [];
-
   // Estados de Dados do Dashboard de BI e Gráficos
   isLoadingMetrics = true;
   cardsMetricas = { totalTreinamentos: 0, totalUsuarios: 0, taxaConformidadeGeral: 0 };
@@ -179,13 +181,6 @@ export class AdminDashboardComponent implements OnInit {
   tipoVinculoSelecionado: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO' = 'EMPRESA';
   idReferenciaSelecionado: number | null = null;
   listaVinculosAtivos: any[] = []; // Guarda os públicos já amarrados ao curso ativo
-
-  // Listas temporárias de simulação (Mock do Protheus) até a carga de dados rodar
-  mockEmpresas = [{ id: 1, nome: 'Fundação ABC - Matriz' }, { id: 2, nome: 'Central de Convênios' }];
-  mockUnidades = [{ id: 10, nome: 'Hospital Mário Covas' }, { id: 11, nome: 'CHM Santo André' }];
-  mockDepartamentos = [{ id: 100, nome: 'Enfermagem' }, { id: 101, nome: 'Recursos Humanos' }];
-  mockCargos = [{ id: 50, nome: 'Técnico de Enfermagem' }, { id: 51, nome: 'Médico Plantonista' }];
-  mockUsuarios = [{ id: 999, nome: 'Julio Valente (Mtr: 1234)' }, { id: 888, nome: 'Colaborador Teste' }];
 
   listaProjetosAdmin: any[] = [];
   isLoadingProjetos = false;
@@ -246,7 +241,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     ]
   };
-
   // CONFIGURAÇÃO DO GRÁFICO DE CONFORMIDADE POR UNIDADE (BARRAS VERTICAIS)
   public unidadeBarChartType: ChartType = 'bar';
   public unidadeBarChartOptions: ChartConfiguration['options'] = {
@@ -270,16 +264,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     ]
   };
-
-  ngOnInit(): void {
-    // O boot inicial agora carrega apenas o painel de BI com os dados novos
-    this.carregarDadosBI();
-
-    // Mantém os dicionários e a esteira de projetos carregando em background
-    this.carregarDicionariosRH();
-    this.carregarProjetosKanbanAdmin();
-  }
-
   get cursosGerenciaisExibidos(): any[] {
     const busca = this.filtroTextoAdmin.toLowerCase().trim();
 
@@ -297,7 +281,6 @@ export class AdminDashboardComponent implements OnInit {
 
     return filtrados.slice(inicio, fim);
   }
-
   get totalPaginasAdmin(): number {
     const busca = this.filtroTextoAdmin.toLowerCase().trim();
     const filtrados = this.listaCursosGerencial.filter(curso =>
@@ -305,16 +288,13 @@ export class AdminDashboardComponent implements OnInit {
     );
     return Math.ceil(filtrados.length / this.itensPorPaginaAdmin) || 1;
   }
-
   get abaAtiva(): string {
     return this.tabService.abaAtiva();
   }
-
   mudarAba(aba: string): void {
     this.tabService.mudarAba(aba);
     this.router.navigate([`/admin/${aba}`]);
   }
-
   proximaPaginaAdmin(): void {
     if (this.paginaAtualAdmin < this.totalPaginasAdmin) {
       this.paginaAtualAdmin++;
@@ -500,6 +480,8 @@ export class AdminDashboardComponent implements OnInit {
         this.idAulaCriada = null;
 
         this.passoAtual = 5;
+
+        this.carregarDadosOrigemProtheus();
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erro ao salvar quiz no NestJS:', err);
@@ -507,15 +489,23 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-  private obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: number | null): string {
+  public obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: string | number | null): string {
     if (!id) return '';
 
-    if (tipo === 'EMPRESA') return this.mockEmpresas.find(e => e.id === id)?.nome || `Empresa ID: ${id}`;
-    if (tipo === 'UNIDADE') return this.mockUnidades.find(u => u.id === id)?.nome || `Unidade ID: ${id}`;
-    if (tipo === 'DEPARTAMENTO') return this.mockDepartamentos.find(d => d.id === id)?.nome || `Depto ID: ${id}`;
-    if (tipo === 'CARGO') return this.mockCargos.find(c => c.id === id)?.nome || `Cargo ID: ${id}`;
+    const idProcurado = String(id).trim();
 
-    return this.mockUsuarios.find(u => u.id === id)?.nome || `Usuário ID: ${id}`;
+    if (tipo === 'EMPRESA') {
+      return this.listaEmpresas.find(e => String(e.id) === idProcurado)?.nome || `Complexo ID: ${idProcurado}`;
+    }
+    if (tipo === 'UNIDADE') {
+      return this.listaUnidades.find(u => String(u.id) === idProcurado)?.nome || `Unidade ID: ${idProcurado}`;
+    }
+    if (tipo === 'CARGO') {
+      return this.listaCargos.find(c => String(c.id) === idProcurado)?.nome || `Cargo ID: ${idProcurado}`;
+    }
+
+    // Fallbacks genéricos caso precise de Depto ou Usuário temporariamente
+    return `${tipo} ID: ${idProcurado}`;
   }
   salvarVinculoPublico(): void {
     if (!this.idCursoCriado) {
@@ -530,15 +520,13 @@ export class AdminDashboardComponent implements OnInit {
     const payloadVinculo = {
       treinamentoId: Number(this.idCursoCriado),
       tipo: this.tipoVinculoSelecionado,
-      referenciaId: Number(this.idReferenciaSelecionado)
+      referenciaId: String(this.idReferenciaSelecionado).trim()
     };
-
 
     this.treinamentoService.vincularPublico(payloadVinculo).subscribe({
       next: (res) => {
         this.alerts.sucesso(`Público alvo (${this.tipoVinculoSelecionado}) vinculado com sucesso!`);
 
-        // Armazena temporariamente os valores antes de resetar o formulário
         const tipoAtual = this.tipoVinculoSelecionado;
         const idAtual = this.idReferenciaSelecionado;
 
@@ -546,17 +534,47 @@ export class AdminDashboardComponent implements OnInit {
           id: res.id || Date.now(),
           tipo: tipoAtual,
           referenciaId: idAtual,
-          // ✅ AGORA PASSA PERFEITO: Os tipos batem letra por letra!
           nome: this.obterNomeMock(tipoAtual, idAtual)
         });
 
-        // Reseta o seletor secundário para o próximo vínculo com segurança
         this.idReferenciaSelecionado = null;
       },
       error: (err) => {
         console.error('Erro ao vincular público no NestJS:', err);
         this.alerts.erro('Falha ao registrar vínculo organizacional.');
       }
+    });
+  }
+  carregarDadosOrigemProtheus(): void {
+    this.isLoadingCursos = true; // Reaproveita o indicador de carga para a UX
+
+    this.treinamentoService.obterEmpresasERP().subscribe({
+      next: (empresas) => {
+        this.listaEmpresas = empresas;
+        this.isLoadingCursos = false;
+      },
+      error: () => this.isLoadingCursos = false
+    });
+
+    this.treinamentoService.obterCargosERP().subscribe({
+      next: (cargos) => this.listaCargos = cargos,
+      error: (err) => console.error('Erro ao carregar cargos do ERP:', err)
+    });
+  }
+  aoMudarEmpresa(empresaId: string): void {
+    this.vinculoRH.empresa_id = empresaId;
+    this.vinculoRH.unidade_id = ''; // Reseta seleções anteriores por segurança
+    this.listaUnidades = [];
+
+    if (!empresaId) return;
+
+    // Disca para o serviço buscando as filiais correspondentes
+    this.treinamentoService.obterUnidadesERP(empresaId).subscribe({
+      next: (unidades) => {
+        this.listaUnidades = unidades;
+        console.log(`🏥 Filiais carregadas para a Empresa [${empresaId}]:`, unidades);
+      },
+      error: (err) => console.error('Erro ao buscar unidades filtradas:', err)
     });
   }
   finalizarEsteiraTreinamento(): void {
@@ -644,8 +662,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
-  // 🚪 AÇÃO 1: Carrega a listagem de todas as salas abertas no Postgres
   carregarPainelSuporteRH(): void {
     this.isLoadingChats = true;
     this.chatApiService.listarSalasAtivasDoRH().subscribe({
@@ -659,8 +675,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
-  // 🚪 AÇÃO 2: Selecionar um aluno na lista e entrar na sala de WebSocket correspondente
   selecionarSalaSuporte(sala: any): void {
     this.salaChatSelecionada = sala;
     this.historicoMensagensChat = [];
@@ -692,8 +706,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-
-  // 💬 AÇÃO 3: Dispara o texto digitado pelo tutor do RH na rede
   enviarMensagemDoTutor(): void {
     if (!this.novaMensagemTutorText.trim() || !this.salaChatSelecionada) return;
 
@@ -710,8 +722,6 @@ export class AdminDashboardComponent implements OnInit {
 
     this.novaMensagemTutorText = ''; // Limpa a caixa de texto reativa
   }
-
-  // UX Premium: Mantém o scroll da conversa sempre fixado na última mensagem enviada
   private rolarChatParaOFinal(): void {
     setTimeout(() => {
       const container = document.getElementById('chat-messages-container');
@@ -720,6 +730,29 @@ export class AdminDashboardComponent implements OnInit {
       }
     }, 100);
   }
+  deletarVinculoReal(vinculoId: number): void {
+    if (!vinculoId) return;
 
+    // 1. Dispara o cano HTTP Delete para o back-end NestJS detonar o dado no Postgres
+    this.treinamentoService.removerVinculoPublico(vinculoId).subscribe({
+      next: (resposta) => {
+        // 2. FILTRO REATIVO SUPREMO: Remove o card da lista da tela instantaneamente sem dar nenhuma piscada!
+        this.listaVinculosAtivos = this.listaVinculosAtivos.filter(v => v.id !== vinculoId);
+        
+        // 3. Exibe o feedback visual premium de sucesso para o gestor do RH
+        this.snackBar.open('Vínculo organizacional removido com sucesso!', 'Fechar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        });
+        
+        console.log(`🧹 Registro ID [${vinculoId}] removido fisicamente e expurgado da memória RAM.`);
+      },
+      error: (err) => {
+        console.error('🚨 Erro ao remover vínculo regulamentar do Passo 5:', err);
+        this.snackBar.open('Falha ao excluir o vínculo. Tente novamente.', 'Fechar', { duration: 4000 });
+      }
+    });
+  }
   tratarErro(err: HttpErrorResponse): void { console.error(err); }
 }

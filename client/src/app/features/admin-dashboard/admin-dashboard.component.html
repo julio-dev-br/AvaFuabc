@@ -1,9 +1,8 @@
 <div style="width: 100%; box-sizing: border-box; padding: 4px; animation: fadeIn 0.3s ease;">
-  @if (abaAtiva === 'bi') {
+  @if (abaAtiva === 'dashboard') {
   <div style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
     <div style="margin-bottom: 8px; padding: 0 4px;">
-      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Dashboard
-        Indicadores</h1>
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Dashboard</h1>
       <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">Acompanhe o engajamento e a
         conformidade regulatória em tempo real na Fundação ABC.</p>
     </div>
@@ -23,8 +22,9 @@
             <span
               style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Treinamentos
               Publicados</span>
-            <h2 style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #003366; line-height: 1;">{{
-              cardsMetricas.totalTreinamentos || 0 }}</h2>
+            <h2 style="margin: 8px 0 0 0; font-size: 28px; font-weight: 700; color: #003366; line-height: 1;">
+              {{cardsMetricas.totalTreinamentos || 0 }}
+            </h2>
           </div>
           <mat-icon style="color: #003366; font-size: 32px; width: 32px; height: 32px; opacity: 0.8;">school</mat-icon>
         </mat-card-content>
@@ -116,7 +116,7 @@
       </div>
       @if (passoAtual === 0) {
       <button mat-raised-button
-        style="background-color: #ff9800; color: #ffffff; font-weight: 700; height: 40px; border-radius: 6px; padding: 0 16px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;"
+        style="background-color: #003366; color: #ffffff; font-weight: 700; height: 40px; border-radius: 6px; padding: 0 16px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;"
         (click)="passoAtual = 1; cursoSelecionadoParaGerenciar = null">
         <mat-icon style="font-size: 20px; width: 20px; height: 20px;">add_to_photos</mat-icon> Criar Novo Treinamento
       </button>
@@ -274,7 +274,7 @@
             5
           </span>
           <span [style.color]="passoAtual === 5 ? '#003366' : '#64748b'"
-            style="font-size: 13px; font-weight: 700;">Público-ALVO</span>
+            style="font-size: 13px; font-weight: 700;">Público Alvo</span>
         </div>
       </div>
       @if (passoAtual === 1) {
@@ -382,15 +382,9 @@
         </div>
       </div>
       }
-
-      <!-- ==========================================================================
-           🏛️ PASSO 4: MONTAGEM DO QUIZ REATIVO REGULAMENTAR HÍBRIDO (COM INTELIGÊNCIA ARTIFICIAL)
-           ========================================================================== -->
       @if (passoAtual === 4) {
       <div
         style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; width: 100%; box-sizing: border-box;">
-
-        <!-- Cabeçalho do Passo -->
         <div
           style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; width: 100%;">
           <div>
@@ -400,8 +394,6 @@
               certificação ou use inteligência artificial.</p>
           </div>
         </div>
-
-        <!-- 🌟 NOVA CENTRAL EXPANSÍVEL DE IA GEMINI (REUTILIZAÇÃO OPCIONAL INTELIGENTE) -->
         <mat-expansion-panel
           style="border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; background: #ffffff; overflow: hidden;">
           <mat-expansion-panel-header style="height: 54px; background: #f8fafc;">
@@ -417,16 +409,12 @@
               Cole abaixo as diretrizes, trechos de apostilas ou o resumo técnico da Norma Regulamentadora. O Gemini
               criará automaticamente um questionário completo com 5 perguntas perfeitamente estruturadas.
             </p>
-
-            <!-- Campo elástico para inserção da matéria da NR -->
             <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
               <mat-label>Conteúdo Base da Norma Técnica</mat-label>
               <textarea matInput rows="4" [(ngModel)]="textoBaseIA"
                 placeholder="Ex: Cole aqui os artigos ou resumo da NR-32 sobre riscos biológicos e uso de EPIs hospitalares..."></textarea>
               <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">assignment_turned_in</mat-icon>
             </mat-form-field>
-
-            <!-- Botão de Disparo com Opacidade Azul Claro Pastel Condicional -->
             <div style="display: flex; justify-content: flex-end;">
               <button mat-raised-button
                 [style.background]="!textoBaseIA || !textoBaseIA.trim() ? 'rgba(79, 70, 229, 0.25)' : 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)'"
@@ -439,8 +427,6 @@
             </div>
           </div>
         </mat-expansion-panel>
-
-        <!-- Configurações Gerais do Título e Nota Mínima -->
         <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%; box-sizing: border-box; margin-top: 4px;">
           <mat-form-field appearance="outline" style="flex: 2; min-width: 240px; margin-bottom: 0;"
             class="compact-form">
@@ -453,21 +439,16 @@
             <input matInput type="number" [(ngModel)]="quizNotaMinima" min="0" max="10">
           </mat-form-field>
         </div>
-
-        <!-- 📝 CONSTRUTOR MANUAL / VISUALIZAÇÃO DE QUESTÕES INLINE -->
         <div
           style="background: #f8fafc; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box;">
           <h4
             style="color: #003366; font-weight: 700; margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
             Injetar Nova Questão Manualmente</h4>
-
           <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
             <mat-label>Enunciado da Pergunta</mat-label>
             <input matInput [(ngModel)]="novaQuestao.enunciado"
               placeholder="Digite a pergunta regulamentar de forma clara...">
           </mat-form-field>
-
-          <!-- Grid de Alternativas -->
           <div
             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; width: 100%; box-sizing: border-box;">
             <mat-form-field appearance="outline" class="compact-form" style="margin-bottom: 0; width: 100%;">
@@ -487,8 +468,6 @@
               <input matInput [(ngModel)]="novaQuestao.alternativaD" placeholder="Texto da opção D">
             </mat-form-field>
           </div>
-
-          <!-- Gabarito e Envio à Memória -->
           <div
             style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 4px;">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -515,16 +494,12 @@
             </button>
           </div>
         </div>
-
-        <!-- Badge Reativo de Volume de Questões (Monitora tanto as manuais quanto as de IA) -->
         <div
           style="display: flex; align-items: center; gap: 12px; background: #f0fdf4; padding: 12px 16px; border-radius: 8px; border: 1px solid #bbf7d0; width: 100%; box-sizing: border-box;">
           <mat-icon style="color: #16a34a; font-size: 20px; width: 20px; height: 20px;">fact_check</mat-icon>
           <span style="font-size: 13px; color: #16a34a; font-weight: 600;">Questões prontas para gravação na esteira:
             <strong>{{ perguntasQuiz.length }}</strong> pergunta(s).</span>
         </div>
-
-        <!-- Navegação da Base -->
         <div
           style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px; width: 100%; box-sizing: border-box;">
           <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
@@ -545,13 +520,14 @@
           <p style="margin: 0; color: #64748b; font-size: 13px;">Selecione quais escopos e estruturas do ERP Protheus de
             RH serão matriculados compulsoriamente neste treinamento.</p>
         </div>
+
         <div
           style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
           <mat-form-field appearance="outline" style="width: 180px;" class="compact-form">
             <mat-label>Tipo de Vínculo</mat-label>
             <mat-select [(ngModel)]="tipoVinculoSelecionado" (selectionChange)="idReferenciaSelecionado = null">
-              <mat-option value="EMPRESA">🏢 Empresa / Matriz</mat-option>
-              <mat-option value="UNIDADE">Hospital / Unidade</mat-option>
+              <mat-option value="EMPRESA">🏢 Empresa</mat-option>
+              <mat-option value="UNIDADE">Unidade</mat-option>
               <mat-option value="DEPARTAMENTO">🩺 Setor / Depto</mat-option>
               <mat-option value="CARGO">📋 Cargo / Função</mat-option>
               <mat-option value="USUARIO">👤 Funcionário Avulso</mat-option>
@@ -560,16 +536,20 @@
           @if (tipoVinculoSelecionado === 'EMPRESA') {
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione a Empresa</mat-label>
-            <mat-select [(ngModel)]="idReferenciaSelecionado">
-              @for (emp of mockEmpresas; track emp.id) { <mat-option [value]="emp.id">{{ emp.nome }}</mat-option> }
+            <mat-select [(ngModel)]="idReferenciaSelecionado" (selectionChange)="aoMudarEmpresa($event.value)">
+              @for (emp of listaEmpresas; track emp.id) {
+              <mat-option [value]="emp.id">{{ emp.nome }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           }
           @if (tipoVinculoSelecionado === 'UNIDADE') {
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Hospital / Unidade</mat-label>
-            <mat-select [(ngModel)]="idReferenciaSelecionado">
-              @for (uni of mockUnidades; track uni.id) { <mat-option [value]="uni.id">{{ uni.nome }}</mat-option> }
+            <mat-select [(ngModel)]="idReferenciaSelecionado" [disabled]="listaUnidades.length === 0">
+              @for (uni of listaUnidades; track uni.id) {
+              <mat-option [value]="uni.id">{{ uni.nome }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           }
@@ -577,7 +557,8 @@
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Setor / Departamento</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado">
-              @for (dep of mockDepartamentos; track dep.id) { <mat-option [value]="dep.id">{{ dep.nome }}</mat-option> }
+              <mat-option value="100">Enfermagem Geral</mat-option>
+              <mat-option value="101">Medicina Preventiva</mat-option>
             </mat-select>
           </mat-form-field>
           }
@@ -585,7 +566,9 @@
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Cargo / Função</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado">
-              @for (car of mockCargos; track car.id) { <mat-option [value]="car.id">{{ car.nome }}</mat-option> }
+              @for (car of listaCargos; track car.id) {
+              <mat-option [value]="car.id">{{ car.nome }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           }
@@ -593,7 +576,8 @@
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Funcionário</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado">
-              @for (usr of mockUsuarios; track usr.id) { <mat-option [value]="usr.id">{{ usr.nome }}</mat-option> }
+              <mat-option value="999">Julio Valente (Mtr: 1234)</mat-option>
+              <mat-option value="888">Colaborador Teste ABC</mat-option>
             </mat-select>
           </mat-form-field>
           }
@@ -622,7 +606,7 @@
                 <div style="display: flex; flex-direction: column; min-width: 0;">
                   <span
                     style="font-size: 13px; font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                    {{ vinculo.nome }}
+                    {{ obterNomeMock(vinculo.tipo, vinculo.referencia_id || vinculo.referenciaId) }}
                   </span>
                   <span
                     style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px;">
@@ -631,10 +615,10 @@
                 </div>
               </div>
               <button mat-icon-button
-                style="color: #dc2626; cursor: pointer; background: transparent; border: none; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;"
-                title="Excluir vínculo regulamentar"
-                (click)="snackBar.open('Acionando ConfirmDialog para deletar ID: ' + vinculo.id, 'Fechar', {duration: 3000})">
-                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete_outline</mat-icon>
+                style="color: #dc2626; cursor: pointer; background: transparent; border: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; padding: 0;"
+                title="Excluir vínculo regulamentar" (click)="deletarVinculoReal(vinculo.id)">
+                <mat-icon
+                  style="font-size: 20px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin: 0;">delete_outline</mat-icon>
               </button>
             </div>
             } @empty {
@@ -644,7 +628,6 @@
               colaboradores em lote.
             </div>
             }
-
           </div>
         </div>
         <div
@@ -673,7 +656,6 @@
     <app-projetos-kanban></app-projetos-kanban>
   </div>
   }
-  <!-- 🌟 ABA DO CHAT CENTRAL EM TEMPO REAL (SUPORTE RH) -->
   @if (abaAtiva === 'chat') {
   <div style="width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
     <div class="chat-grid-wrapper">
@@ -699,7 +681,7 @@
             [class.sala-ativa]="salaChatSelecionada?.id === sala.id" (click)="selecionarSalaSuporte(sala)">
 
             <div class="avatar-wrapper">
-              <img [src]="sala.user?.avatar_url || 'assets/images/default-avatar.png'" alt="Avatar"
+              <img [src]="sala.user?.avatar_url || 'assets/images/default-avatar.jpg'" alt="Avatar"
                 class="avatar-aluno-img">
               <span class="status-indicator online"></span>
             </div>
@@ -731,7 +713,7 @@
         <div class="janela-chat-ativa-wrapper">
           <div class="header-conversa-ativa">
             <div class="header-avatar-box">
-              <img [src]="salaChatSelecionada.user?.avatar_url || 'assets/images/default-avatar.png'"
+              <img [src]="salaChatSelecionada.user?.avatar_url || 'assets/images/default-avatar.jpg'"
                 class="avatar-header-img">
             </div>
             <div class="header-info-box">

@@ -205,7 +205,7 @@ export class DashboardComponent implements OnInit {
 
           this.router.navigate(['/dashboard/curso', treinamentoId]);
         } else {
-          this.alerts.erro('Não foi Counseling iniciar este treinamento. Tente novamente.');
+          this.alerts.erro('Não foi possível iniciar este treinamento. Tente novamente.');
         }
       }
     });
@@ -290,4 +290,4 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-} // Chave final da classe fechada com sucesso!
+} 

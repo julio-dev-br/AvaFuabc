@@ -4,7 +4,7 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class AdminTabService {
-  public abaAtiva = signal<string>('bi');
+  public abaAtiva = signal<string>('dashboard');
 
   public mudarAba(aba: string): void {
     this.abaAtiva.set(aba);

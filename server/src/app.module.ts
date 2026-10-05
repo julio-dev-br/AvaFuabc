@@ -14,7 +14,6 @@ import { NotificacoesController } from './motificacoes/notificacoes.controller';
 import { MateriaisModule } from './materiais/materiais.module';
 import { GeminiModule } from './gemini/gemini.module'; 
 import { ChatModule } from './chat/chat.module';
-// 🌟 CORRIGIDO: Nome do membro importado alterado para ProtheusMockController
 import { ProtheusMockController } from './integracao/protheus/protheus.controller';
 
 @Module({
@@ -33,7 +32,6 @@ import { ProtheusMockController } from './integracao/protheus/protheus.controlle
     GeminiModule,
     ChatModule,   
   ],
-  // 🌟 CORRIGIDO: Injetada a classe ProtheusMockController corretamente no array
   controllers: [UserController, NotificacoesController, ProtheusMockController],
   providers: [PrismaService, NotificacoesService],
 })

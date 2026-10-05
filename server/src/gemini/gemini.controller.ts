@@ -7,7 +7,6 @@ export class GeminiController {
 
   @Post('gerar-quiz')
   @HttpCode(HttpStatus.OK)
-  // 🌟 CORRIGIDO: Tipado explicitamente como Promise<any[]> para casar com o Service!
   async gerarQuizAutomatico(@Body('texto') texto: string): Promise<any[]> {
     return await this.geminiService.gerarQuestoesQuiz(texto);
   }

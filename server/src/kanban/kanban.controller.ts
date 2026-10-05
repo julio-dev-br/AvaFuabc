@@ -11,13 +11,13 @@ import type { MoverCardDTO } from './dtos/mover-card.dto';
 export class KanbanController {
   constructor(private readonly kanbanService: KanbanService) { }
 
-  // 1. Obter o quadro completo: GET /kanban
+  // Obter o quadro completo: GET /kanban
   @Get()
   async obterQuadro(@CurrentUser() user: { id: number }) {
     return this.kanbanService.obterQuadro(user.id);
   }
 
-  // 2. Criar uma nova coluna: POST /kanban/colunas
+  // Criar uma nova coluna: POST /kanban/colunas
   @Post('colunas')
   async criarColuna(@CurrentUser() user: { id: number }, @Body() body: CriarColunaDTO) {
     return this.kanbanService.criarColuna(user.id, body);
@@ -29,7 +29,7 @@ export class KanbanController {
     return this.kanbanService.criarCard(user.id, body);
   }
 
-  // 4. Mover ou reordenar um cartão: PATCH /kanban/cards/:id/mover
+  // Mover ou reordenar um cartão: PATCH /kanban/cards/:id/mover
   @Patch('cards/:id/mover')
   async moverCard(
     @CurrentUser() user: { id: number },
@@ -39,13 +39,12 @@ export class KanbanController {
     return this.kanbanService.moverCard(user.id, cardId, body);
   }
 
-  //  PATCH /notificacoes/../admin/mover-card/:id
+  //  Mover card
   @Patch('admin/mover-card/:id')
   async moverCardAdmin(
     @Param('id', ParseIntPipe) cardId: number,
     @Body() corpo: { colunaId: number; ordem: number },
   ) {
-    // Agora chama o motor exclusivo do administrador livre de travas de segurança de aluno!
     return this.kanbanService.moverCardAdmin(cardId, corpo);
   }
 
@@ -57,10 +56,9 @@ export class KanbanController {
     return this.kanbanService.atualizarCardReal(id, dados);
   }
 
-  // ENDPOINT DE EXCLUSÃO DEFINITIVA DO CARD VIA PRISMA
+  // Exclusão definitiva do card via prisma
   @Delete('cards/:id')
   async excluirCard(@Param('id', ParseIntPipe) id: number) {
     return this.kanbanService.excluirCardReal(id);
   }
-
 }

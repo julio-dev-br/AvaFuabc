@@ -10,7 +10,6 @@ export class TreinamentoService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/treinamentos`;
 
-  // 🔒 CENTRALIZADOR DE SEGURANÇA: Garante a fiação do JWT e Content-Type padrão para todas as chamadas
   private obterHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({ 
@@ -19,7 +18,6 @@ export class TreinamentoService {
     });
   }
 
-  // 🔒 AUXILIAR PARA UPLOAD (FormData não pode receber Content-Type JSON manual)
   private obterHeadersUpload(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
@@ -62,8 +60,13 @@ export class TreinamentoService {
     return this.http.post(`${this.apiUrl}/admin/aulas`, aula, { headers: this.obterHeaders() });
   }
 
-  vincularPublico(vinculo: { treinamentoId: number; tipo: string; referenciaId: number }): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/vincular-publico`, vinculo, { headers: this.obterHeaders() });
+  vincularPublico(payload: { treinamentoId: number; tipo: string; referenciaId: string | number }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/treinamentos/admin/vincular-publico`, payload, { headers: this.obterHeaders() });
+  }
+
+  // 🗑️ EXCLUSIVO DO GESTOR: Dispara o comando HTTP DELETE para detonar o vínculo no PostgreSQL
+  removerVinculoPublico(vinculoId: number): Observable<any> {
+    return this.http.delete<any>(`${environment.apiUrl}/treinamentos/admin/vincular-publico/${vinculoId}`, { headers: this.obterHeaders() });
   }
 
   obterMetricasAnaliticas(): Observable<any> {
@@ -90,9 +93,22 @@ export class TreinamentoService {
     return this.http.delete<any>(`${environment.apiUrl}/materiais/${materialId}`, { headers: this.obterHeaders() });
   }
 
-  // 💼 ROTA DO GESTOR: Busca a lista de projetos apontando para o endpoint em português do NestJS
   obterProjetosAdmin(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/admin/projetos`, { headers: this.obterHeaders() || this.obterHeaders() });
+    return this.http.get<any[]>(`${this.apiUrl}/admin/projetos`, { headers: this.obterHeaders() });
   }
 
+  // 🏢 1. BUSCA AS EMPRESAS/COMPLEXOS DO MOCK DO PROTHEUS
+  obterEmpresasERP(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/empresas`, { headers: this.obterHeaders() });
+  }
+
+  // 🏥 2. BUSCA AS UNIDADES/FILIAIS FILTRADAS POR EMPRESA (ENCADEAMENTO REATIVO)
+  obterUnidadesERP(empresaId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/unidades?empresaId=${empresaId}`, { headers: this.obterHeaders() });
+  }
+
+  // 📋 3. BUSCA OS CARGOS/FUNÇÕES REGULAMENTARES DO ERP
+  obterCargosERP(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/cargos`, { headers: this.obterHeaders() });
+  }
 }

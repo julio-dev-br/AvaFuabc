@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param, Delete } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { TreinamentoService } from './treinamento.service';
@@ -83,17 +83,21 @@ export class TreinamentoController {
     return this.treinamentosService.obterConteudoCurso(Number(id));
   }
 
-  // 💼 ROTA DO GESTOR: GET /treinamentos/admin/projetos
   @Get('admin/projetos')
   async obterProjetosAdmin() {
-    return this.treinamentosService.listarProjetosAdmin(); // Ajuste o nome conforme o seu construtor
+    return this.treinamentosService.listarProjetosAdmin();
   }
 
-  // 💼 ROTA DO GESTOR: GET /treinamentos/admin/metricas
+
   @Get('admin/metricas')
   async obterMetricasAnaliticas() {
-    // 🌟 A CORREÇÃO: Mude de obterMetricasPainel() para obterMetricasAnaliticas()
     return this.treinamentosService.obterMetricasAnaliticas();
   }
+
+  @Delete('admin/vincular-publico/:id')
+  async removerVinculoPublico(@Param('id') id: string) {
+    return this.treinamentosService.removerVinculoPublico(Number(id));
+  }
+
 
 }

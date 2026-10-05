@@ -5,6 +5,6 @@ import { GeminiController } from './gemini.controller';
 @Module({
   controllers: [GeminiController],
   providers: [GeminiService],
-  exports: [GeminiService], // 🌟 O SEGREDO DO CHAVEAMENTO: Permite que outros módulos usem a IA se quiserem!
+  exports: [GeminiService], 
 })
 export class GeminiModule {}

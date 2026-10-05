@@ -2,10 +2,10 @@ import { Controller, Get, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs
 import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('integracao/protheus')
-@UseGuards(AuthGuard) // Mantém o padrão ouro de segurança que você adotou
+@UseGuards(AuthGuard) 
 export class ProtheusMockController {
 
-  // 🏢 SIMULAÇÃO: Retorna a lista de Empresas/Filiais cadastradas no ERP
+  // Retorna a lista de Empresas/Filiais cadastradas no ERP
   @Get('empresas')
   @HttpCode(HttpStatus.OK)
   async obterEmpresasERP() {
@@ -16,7 +16,7 @@ export class ProtheusMockController {
     ];
   }
 
-  // 🏥 SIMULAÇÃO: Retorna as Unidades/Filiais filtradas pela empresa selecionada
+  // Retorna as Unidades/Filiais filtradas pela empresa selecionada
   @Get('unidades')
   @HttpCode(HttpStatus.OK)
   async obterUnidadesERP(@Query('empresaId') empresaId: string) {
@@ -31,7 +31,7 @@ export class ProtheusMockController {
     ];
   }
 
-  // 📋 SIMULAÇÃO: Retorna os Cargos ou Departamentos para refinar o Público-Alvo (Passo 5)
+  // Retorna os Cargos ou Departamentos para refinar o Público-Alvo (Passo 5)
   @Get('cargos')
   @HttpCode(HttpStatus.OK)
   async obterCargosERP() {

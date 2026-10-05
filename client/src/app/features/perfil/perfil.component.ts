@@ -149,9 +149,7 @@ export class PerfilComponent implements OnInit, AfterViewInit {
         this.usuario.empresa = dados.empresa;
         this.usuario.unidade = dados.unidade;
         this.usuario.cargo = dados.cargo;
-        if (dados.avatarUrl) {
-          this.usuario.avatarUrl = dados.avatarUrl;
-        }
+        this.usuario.avatarUrl = dados.avatarUrl ? dados.avatarUrl : 'assets/default-avatar.jpg';
       },
       error: (err) => console.error('Erro ao carregar dados cadastrais do Postgres:', err)
     });

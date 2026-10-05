@@ -152,8 +152,7 @@ export class UserController {
       id: usuario.id,
       nome: usuario.name || 'Colaborador',
       email: usuario.email,
-      avatarUrl: usuario.avatar_url || 'assets/default-avatar.png',
-      // Mapeia os códigos de BigInt vindos do Protheus de forma amigável
+      avatarUrl: usuario.avatar_url || 'assets/default-avatar.jpg',
       empresa: usuario.empresa_id ? `Empresa ${usuario.empresa_id.toString()}` : 'Fundação ABC',
       unidade: usuario.unidade_id ? `Unidade ${usuario.unidade_id.toString()}` : 'Hospital Mário Covas',
       cargo: usuario.cargo_id ? `Cargo ${usuario.cargo_id.toString()}` : 'Colaborador'

@@ -27,8 +27,8 @@ export const routes: Routes = [
       { path: 'dashboard/forum/aula/:id', component: ForumComponent, data: { breadcrumb: 'Fórum Técnico', scope: 'aluno' } },
       { path: 'dashboard/perfil', component: PerfilComponent, data: { breadcrumb: 'Meu Perfil', scope: 'aluno' } },
 
-      { path: 'admin', redirectTo: 'admin/bi', pathMatch: 'full' },
-      { path: 'admin/bi', component: AdminDashboardComponent, data: { breadcrumb: 'Dashboard de BI', scope: 'admin', aba: 'bi' } },
+      { path: 'admin', redirectTo: 'admin/dashboard', pathMatch: 'full' },
+      { path: 'admin/dashboard', component: AdminDashboardComponent, data: { breadcrumb: 'Dashboard', scope: 'admin', aba: 'dashboard' } },
       { path: 'admin/cadastro', component: AdminDashboardComponent, data: { breadcrumb: 'Fábrica de Conteúdos', scope: 'admin', aba: 'cadastro' } },
       { path: 'admin/comunicados', component: AdminDashboardComponent, data: { breadcrumb: 'Gestão de Comunicados', scope: 'admin', aba: 'comunicados' } },
       { path: 'admin/usuarios', component: AdminDashboardComponent, data: { breadcrumb: 'Perfis de Acesso', scope: 'admin', aba: 'usuarios' } },

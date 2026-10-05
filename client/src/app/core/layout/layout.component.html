@@ -21,7 +21,6 @@
     </div>
 </div>
 }
-
 <div
     style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
     <aside class="sidebar-container" [class.colapsada]="sidebarColapsada" [class.aberta-mobile]="menuMobileAberto"
@@ -87,12 +86,12 @@
             }
             }
             @if (estaNoPainelAdmin()) {
-            <a mat-button routerLink="/admin/bi" routerLinkActive="active-saas-link"
+            <a mat-button routerLink="/admin/dashboard" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Dashboard' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">insights</mat-icon>
                 @if (!sidebarColapsada) { <span
-                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Dashboard BI</span> }
+                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Dashboard</span> }
             </a>
             <a mat-button routerLink="/admin/cadastro" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Gerenciar Cursos' : ''" matTooltipPosition="right"
@@ -146,7 +145,7 @@
                 style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s; min-height: 52px;"
                 onmouseover="this.style.backgroundColor='#f8fafc'"
                 onmouseout="this.style.backgroundColor='transparent'">
-                <img [src]="usuario.avatarUrl || 'assets/default-avatar.png'" alt="Avatar"
+                <img [src]="usuario.avatarUrl || 'assets/default-avatar.jpg'" alt="Avatar"
                     style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #003366; flex-shrink: 0;">
                 @if (!sidebarColapsada) {
                 <div

@@ -18,7 +18,6 @@ import { AdminTabService } from '../services/admin-tab.service';
 import { LayoutService } from '../services/layout.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-
 @Component({
   selector: 'app-layout',
   standalone: true,
@@ -50,9 +49,7 @@ export class LayoutComponent implements OnInit {
 
   // Propriade reativa que guardará os pedaços do nosso Breadcrumb
   breadcrumbs: Array<{ texto: string, url: string }> = [];
-
   notificacoes: any[] = [];
-
   // Objeto central do usuário carregado direto do Postgres
   usuario: any = {
     nome: 'Carregando...',
@@ -66,49 +63,78 @@ export class LayoutComponent implements OnInit {
   ngOnInit(): void {
     this.carregarDadosPerfilReal();
     this.carregarNotificacoes();
-
-    // ESCUTA REATIVA DO BREADCRUMB: Atualiza a trilha automaticamente a cada clique!
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.gerarBreadcrumbs();
     });
 
-    // Gera o primeiro breadcrumb logo no primeiro boot da página
     this.gerarBreadcrumbs();
   }
-
-  // Mapeia matematicamente a URL do navegador em caminhos amigáveis e corporativos
   private gerarBreadcrumbs(): void {
-    const urlAtual = this.router.url; // Pega ex: "/dashboard/cursos"
-    const partes = urlAtual.split('/').filter(p => p && p !== 'dashboard'); // Remove vazios e a raiz
+    const urlAtual = this.router.url; // Pega ex: "/dashboard/forum/aula/12" ou "/dashboard/quiz/aula/5"
 
-    // Todo breadcrumb sempre começa na Home do Portal
-    this.breadcrumbs = [{ texto: 'Portal do Aluno', url: '/dashboard' }];
+    const ehAdmin = urlAtual.includes('/admin');
 
-    let urlAcumulada = '/dashboard';
+    if (ehAdmin) {
+      const partes = urlAtual.split('/').filter(p => p && p !== 'dashboard' && p !== 'admin');
+      this.breadcrumbs = [{ texto: 'Painel Admin', url: '/admin/dashboard' }];
+      let urlAcumulada = '/admin';
 
-    partes.forEach((parte, index) => {
-      // Ignora parâmetros numéricos de ID (como o ID do curso /curso/12) para não poluir
-      if (isNaN(Number(parte))) {
-        urlAcumulada += `/${parte}`;
+      partes.forEach((parte) => {
+        if (isNaN(Number(parte))) {
+          urlAcumulada += `/${parte}`;
+          let textoTraduzido = parte.charAt(0).toUpperCase() + parte.slice(1);
+          if (parte === 'cadastro') textoTraduzido = 'Fábrica de Conteúdos';
+          if (parte === 'dashboard') textoTraduzido = 'Indicadores';
+          if (parte === 'comunicados') textoTraduzido = 'Gestão de Comunicados';
+          if (parte === 'usuarios') textoTraduzido = 'Perfis de Acesso';
+          if (parte === 'projetos') textoTraduzido = 'Projetos Kanban';
+          if (parte === 'chat') textoTraduzido = 'Chat Central (RH)';
 
-        // Traduz o termo da URL para um nome comercial elegante da Fundação ABC
-        let textoTraduzido = parte.charAt(0).toUpperCase() + parte.slice(1);
-        if (parte === 'cursos') textoTraduzido = 'Meus Cursos';
-        if (parte === 'progresso') textoTraduzido = 'Meu Progresso';
-        if (parte === 'kanban') textoTraduzido = 'Quadro de Estudos';
-        if (parte === 'perfil') textoTraduzido = 'Central da Conta';
-        if (parte === 'forum') textoTraduzido = 'Fórum de Dúvidas';
-        if (parte === 'quiz') textoTraduzido = 'Avaliação';
-        if (parte === 'curso') textoTraduzido = 'Treinamento';
+          this.breadcrumbs.push({ texto: textoTraduzido, url: urlAcumulada });
+        }
+      });
+    } else {
+      this.breadcrumbs = [{ texto: 'Portal do Aluno', url: '/dashboard' }];
+      // Quebra todas as partes da URL (ex: ['', 'dashboard', 'forum', 'aula', '12'])
+      const segmentos = urlAtual.split('/').filter(p => p);
+      const idString = segmentos.find(s => !isNaN(Number(s)));
+      const idNum = idString ? Number(idString) : null;
 
-        this.breadcrumbs.push({ texto: textoTraduzido, url: urlAcumulada });
+      if (idNum && (urlAtual.includes('/forum/aula') || urlAtual.includes('/quiz/aula'))) {
+        this.breadcrumbs.push({
+          texto: 'Assistir Aula',
+          url: `/dashboard/curso/${idNum}`
+        });
+
+        const termoFinal = urlAtual.includes('/forum/aula') ? 'Fórum de Dúvidas' : 'Avaliação Regulamentar';
+        this.breadcrumbs.push({
+          texto: termoFinal,
+          url: urlAtual // Mantém a URL cheia por segurança
+        });
+
+      } else {
+        const partes = urlAtual.split('/').filter(p => p && p !== 'dashboard');
+        let urlAcumulada = '/dashboard';
+
+        partes.forEach((parte) => {
+          if (isNaN(Number(parte))) {
+            urlAcumulada += `/${parte}`;
+
+            let textoTraduzido = parte.charAt(0).toUpperCase() + parte.slice(1);
+            if (parte === 'cursos') textoTraduzido = 'Meus Cursos';
+            if (parte === 'progresso') textoTraduzido = 'Meu Progresso';
+            if (parte === 'kanban') textoTraduzido = 'Quadro de Estudos';
+            if (parte === 'perfil') textoTraduzido = 'Central da Conta';
+
+            this.breadcrumbs.push({ texto: textoTraduzido, url: urlAcumulada });
+          }
+        });
       }
-    });
+    }
   }
 
-  // DICIONE ESTE MÉTODO EXATAMENTE AQUI DENTRO DO SEU LAYOUT_COMPONENT
   marcarLida(id: number): void {
     this.notificationService.marcarComoLida(id).subscribe({
       next: () => {
@@ -120,13 +146,10 @@ export class LayoutComponent implements OnInit {
       }
     });
   }
-
-
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
-
   carregarDadosPerfilReal(): void {
     this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
       next: (dados) => {
@@ -139,14 +162,12 @@ export class LayoutComponent implements OnInit {
       error: (err) => console.error('Erro no layout master ao buscar usuário:', err)
     });
   }
-
   carregarNotificacoes(): void {
     this.notificationService.buscarNaoLidas().subscribe({
       next: (dados: any[]) => this.notificacoes = dados,
       error: (err) => console.error('Erro ao carregar notificações no layout:', err)
     });
   }
-
   estaNoPainelAdmin(): boolean {
     return this.router.url.includes('/admin');
   }
@@ -159,14 +180,11 @@ export class LayoutComponent implements OnInit {
       // Se for Mobile, abre e fecha o menu flutuante por completo
       this.menuMobileAberto = !this.menuMobileAberto;
     }
-    console.log(`=== 🧭 SIDEBAR STATUS: Colapsada: ${this.sidebarColapsada} | Mobile Aberto: ${this.menuMobileAberto} ===`);
   }
-
   isAdmin(): boolean {
     const role = this.authService.getUserRole();
     return role === 'admin' || role === 'manager';
   }
-
   logout(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);
