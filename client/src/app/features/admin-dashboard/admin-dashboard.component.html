@@ -520,10 +520,9 @@
           <p style="margin: 0; color: #64748b; font-size: 13px;">Selecione quais escopos e estruturas do ERP Protheus de
             RH serão matriculados compulsoriamente neste treinamento.</p>
         </div>
-
         <div
           style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; width: 100%; box-sizing: border-box;">
-          <mat-form-field appearance="outline" style="width: 180px;" class="compact-form">
+          <mat-form-field appearance="outline" style="width: 300px;" class="compact-form">
             <mat-label>Tipo de Vínculo</mat-label>
             <mat-select [(ngModel)]="tipoVinculoSelecionado" (selectionChange)="idReferenciaSelecionado = null">
               <mat-option value="EMPRESA">🏢 Empresa</mat-option>
@@ -544,6 +543,16 @@
           </mat-form-field>
           }
           @if (tipoVinculoSelecionado === 'UNIDADE') {
+          <mat-form-field appearance="outline" style="width: 220px;" class="compact-form">
+            <mat-label>Empresa Matriz</mat-label>
+            <mat-select (selectionChange)="aoMudarEmpresa($event.value)">
+              @for (emp of listaEmpresas; track emp.id) {
+              <mat-option [value]="emp.id">{{ emp.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          }
+          @if (tipoVinculoSelecionado === 'UNIDADE') {
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Hospital / Unidade</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado" [disabled]="listaUnidades.length === 0">
@@ -557,11 +566,13 @@
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Setor / Departamento</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado">
-              <mat-option value="100">Enfermagem Geral</mat-option>
-              <mat-option value="101">Medicina Preventiva</mat-option>
+              @for (depto of listaDepartamentos; track depto.id) {
+              <mat-option [value]="depto.id">{{ depto.nome }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           }
+
           @if (tipoVinculoSelecionado === 'CARGO') {
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Cargo / Função</mat-label>
@@ -576,16 +587,17 @@
           <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;" class="compact-form">
             <mat-label>Selecione o Funcionário</mat-label>
             <mat-select [(ngModel)]="idReferenciaSelecionado">
-              <mat-option value="999">Julio Valente (Mtr: 1234)</mat-option>
-              <mat-option value="888">Colaborador Teste ABC</mat-option>
+              @for (user of listaUsuarios; track user.id) {
+              <mat-option [value]="user.id">{{ user.nome }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           }
           <button mat-flat-button
-            style="background-color: #003366 !important; color: white; height: 38px; border-radius: 6px; font-weight: 600; transition: all 0.2s;"
+            style="background-color: #003366 !important; color: white; height: 51px; border-radius: 6px; font-weight: 600; transition: all 0.2s; margin-bottom: 22px;"
             [disabled]="!idReferenciaSelecionado" (click)="salvarVinculoPublico()">
             <mat-icon
-              style="font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">add</mat-icon>
+              style="font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-right: 4px;">add</mat-icon>
             Vincular Regra
           </button>
         </div>

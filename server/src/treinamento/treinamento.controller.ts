@@ -1,35 +1,26 @@
-import { Controller, Get, Post, Body, UseGuards, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param, Delete, Req } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { TreinamentoService } from './treinamento.service';
-
-// Importações dos novos mecanismos de segurança
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/auth/roles.enum';
 
 @Controller('treinamentos')
-@UseGuards(AuthGuard) // Regra global: precisa estar logado para qualquer rota aqui
+@UseGuards(AuthGuard)
 export class TreinamentoController {
   constructor(private readonly treinamentosService: TreinamentoService) { }
 
-  // 1. ROTA DO ALUNO: Buscar cursos liberados (Livre para qualquer Role logada)
   @Get('disponiveis')
   async getDisponiveis(@CurrentUser() user: any) {
     return this.treinamentosService.findAvailableForUser(user);
   }
 
-  //  ROTA DA GAMIFICAÇÃO: GET /treinamentos/aluno/gamificacao
   @Get('aluno/gamificacao')
   async obterGamificacao(@CurrentUser() user: any) {
     return this.treinamentosService.obterDadosGamificacao(user.id);
   }
 
-  // =========================================================================
-  //  ROTAS ADMINISTRATIVAS: Protegidas por barreira dupla de cargo (Roles)
-  // =========================================================================
-
-  // 2. Cadastra um novo Treinamento Base: POST /treinamentos/admin/criar
   @Post('admin/criar')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
@@ -37,7 +28,6 @@ export class TreinamentoController {
     return this.treinamentosService.criar(body);
   }
 
-  // 3. Cadastra un Módulo dentro de um Treinamento: POST /treinamentos/admin/modulos
   @Post('admin/modulos')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
@@ -45,18 +35,13 @@ export class TreinamentoController {
     return this.treinamentosService.criarModulo(body);
   }
 
-  // 4. Cadastra uma Aula dentro de um Módulo: POST /treinamentos/admin/aulas
   @Post('admin/aulas')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
-  async criarAula(@Body() body: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) {
-
-    // ✅ LIMPO E SEGURO: Sem marretas de texto duplicadas! 
-    // Apenas repassa o pacote com a URL perfeita tratada pelo Angular direto para o serviço salvar
+  async criarAula(@Body() body: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) { 
     return this.treinamentosService.criarAula(body);
   }
 
-  // Adicione esta rota no bloco administrativo do seu TreinamentoController:
   @Post('admin/vincular-publico')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
@@ -64,16 +49,15 @@ export class TreinamentoController {
     return this.treinamentosService.vincularPublico(body);
   }
 
-  //  NOVA ROTA DE BI: GET /treinamentos/admin/metricas
   @Get('admin/metricas')
   @UseGuards(RolesGuard)
-  @Roles('admin', 'manager') // Apenas gestores e admins conseguem ler os relatórios
+  @Roles('admin', 'manager') 
   async obterMetricasAdmin() {
     return this.treinamentosService.obterMetricasPainel();
   }
 
   @Get('gerencial')
-  @Roles(Role.ADMIN, Role.MANAGER) // Apenas administradores e gerentes acessam o catálogo gerencial
+  @Roles(Role.ADMIN, Role.MANAGER) 
   async obterCatalogoGerencial() {
     return this.treinamentosService.listarTreinamentosGerencial();
   }
@@ -88,7 +72,6 @@ export class TreinamentoController {
     return this.treinamentosService.listarProjetosAdmin();
   }
 
-
   @Get('admin/metricas')
   async obterMetricasAnaliticas() {
     return this.treinamentosService.obterMetricasAnaliticas();
@@ -99,5 +82,11 @@ export class TreinamentoController {
     return this.treinamentosService.removerVinculoPublico(Number(id));
   }
 
+    @Post('admin/publicar/:id')
+  async publicarTreinamentoComKanban(@Param('id') id: string, @Req() req: any) {
+    // Captura o ID do administrador direto do payload do JWT pelo AuthGuard
+    const usuarioId = req.user.id; 
+    return this.treinamentosService.finalizarEPublicarTreinamento(Number(id), usuarioId);
+  }
 
 }

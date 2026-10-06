@@ -12,7 +12,7 @@ export class TreinamentoService {
 
   private obterHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
-    return new HttpHeaders({ 
+    return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
@@ -64,7 +64,6 @@ export class TreinamentoService {
     return this.http.post<any>(`${environment.apiUrl}/treinamentos/admin/vincular-publico`, payload, { headers: this.obterHeaders() });
   }
 
-  // 🗑️ EXCLUSIVO DO GESTOR: Dispara o comando HTTP DELETE para detonar o vínculo no PostgreSQL
   removerVinculoPublico(vinculoId: number): Observable<any> {
     return this.http.delete<any>(`${environment.apiUrl}/treinamentos/admin/vincular-publico/${vinculoId}`, { headers: this.obterHeaders() });
   }
@@ -97,18 +96,33 @@ export class TreinamentoService {
     return this.http.get<any[]>(`${this.apiUrl}/admin/projetos`, { headers: this.obterHeaders() });
   }
 
-  // 🏢 1. BUSCA AS EMPRESAS/COMPLEXOS DO MOCK DO PROTHEUS
   obterEmpresasERP(): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/empresas`, { headers: this.obterHeaders() });
   }
 
-  // 🏥 2. BUSCA AS UNIDADES/FILIAIS FILTRADAS POR EMPRESA (ENCADEAMENTO REATIVO)
   obterUnidadesERP(empresaId: string): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/unidades?empresaId=${empresaId}`, { headers: this.obterHeaders() });
   }
 
-  // 📋 3. BUSCA OS CARGOS/FUNÇÕES REGULAMENTARES DO ERP
   obterCargosERP(): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/cargos`, { headers: this.obterHeaders() });
+  }
+
+  obterDepartamentosERP(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/departamentos`, {
+      headers: this.obterHeaders()
+    });
+  }
+
+  //BUSCA OS COLABORADORES DO ERP MOCK PARA MATRÍCULA AVULSA
+  obterFuncionariosERP(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/funcionarios`, {
+      headers: this.obterHeaders()
+    });
+  }
+
+  // Dispara a rota do NestJS para ativar o curso e criar o card no Kanban Admin
+  publicarTreinamentoComKanban(treinamentoId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/admin/publicar/${treinamentoId}`, {}, { headers: this.obterHeaders() });
   }
 }

@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class TreinamentoService {
   constructor(private prisma: PrismaService) { }
 
-  // 1. Busca treinamentos disponíveis baseados nas regras de negócio de RH
+  // Busca treinamentos disponíveis baseados nas regras de negócio de RH
   async findAvailableForUser(user: any) {
     const filtrosPublico: any[] = [];
 
@@ -62,7 +62,7 @@ export class TreinamentoService {
     });
   }
 
-  // 2. Grava um novo Treinamento Base no banco
+  // Grava um novo Treinamento Base no banco
   async criar(data: { titulo: string; descricao?: string; carga_horaria: number; obrigatorio: boolean }) {
     return this.prisma.treinamento.create({
       data: {
@@ -76,7 +76,7 @@ export class TreinamentoService {
     });
   }
 
-  // 3. Grava um Módulo associado ao Treinamento
+  // Grava um Módulo associado ao Treinamento
   async criarModulo(data: { treinamentoId: number; titulo: string; ordem: number }) {
     return this.prisma.modulo.create({
       data: {
@@ -87,17 +87,12 @@ export class TreinamentoService {
     });
   }
 
-  // 4. Grava uma Aula vinculada a um Módulo programático
+  // Grava uma Aula vinculada a um Módulo programático
   async criarAula(data: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) {
     const urlCrua = data.videoUrl ? data.videoUrl.trim() : '';
-
-    // A MARRETA DO POSTGRESQL: Pega os últimos 11 caracteres do link de forma obrigatória!
     const idVideoPuro = urlCrua.slice(-11);
+    const urlFinal = 'https://youtube.com' + idVideoPuro.trim();
 
-    // Injetado o 'www.', a barra '/' e o 'embed/' obrigatório para o player rodar!
-    const urlFinal = 'https://www.youtube.com/embed/' + idVideoPuro.trim();
-
-    // Persiste fisicamente no contêiner do PostgreSQL
     return this.prisma.aula.create({
       data: {
         modulo_id: Number(data.moduloId),
@@ -109,48 +104,74 @@ export class TreinamentoService {
     });
   }
 
-  // 5. Vincula o Treinamento a um público do RH (Essencial para o curso aparecer para os alunos)
+  // Vincula a regra de público-alvo e matricula compulsoriamente os funcionários enquadrados!
   async vincularPublico(data: {
     treinamentoId: number;
     tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO';
     referenciaId: number
   }) {
-    return this.prisma.treinamentoPublico.create({
+    // 1. Persiste fisicamente a nova regra organizacional na tabela do Postgres
+    const novaRegra = await this.prisma.treinamentoPublico.create({
       data: {
         treinamento_id: Number(data.treinamentoId),
         tipo: data.tipo,
         referencia_id: Number(data.referenciaId)
       }
     });
+
+    // 2. Mapeamento dinâmico para buscar os colaboradores baseados no tipo de escopo selecionado
+    const queryFiltroUser: any = { ativo: true };
+    const refIdBigInt = BigInt(data.referenciaId);
+
+    if (data.tipo === 'EMPRESA') queryFiltroUser.empresa_id = refIdBigInt;
+    if (data.tipo === 'UNIDADE') queryFiltroUser.unidade_id = refIdBigInt;
+    if (data.tipo === 'DEPARTAMENTO') queryFiltroUser.departamento_id = refIdBigInt;
+    if (data.tipo === 'CARGO') queryFiltroUser.cargo_id = refIdBigInt;
+    if (data.tipo === 'USUARIO') queryFiltroUser.id = Number(data.referenciaId);
+
+    // 3. Executa a varredura reativa caçando a Ana, o Carlos, o Roberto e os demais da regra
+    const usuariosAfetados = await this.prisma.user.findMany({
+      where: queryFiltroUser,
+      select: { id: true }
+    });
+
+    // 4. Injeta as matrículas em lote de forma resiliente respeitando as chaves únicas do Postgres
+    for (const usuario of usuariosAfetados) {
+      await this.prisma.matricula.upsert({
+        where: {
+          usuario_id_treinamento_id: {
+            usuario_id: usuario.id,
+            treinamento_id: Number(data.treinamentoId)
+          }
+        },
+        update: {}, // Se já existir matrícula ativa, mantém intacto o histórico do aluno
+        create: {
+          usuario_id: usuario.id,
+          treinamento_id: Number(data.treinamentoId),
+          status: 'EM_ANDAMENTO',
+          progresso: 0
+        }
+      });
+    }
+    return novaRegra;
   }
 
-  // 6 BI: Agrega contagens e dados estatísticos
+  // Agrega contagens e dados estatísticos
   async obterMetricasPainel() {
-    // 1. Contagens rápidas de volume para os cards de resumo
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
-
-    // 2. Agrupamento para o Gráfico de Pizza (Status de Conformidade das Matrículas)
     const matriculasConcluidas = await this.prisma.matricula.count({ where: { progresso: 100 } });
     const matriculasEmAndamento = await this.prisma.matricula.count({ where: { progresso: { lt: 100 } } });
 
-    // 3. Consulta estruturada para o Gráfico de Barras (Ranking dos Cursos Mais Acessados)
     const rankingsCursos = await this.prisma.treinamento.findMany({
       where: { ativo: true },
       select: {
         titulo: true,
-        _count: {
-          select: { matriculas: true }
-        }
+        _count: { select: { matriculas: true } }
       },
-      orderBy: {
-        matriculas: { _count: 'desc' }
-      },
+      orderBy: { matriculas: { _count: 'desc' } },
       take: 5
     });
-
-    const labelsRanking = rankingsCursos.map(c => c.titulo);
-    const dadosRanking = rankingsCursos.map(c => c._count.matriculas);
 
     return {
       cards: {
@@ -163,23 +184,19 @@ export class TreinamentoService {
         labels: ['Concluídos', 'Em Andamento']
       },
       graficoBarras: {
-        labels: labelsRanking,
-        dados: dadosRanking
+        labels: rankingsCursos.map(c => c.titulo),
+        dados: rankingsCursos.map(c => c._count.matriculas)
       }
     };
   }
 
-  // PAINEL DE BI UNIFICADO: Consolida métricas antigas e novos gráficos direto do Postgres via Prisma
+  // Consolida métricas antigos e novos gráficos direto do Postgres via Prisma
   async obterMetricasAnaliticas() {
-    // Contagens rápidas de volume globais para os cards de KPI superiores
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
-
-    // 2. Gráfico de Pizza: Progresso real das matrículas (Concluídos vs Em Andamento)
     const matriculasConcluidas = await this.prisma.matricula.count({ where: { progresso: 100 } });
     const matriculasEmAndamento = await this.prisma.matricula.count({ where: { progresso: { lt: 100 } } });
 
-    // Consulta os 5 cursos mais acessados na base
     const rankingsCursos = await this.prisma.treinamento.findMany({
       where: { ativo: true },
       select: {
@@ -190,7 +207,6 @@ export class TreinamentoService {
       take: 5
     });
 
-    // HISTÓRICO DE MATRÍCULAS (Linha): Volume acumulado na base
     const totalMatriculasBanco = await this.prisma.matricula.count();
     const dadosHistoricoAcumulado = [
       Math.round(totalMatriculasBanco * 0.2),  // Jan
@@ -200,10 +216,9 @@ export class TreinamentoService {
       Math.round(totalMatriculasBanco * 0.8),  // Mai
       Math.round(totalMatriculasBanco * 0.9),  // Jun
       Math.round(totalMatriculasBanco * 0.95), // Jul
-      totalMatriculasBanco                     // Ago (Total atual da base!)
+      totalMatriculasBanco                     // Ago
     ];
 
-    //AUDITORIA DE HOSPITAIS (Barras Verticais): Cruza as matrículas com a lotação do usuário
     const todasMatriculas = await this.prisma.matricula.findMany({
       include: { user: true }
     }) as any[];
@@ -230,17 +245,10 @@ export class TreinamentoService {
       }
     });
 
-    const valoresConformidade = hospitaisFuabc.map(h => {
-      return h.total > 0 ? Math.round((h.concluidos / h.total) * 100) : 0;
-    });
-
-    // 6. Calcula a taxa de conformidade geral ponderada da Fundação ABC
+    const valoresConformidade = hospitaisFuabc.map(h => h.total > 0 ? Math.round((h.concluidos / h.total) * 100) : 0);
     const totalMatriculasGerais = matriculasConcluidas + matriculasEmAndamento;
-    const taxaConformidadeGeral = totalMatriculasGerais > 0
-      ? Math.round((matriculasConcluidas / totalMatriculasGerais) * 100)
-      : 0;
+    const taxaConformidadeGeral = totalMatriculasGerais > 0 ? Math.round((matriculasConcluidas / totalMatriculasGerais) * 100) : 0;
 
-    // 🔥 O RETORNO COMPLETO: Agora unifica todas as chaves exigidas pelo Angular!
     return {
       cards: {
         totalTreinamentos,
@@ -255,7 +263,6 @@ export class TreinamentoService {
         labels: rankingsCursos.map(c => c.titulo),
         dados: rankingsCursos.map(c => c._count.matriculas)
       },
-      // 🌟 AS DUAS CHAVES NOVAS QUE FALTAVAM NO SEU SEU ARQUIVO ANTIGO:
       graficoLinhaMatriculas: dadosHistoricoAcumulado,
       graficoBarrasUnidades: {
         labels: hospitaisFuabc.map(h => h.nome),
@@ -264,22 +271,16 @@ export class TreinamentoService {
     };
   }
 
-  // 7 GAMIFICAÇÃO: Calcula o Ranking de Alunos e Medalhas via PostgreSQL
+  // Calcula o Ranking de Alunos e Medalhas via PostgreSQL
   async obterDadosGamificacao(usuarioId: number) {
     const rankingGeral = await this.prisma.user.findMany({
-      select: {
-        id: true,
-        name: true
-      },
+      select: { id: true, name: true },
       take: 5
     });
 
     const rankingFormatado = await Promise.all(
       rankingGeral.map(async (u) => {
-        const contagemRespostas = await this.prisma.quizResponse.count({
-          where: { usuario_id: u.id }
-        });
-
+        const contagemRespostas = await this.prisma.quizResponse.count({ where: { usuario_id: u.id } });
         return {
           nome: u.name || 'Usuário Sem Nome',
           pontuacao: contagemRespostas * 10,
@@ -289,14 +290,8 @@ export class TreinamentoService {
     );
 
     rankingFormatado.sort((a, b) => b.pontuacao - a.pontuacao);
-
-    const totalSuasRespostas = await this.prisma.quizResponse.count({
-      where: { usuario_id: usuarioId }
-    });
-
-    const suasMatriculas = await this.prisma.matricula.findMany({
-      where: { usuario_id: usuarioId }
-    });
+    const totalSuasRespostas = await this.prisma.quizResponse.count({ where: { usuario_id: usuarioId } });
+    const suasMatriculas = await this.prisma.matricula.findMany({ where: { usuario_id: usuarioId } });
 
     const medalhas = [
       {
@@ -335,14 +330,9 @@ export class TreinamentoService {
   async listarTreinamentosGerencial() {
     const treinamentos = await this.prisma.treinamento.findMany({
       orderBy: { id: 'desc' },
-      include: {
-        modulos: {
-          select: { id: true }
-        }
-      }
+      include: { modulos: { select: { id: true } } }
     });
 
-    // Formata o retorno para incluir a propriedade computada totalModulos que o HTML do Admin lê
     return treinamentos.map(t => ({
       ...t,
       totalModulos: t.modulos.length
@@ -359,10 +349,7 @@ export class TreinamentoService {
           include: {
             aulas: {
               orderBy: { ordem: 'asc' },
-              include: {
-                // 🌟 A fiação relacional que precisávamos para os PDFs pularem na tela do Aluno!
-                materiais: true
-              }
+              include: { materiais: true }
             }
           }
         }
@@ -370,36 +357,24 @@ export class TreinamentoService {
     });
   }
 
-  // PAINEL DO ADMIN: Lista todos os treinamentos/projetos com dados de auditoria estruturados
+  // Lista todos os treinamentos/projetos com dados de auditoria estruturados no Kanban Admin
   async listarProjetosAdmin() {
     const projetos = await this.prisma.treinamento.findMany({
       include: {
         kanban_cards: {
-          select: {
-            coluna_id: true,
-            coluna: {
-              select: {
-                titulo: true,
-                cor: true
-              }
-            }
+          include: {
+            coluna: true // 🌟 Traz a tabela de colunas acoplada para ler o título reativamente!
           }
         },
-        _count: {
-          select: {
-            modulos: true,
-            publicos: true
-          }
-        }
+        _count: { select: { modulos: true, publicos: true } }
       },
       orderBy: { id: 'desc' }
     });
 
-    // Envelopa o payload garantindo que as chaves fiquem no primeiro nível do objeto JSON
     return projetos.map(p => {
-      // 🌟 A VACINA: Captura com segurança o primeiro card do array se ele existir
+      // 🕵️‍♂️ A VACINA DO ÍNDICE: Captura o PRIMEIRO card do array de forma robusta e segura
       const temCard = p.kanban_cards && p.kanban_cards.length > 0;
-      const cardPrimeiro = temCard ? p.kanban_cards[0] : null;
+      const cardPrimeiro = temCard ? p.kanban_cards[0] : null; // ➔ [0] garante o objeto correto!
 
       return {
         id: p.id,
@@ -409,17 +384,17 @@ export class TreinamentoService {
         ativo: p.ativo,
         totalModulos: p._count.modulos,
         totalRegrasPublico: p._count.publicos,
-        // 🎨 Metadados de Gestão à Vista: Passa o ID real da coluna do card para o front ler!
-        estagioId: cardPrimeiro ? Number(cardPrimeiro.coluna_id) : 1, // Começa na coluna 1 se for novo
-        estagioNome: cardPrimeiro ? cardPrimeiro.coluna.titulo : '📌 Em Rascunho / Mapeamento',
-        estagioCor: cardPrimeiro ? cardPrimeiro.coluna.cor : '#dc2626'
+
+        // 🎨 Se o card físico existir no Postgres, ele lê dinamicamente as raias do quadro!
+        estagioId: cardPrimeiro ? Number(cardPrimeiro.coluna_id) : 1,
+        estagioNome: cardPrimeiro && cardPrimeiro.coluna ? cardPrimeiro.coluna.titulo : '📌 Em Rascunho / Mapeamento',
+        estagioCor: cardPrimeiro && cardPrimeiro.coluna ? cardPrimeiro.coluna.cor : '#dc2626'
       };
     });
   }
 
-  // 🗑️ EXCLUSIVO DO GESTOR: Deleta fisicamente uma regra de público-alvo (Lixeira Vermelha)
+  // Deleta fisicamente uma regra de público-alvo (Lixeira Vermelha)
   async removerVinculoPublico(vinculoId: number) {
-    // 1. Verifica se a regra de fato existe na base de dados antes de tentar a query
     const vinculoExistente = await this.prisma.treinamentoPublico.findUnique({
       where: { id: Number(vinculoId) },
     });
@@ -428,7 +403,6 @@ export class TreinamentoService {
       throw new NotFoundException('Esta regra de vínculo organizacional não foi localizada no sistema.');
     }
 
-    // 2. Executa a remoção física no banco relacional PostgreSQL
     await this.prisma.treinamentoPublico.delete({
       where: { id: Number(vinculoId) },
     });
@@ -439,5 +413,51 @@ export class TreinamentoService {
     };
   }
 
+  // Finaliza a esteira e força o card a nascer com coluna_id = 3
+  async finalizarEPublicarTreinamento(treinamentoId: number, usuarioId: number) {
+    // 1. Verifica se o curso de fato existe no Postgres antes de iniciar o processo
+    const curso = await this.prisma.treinamento.findUnique({
+      where: { id: Number(treinamentoId) }
+    });
 
+    if (!curso) {
+      throw new NotFoundException('Treinamento não localizado para fechamento de esteira.');
+    }
+
+    // 2. 🌟 A JOGADA SÊNIOR: Força o ID canônico 3 da raia de Publicados
+    const COLUNA_PUBLICADOS_ID = 3;
+
+    // 3. Captura a maior ordem atual dentro da coluna 3 para empilhar o card perfeitamente no final
+    const maiorOrdemCard = await this.prisma.kanbanCard.aggregate({
+      where: { coluna_id: COLUNA_PUBLICADOS_ID },
+      _max: { ordem: true }
+    });
+    const proximaOrdem = (maiorOrdemCard._max.ordem || 0) + 1;
+
+    // 4. TRANSACIONAL SUPREMO: Executa as atualizações em lote de forma 100% atômica no PostgreSQL
+    return this.prisma.$transaction(async (tx) => {
+      // Modifica o status do treinamento para ativo, liberando o catálogo dos alunos
+      const cursoAtualizado = await tx.treinamento.update({
+        where: { id: Number(treinamentoId) },
+        data: { ativo: true }
+      });
+
+      // Cria fisicamente o card de Gestão à Vista espetado com precisão matemática na coluna 3!
+      const novoCard = await tx.kanbanCard.create({
+        data: {
+          coluna_id: COLUNA_PUBLICADOS_ID, // ➔ Cravado no ID 3 de Publicados!
+          treinamento_id: cursoAtualizado.id, // 🌟 Amarração relacional do seu schema.prisma
+          titulo: cursoAtualizado.titulo,
+          descricao: cursoAtualizado.descricao || `Curso regulamentar publicado via Fábrica de Conteúdos.`,
+          ordem: proximaOrdem
+        }
+      });
+      return {
+        success: true,
+        treinamentoId: cursoAtualizado.id,
+        cardId: novoCard.id,
+        message: 'Esteira concluída com sucesso! Curso ativado e cartão inserido na coluna de Publicados.'
+      };
+    });
+  }
 }

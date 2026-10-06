@@ -128,6 +128,8 @@ export class AdminDashboardComponent implements OnInit {
   novaMensagemTutorText = '';
   isLoadingChats = false;
 
+  listaUsuarios: any[] = [];
+
   // Estados do Controle de Usuários (Aba 'usuarios')
   userDataSource = new MatTableDataSource<any>([]);
   isLoadingUsuarios = true;
@@ -213,7 +215,6 @@ export class AdminDashboardComponent implements OnInit {
   };
   public barChartData: ChartData<'bar'> = { labels: [], datasets: [{ data: [], label: 'Matrículas', backgroundColor: '#0284c7' }] };
 
-  //  CONFIGURAÇÃO DO GRÁFICO DE ADESÃO MENSAL (LINHA)
   public lineChartType: ChartType = 'line';
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -241,7 +242,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     ]
   };
-  // CONFIGURAÇÃO DO GRÁFICO DE CONFORMIDADE POR UNIDADE (BARRAS VERTICAIS)
   public unidadeBarChartType: ChartType = 'bar';
   public unidadeBarChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -503,9 +503,47 @@ export class AdminDashboardComponent implements OnInit {
     if (tipo === 'CARGO') {
       return this.listaCargos.find(c => String(c.id) === idProcurado)?.nome || `Cargo ID: ${idProcurado}`;
     }
+    if (tipo === 'DEPARTAMENTO') {
+      return this.listaDepartamentos.find(d => String(d.id) === idProcurado)?.nome || `Departamento ID: ${idProcurado}`;
+    }
 
-    // Fallbacks genéricos caso precise de Depto ou Usuário temporariamente
+    if (tipo === 'USUARIO') {
+      return this.listaUsuarios.find(u => String(u.id) === idProcurado)?.nome || `Funcionário ID: ${idProcurado}`;
+    }
+
     return `${tipo} ID: ${idProcurado}`;
+  }
+  carregarDadosOrigemProtheus(): void {
+    this.isLoadingCursos = true;
+
+    this.treinamentoService.obterEmpresasERP().subscribe({
+      next: (empresas) => {
+        this.listaEmpresas = empresas;
+        this.isLoadingCursos = false;
+      },
+      error: () => this.isLoadingCursos = false
+    });
+
+    this.treinamentoService.obterCargosERP().subscribe({
+      next: (cargos) => this.listaCargos = cargos,
+      error: (err) => console.error('Erro ao carregar cargos do ERP:', err)
+    });
+
+    this.treinamentoService.obterDepartamentosERP().subscribe({
+      next: (deptos) => this.listaDepartamentos = deptos,
+      error: (err) => console.error('Erro ao carregar departamentos dinâmicos do Protheus:', err)
+    });
+
+    this.treinamentoService.obterUnidadesERP('1000000000000002').subscribe({
+      next: (unidades) => this.listaUnidades = unidades,
+      error: (err) => console.error('Erro ao inicializar unidades:', err)
+    });
+
+    this.treinamentoService.obterFuncionariosERP().subscribe({
+      next: (users) => this.listaUsuarios = users,
+      error: (err) => console.error('Erro ao carregar funcionários do ERP:', err)
+    });
+
   }
   salvarVinculoPublico(): void {
     if (!this.idCursoCriado) {
@@ -545,25 +583,9 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-  carregarDadosOrigemProtheus(): void {
-    this.isLoadingCursos = true; // Reaproveita o indicador de carga para a UX
-
-    this.treinamentoService.obterEmpresasERP().subscribe({
-      next: (empresas) => {
-        this.listaEmpresas = empresas;
-        this.isLoadingCursos = false;
-      },
-      error: () => this.isLoadingCursos = false
-    });
-
-    this.treinamentoService.obterCargosERP().subscribe({
-      next: (cargos) => this.listaCargos = cargos,
-      error: (err) => console.error('Erro ao carregar cargos do ERP:', err)
-    });
-  }
   aoMudarEmpresa(empresaId: string): void {
     this.vinculoRH.empresa_id = empresaId;
-    this.vinculoRH.unidade_id = ''; // Reseta seleções anteriores por segurança
+    this.vinculoRH.unidade_id = '';
     this.listaUnidades = [];
 
     if (!empresaId) return;
@@ -572,19 +594,41 @@ export class AdminDashboardComponent implements OnInit {
     this.treinamentoService.obterUnidadesERP(empresaId).subscribe({
       next: (unidades) => {
         this.listaUnidades = unidades;
-        console.log(`🏥 Filiais carregadas para a Empresa [${empresaId}]:`, unidades);
       },
       error: (err) => console.error('Erro ao buscar unidades filtradas:', err)
     });
   }
   finalizarEsteiraTreinamento(): void {
-    this.alerts.sucesso('Parabéns! Esteira de treinamento publicada e integrada com sucesso!');
+    // 1. Validação defensiva: Garante que temos um curso em edição na esteira
+    if (!this.idCursoCriado) {
+      this.alerts.erro('Erro: Nenhum identificador de curso localizado para publicação.');
+      return;
+    }
 
-    this.carregarCatalogoGerencial();
+    this.isLoadingCursos = true; // Ativa o spinner visual de background
 
-    this.passoAtual = 1;
-    this.idCursoCriado = null;
-    this.listaVinculosAtivos = [];
+    // 2. Dispara a requisição física para o back-end NestJS
+    this.treinamentoService.publicarTreinamentoComKanban(Number(this.idCursoCriado)).subscribe({
+      next: (resposta) => {
+        // 3. Feedback premium de sucesso com os dados da transação do Kanban
+        this.alerts.sucesso('Parabéns! Esteira de treinamento publicada, ativada e inserida no Kanban Admin com sucesso!');
+
+
+        // 4. Recarrega o grid gerencial com o novo curso ativo na listagem
+        this.carregarCatalogoGerencial();
+
+        // 5. Reseta os estados reativos do formulário limpando a bancada do assistente
+        this.passoAtual = 1;
+        this.idCursoCriado = null;
+        this.listaVinculosAtivos = [];
+        this.isLoadingCursos = false;
+      },
+      error: (err) => {
+        this.isLoadingCursos = false;
+        console.error('🚨 Erro crítico na publicação da esteira com Kanban:', err);
+        this.alerts.erro('Falha de comunicação ao publicar e integrar o treinamento com o Kanban.');
+      }
+    });
   }
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
     this.dialog.open(ModalMateriaisComponent, {
@@ -738,15 +782,13 @@ export class AdminDashboardComponent implements OnInit {
       next: (resposta) => {
         // 2. FILTRO REATIVO SUPREMO: Remove o card da lista da tela instantaneamente sem dar nenhuma piscada!
         this.listaVinculosAtivos = this.listaVinculosAtivos.filter(v => v.id !== vinculoId);
-        
+
         // 3. Exibe o feedback visual premium de sucesso para o gestor do RH
         this.snackBar.open('Vínculo organizacional removido com sucesso!', 'Fechar', {
           duration: 3000,
           horizontalPosition: 'right',
           verticalPosition: 'top'
         });
-        
-        console.log(`🧹 Registro ID [${vinculoId}] removido fisicamente e expurgado da memória RAM.`);
       },
       error: (err) => {
         console.error('🚨 Erro ao remover vínculo regulamentar do Passo 5:', err);
