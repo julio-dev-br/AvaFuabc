@@ -10,33 +10,31 @@ export class KanbanService {
 
   // Puxa o quadro isolando rigorosamente apenas as tarefas pessoais (Ignora cards de cursos do Admin)
   async obterQuadro(userId: number) {
-    // Busca inicial no PostgreSQL
+    // 1. Busca inicial no PostgreSQL isolando estritamente os cartões normais do Aluno
     let colunas = await this.prisma.kanbanColuna.findMany({
-      where: { usuario_id: userId },
+      where: { usuario_id: userId, NOT: { titulo: { contains: 'Treinamento', mode: 'insensitive' } } },
       include: {
         cards: {
-          // Filtra para o Aluno ver APENAS os cards normais dele!
-          where: { treinamento_id: null },
+          where: { treinamento_id: null }, // 🌟 Aluno só gerencia tarefas que ele mesmo criou!
           orderBy: { ordem: 'asc' },
         },
       },
       orderBy: { ordem: 'asc' },
     });
 
-    // Se o array de colunas vier vazio, inicializa o quadro pessoal padrão do aluno
+    // 2. SEED DE INFRAESTRUTURA AUTOMÁTICO: Se o banco resetou e veio vazio, monta o quadro clássico do Aluno!
     if (colunas.length === 0) {
-
       await this.prisma.kanbanColuna.createMany({
         data: [
-          { usuario_id: userId, titulo: '📌 A Fazer', ordem: 1 },
-          { usuario_id: userId, titulo: '📖 Estudando', ordem: 2 },
-          { usuario_id: userId, titulo: '✅ Concluído', ordem: 3 },
+          { usuario_id: userId, titulo: '📌 A Fazer', ordem: 1, cor: '#cbd5e1' },
+          { usuario_id: userId, titulo: '📖 Estudando', ordem: 2, cor: '#3b82f6' },
+          { usuario_id: userId, titulo: '✅ Concluído', ordem: 3, cor: '#10b981' },
         ],
       });
 
-      // Refaz a busca aplicando a mesma vacina de segurança
+      // Refaz a busca consolidada garantindo a fiação limpa
       colunas = await this.prisma.kanbanColuna.findMany({
-        where: { usuario_id: userId },
+        where: { usuario_id: userId, NOT: { titulo: { contains: 'Treinamento', mode: 'insensitive' } } },
         include: {
           cards: {
             where: { treinamento_id: null },
@@ -49,6 +47,7 @@ export class KanbanService {
 
     return colunas;
   }
+
 
   // Cria uma nova coluna (Adaptada para aceitar a cor personalizada do Admin)
   async criarColuna(userId: number, dto: { titulo: string; cor?: string }) {
@@ -115,86 +114,77 @@ export class KanbanService {
   }
 
   // Altera ou inicializa o card do curso no Kanban avançado de forma física
+  // 🚀 MOVER CARD ADMIN DEFINITIVO: Recalcula o empilhamento matemático e blinda o Kanban contra resets de F5!
+  // 🚀 MOVER CARD ADMIN INDESTRUTÍVEL: Localiza a coluna gerencial pela posição de ordem matemática global!
   async moverCardAdmin(cardIdOuTreinamentoId: number, dto: { colunaId: number; ordem: number }) {
-
-    // 1. Tenta localizar o card pelo ID enviado
     let card = await this.prisma.kanbanCard.findUnique({
       where: { id: Number(cardIdOuTreinamentoId) }
     });
 
-    // 2. Se não achou pelo ID do card, busca se existe algum card amarrado a esse ID como Treinamento!
     if (!card) {
       card = await this.prisma.kanbanCard.findFirst({
         where: { treinamento_id: Number(cardIdOuTreinamentoId) }
       });
     }
 
-    // 3. Se o card existir, atualiza. 
-    if (card) {
-      // 🌟 VALIDAÇÃO ANTES DE MOVER: Garante que a coluna de destino existe fisicamente!
-      const colunaDestinoExiste = await this.prisma.kanbanColuna.findUnique({
-        where: { id: Number(dto.colunaId) }
+    let colunaIdFinal = Number(dto.colunaId);
+
+    // Confere se a coluna de destino enviada pelo front existe no banco de casa
+    const colunaDestinoExiste = await this.prisma.kanbanColuna.findUnique({
+      where: { id: colunaIdFinal }
+    });
+
+    // 🛡️ CORREÇÃO GLOBAL: Se der erro de ID pós-reset, busca a raia da 3ª posição da esteira (Cursos Publicados)
+    if (!colunaDestinoExiste) {
+      const raiaPublicadosReal = await this.prisma.kanbanColuna.findFirst({
+        where: { ordem: 3 },
+        orderBy: { id: 'asc' }
       });
-
-      // Se a coluna enviada pelo front não existir no banco pós-reset, caça a primeira coluna ativa por segurança
-      let colunaIdFinal = Number(dto.colunaId);
-      if (!colunaDestinoExiste) {
-        const primeiraColunaDisponivel = await this.prisma.kanbanColuna.findFirst({
-          orderBy: { ordem: 'asc' }
-        });
-        if (primeiraColunaDisponivel) {
-          colunaIdFinal = primeiraColunaDisponivel.id;
-        }
+      if (raiaPublicadosReal) {
+        colunaIdFinal = raiaPublicadosReal.id;
       }
+    }
 
+    // Calcula a ordem matemática para empilhar organizadamente no fim da raia escolhida
+    const contagemCardsDestino = await this.prisma.kanbanCard.count({
+      where: { coluna_id: colunaIdFinal }
+    });
+    const ordemCalculada = contagemCardsDestino + 1;
+
+    // Se o card já existir fisicamente, faz a atualização definitiva no Postgres
+    if (card) {
+      console.log(`📡 ARRASTAR KANBAN: Fixando Card [ID: ${card.id}] na Coluna [ID: ${colunaIdFinal}] na ordem [${ordemCalculada}]`);
       return this.prisma.kanbanCard.update({
         where: { id: card.id },
         data: {
-          coluna_id: Number(colunaIdFinal),
-          ordem: dto.ordem ? Number(dto.ordem) : card.ordem
+          coluna_id: colunaIdFinal,
+          ordem: ordemCalculada // ➔ Trava a posição de forma vitalícia no banco!
         }
       });
     } else {
-      // 4. Se não existir (curso órfão antigo), cria um novo na hora!
+      // Se for o clique inicial do botão "Finalizar e Publicar Curso", gera a linha física do cartão espelho
       const treinamento = await this.prisma.treinamento.findUnique({
         where: { id: Number(cardIdOuTreinamentoId) },
         select: { titulo: true, descricao: true }
       });
 
       if (!treinamento) {
-        throw new NotFoundException('Treinamento/Projeto base não localizado no sistema.');
+        throw new NotFoundException('Treinamento de base não localizado no sistema.');
       }
 
-      // 🌟 A VACINA SUPREMA: Se a coluna enviada pelo front for inválida/órfã, busca uma legítima no banco novo!
-      const colunaDestinoExiste = await this.prisma.kanbanColuna.findUnique({
-        where: { id: Number(dto.colunaId) }
-      });
-
-      let colunaIdFinal = Number(dto.colunaId);
-      if (!colunaDestinoExiste) {
-        const primeiraColunaDisponivel = await this.prisma.kanbanColuna.findFirst({
-          orderBy: { ordem: 'asc' }
-        });
-        
-        if (!primeiraColunaDisponivel) {
-          throw new NotFoundException('Nenhuma coluna de triagem cadastrada no Kanban para receber este projeto.');
-        }
-        colunaIdFinal = primeiraColunaDisponivel.id;
-      }
-
-      // Cria a linha física do cartão espelho vinculada com 100% de segurança de integridade referencial!
+      console.log(`📡 FABRICA DE CURSOS: Criando Card para o Curso ID [${cardIdOuTreinamentoId}] na Coluna [ID: ${colunaIdFinal}]`);
       return this.prisma.kanbanCard.create({
         data: {
-          coluna_id: Number(colunaIdFinal), // 🛡️ ID legítimo blindado contra erros P2003
+          coluna_id: colunaIdFinal,
           treinamento_id: Number(cardIdOuTreinamentoId),
           titulo: treinamento.titulo,
           descricao: treinamento.descricao || null,
-          ordem: dto.ordem ? Number(dto.ordem) : 1
+          ordem: ordemCalculada
         }
       });
     }
   }
-  
+
   async atualizarCardReal(id: number, dados: { titulo: string; descricao?: string }) {
     // Verifica se o card de fato existe antes de rodar a query
     const cardExistente = await this.prisma.kanbanCard.findUnique({ where: { id } });

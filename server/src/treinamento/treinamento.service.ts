@@ -88,21 +88,33 @@ export class TreinamentoService {
   }
 
   // Grava uma Aula vinculada a um Módulo programático
+  // 📺 PURIFICAÇÃO DA URL: Isola o ID do vídeo e grava o link canônico /embed/ para o player do Git!
   async criarAula(data: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) {
-    const urlCrua = data.videoUrl ? data.videoUrl.trim() : '';
-    const idVideoPuro = urlCrua.slice(-11);
-    const urlFinal = 'https://youtube.com' + idVideoPuro.trim();
+    const urlCrua = data.videoUrl ? String(data.videoUrl).trim() : '';
+    
+    // 🌟 REGEX UNIVERSAL: Caça os 11 caracteres legítimos do ID do YouTube em qualquer formato de link (comum, embed, encurtado)
+    const regexYoutube = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/)([a-zA-Z0-9_-]{11})/;
+    const resultadoMatch = urlCrua.match(regexYoutube);
+    
+    // Fallback: Se o usuário colar só as letras ou o link vier cortado do front, isola os últimos 11 caracteres limpos
+    const idVideoPuro = resultadoMatch 
+      ? resultadoMatch[1] 
+      : urlCrua.replace(/[^a-zA-Z0-9_-]/g, '').slice(-11);
+    
+    // 🚀 O FORMATO DA VITÓRIA: Constrói a URL de incorporação oficial aceita pelo iframe do Angular!
+    const urlFinal = `https://youtube.com/embed/${idVideoPuro.trim()}`;
 
     return this.prisma.aula.create({
       data: {
         modulo_id: Number(data.moduloId),
         titulo: data.titulo,
         descricao: data.descricao || null,
-        video_url: urlFinal,
+        video_url: urlFinal, // ➔ Salva: https://youtube.com
         ordem: Number(data.ordem)
       }
     });
   }
+
 
   // Vincula a regra de público-alvo e matricula compulsoriamente os funcionários enquadrados!
   async vincularPublico(data: {
@@ -424,17 +436,42 @@ export class TreinamentoService {
       throw new NotFoundException('Treinamento não localizado para fechamento de esteira.');
     }
 
-    // 2. 🌟 A JOGADA SÊNIOR: Força o ID canônico 3 da raia de Publicados
-    const COLUNA_PUBLICADOS_ID = 3;
+    // 🌟 A JOGADA MESTRE GLOBAL: Caça a coluna na posição 3 de forma aberta (Imune a trocas de IDs de usuários!)
+    let colunaDestino = await this.prisma.kanbanColuna.findFirst({
+      where: {
+        ordem: 3 // ➔ Caça cirurgicamente o estágio 3 (Cursos Publicados) na tabela global
+      },
+      orderBy: { id: 'asc' } // Captura a primeira raia de publicados legítima do banco
+    });
 
-    // 3. Captura a maior ordem atual dentro da coluna 3 para empilhar o card perfeitamente no final
+    // 🛡️ FALLBACK 1: Se por acaso a tabela estiver sem a ordem 3, caça por título textual aberta
+    if (!colunaDestino) {
+      colunaDestino = await this.prisma.kanbanColuna.findFirst({
+        where: { titulo: { contains: 'Publicado', mode: 'insensitive' } },
+        orderBy: { id: 'asc' }
+      });
+    }
+
+    // 🛡️ FALLBACK 2: Se a esteira estiver totalmente deserta, cria a raia na hora amarrada ao admin logado
+    if (!colunaDestino) {
+      colunaDestino = await this.prisma.kanbanColuna.create({
+        data: {
+          usuario_id: Number(usuarioId),
+          titulo: '🚀 Cursos Publicados',
+          ordem: 3,
+          cor: '#10b981'
+        }
+      });
+    }
+
+    // Captura a maior ordem atual dentro da coluna correta para empilhar o card perfeitamente no final
     const maiorOrdemCard = await this.prisma.kanbanCard.aggregate({
-      where: { coluna_id: COLUNA_PUBLICADOS_ID },
+      where: { coluna_id: colunaDestino.id },
       _max: { ordem: true }
     });
     const proximaOrdem = (maiorOrdemCard._max.ordem || 0) + 1;
 
-    // 4. TRANSACIONAL SUPREMO: Executa as atualizações em lote de forma 100% atômica no PostgreSQL
+    // 🌟 TRANSACIONAL SUPREMO ATÔMICO PROTEGIDO
     return this.prisma.$transaction(async (tx) => {
       // Modifica o status do treinamento para ativo, liberando o catálogo dos alunos
       const cursoAtualizado = await tx.treinamento.update({
@@ -442,21 +479,24 @@ export class TreinamentoService {
         data: { ativo: true }
       });
 
-      // Cria fisicamente o card de Gestão à Vista espetado com precisão matemática na coluna 3!
+      // Cria fisicamente o card de Gestão à Vista usando o ID legítimo descoberto!
       const novoCard = await tx.kanbanCard.create({
         data: {
-          coluna_id: COLUNA_PUBLICADOS_ID, // ➔ Cravado no ID 3 de Publicados!
-          treinamento_id: cursoAtualizado.id, // 🌟 Amarração relacional do seu schema.prisma
+          coluna_id: colunaDestino.id, // 🌟 DINÂMICO: Integrado 100% ao auto-incremento global do Postgres!
+          treinamento_id: cursoAtualizado.id,
           titulo: cursoAtualizado.titulo,
           descricao: cursoAtualizado.descricao || `Curso regulamentar publicado via Fábrica de Conteúdos.`,
           ordem: proximaOrdem
         }
       });
+
+      console.log(`🏆 KANBAN INTEGRADO: Card [${novoCard.titulo}] publicado com sucesso na Coluna ID: ${colunaDestino.id}!`);
+
       return {
         success: true,
         treinamentoId: cursoAtualizado.id,
         cardId: novoCard.id,
-        message: 'Esteira concluída com sucesso! Curso ativado e cartão inserido na coluna de Publicados.'
+        message: `Esteira concluída com sucesso! Curso ativado e cartão inserido na coluna [${colunaDestino.titulo}].`
       };
     });
   }
