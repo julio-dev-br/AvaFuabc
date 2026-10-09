@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class MateriaisService {
   constructor(private prisma: PrismaService) {}
 
-  // 📂 Busca todas as apostilas/links atrelados a uma aula específica
+  // Busca todas as apostilas/links atrelados a uma aula específica
   async obterPorAula(aulaId: number) {
     return this.prisma.material.findMany({
       where: { aula_id: aulaId },
@@ -13,7 +13,7 @@ export class MateriaisService {
     });
   }
 
-  // 📂 Cria o registro na tabela Material
+  // Cria o registro na tabela Material
   async adicionar(data: { aulaId: number; nome: string; url: string; tipo: string }) {
     return this.prisma.material.create({
       data: {
@@ -25,7 +25,7 @@ export class MateriaisService {
     });
   }
 
-  // 📂 Remove fisicamente o registro do banco de dados
+  // Remove fisicamente o registro do banco de dados
   async remover(id: number) {
     const existe = await this.prisma.material.findUnique({ where: { id } });
     if (!existe) {

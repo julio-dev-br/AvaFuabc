@@ -7,8 +7,10 @@ async function main() {
   console.log('=== 🚀 INICIANDO ENGENHARIA DE SEED DO POSTGRESQL ===');
 
   // 1. LIMPEZA SEGURA DO BANCO (Evita duplicidade em loops de boot e constraints de hardware)
-  await prisma.quizResponse.deleteMany({}); // Limpa o histórico de respostas primeiro
+  await prisma.quizResponse.deleteMany({}); 
   await prisma.matricula.deleteMany({});
+  await prisma.kanbanCard.deleteMany({});    
+  await prisma.kanbanColuna.deleteMany({});  
   await prisma.treinamento.deleteMany({});
   await prisma.user.deleteMany({});
 
@@ -23,7 +25,7 @@ async function main() {
       password: passwordHash,
       role: 'admin',
       matricula: '123456',
-      // 🛡️ VACINA DE BIGINT:IDs sincronizados perfeitamente com o ProtheusMockController!
+      // 🛡️ VACINA DE BIGINT: IDs sincronizados perfeitamente com o ProtheusMockController!
       empresa_id: BigInt('1000000000000002'),       // Hospital Mário Covas
       unidade_id: BigInt('2000000000000001'),       // Pronto Socorro Adulto
       cargo_id: BigInt('5000000000000003'),         // Técnico em Radiologia (NR-32)
@@ -33,7 +35,20 @@ async function main() {
   });
   console.log(`✔️ Usuário gestor criado com sucesso: ${usuarioJulio.email}`);
 
-  // 👥 CRIAÇÃO DE ALUNOS ADICIONAIS PARA HOMOLOGAR AS MATRÍCULAS EM LOTE DO RH
+  // 📊 3. INJEÇÃO EXCLUSIVA DAS COLUNAS DO KANBAN DO ALUNO (Vinculadas de forma legítima ao Julio)
+  console.log('📊 Injetando apenas as colunas do Kanban do Aluno...');
+  await prisma.kanbanColuna.create({
+    data: { id: 1, usuario_id: usuarioJulio.id, titulo: '📌 A Fazer', ordem: 1, cor: '#cbd5e1' }
+  });
+  await prisma.kanbanColuna.create({
+    data: { id: 2, usuario_id: usuarioJulio.id, titulo: '📖 Estudando', ordem: 2, cor: '#3b82f6' }
+  });
+  await prisma.kanbanColuna.create({
+    data: { id: 3, usuario_id: usuarioJulio.id, titulo: '✅ Concluído', ordem: 3, cor: '#10b981' }
+  });
+  console.log('✔️ Colunas "A Fazer", "Estudando" e "Concluído" assentadas com sucesso!');
+
+  // 👥 4. CRIAÇÃO DE ALUNOS ADICIONAIS PARA HOMOLOGAR AS MATRÍCULAS EM LOTE DO RH
   const usuarioAna = await prisma.user.create({
     data: {
       id: 2,
@@ -83,7 +98,7 @@ async function main() {
   });
   console.log('✔️ Massa adicional de 3 alunos injetada com sucesso para testes do RH!');
 
-  // 3. CATÁLOGO REGULAMENTAR DE 11 TREINAMENTOS COM REGRAS E NOTAS REAIS DE RH
+  // 5. CATÁLOGO REGULAMENTAR DE 11 TREINAMENTOS COM REGRAS E NOTAS REAIS DE RH
   const dadosTreinamentosfakes = [
     { titulo: 'NR-32: Segurança na Saúde', progresso: 100, nota: 9.5, status: 'CONCLUIDO' },
     { titulo: 'Compliance e Lei Geral de Proteção de Dados (LGPD)', progresso: 100, nota: 8.0, status: 'CONCLUIDO' },
@@ -126,6 +141,11 @@ async function main() {
       },
     });
   }
+
+  // 🌟 SINCRONISMO DOS SÉQUENCIAIS DO POSTGRESQL: Evita erros P2003 em novas inclusões manuais na tela
+  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"User"', 'id'), COALESCE(MAX(id), 1)) FROM "User";`;
+  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"KanbanColuna"', 'id'), COALESCE(MAX(id), 1)) FROM "KanbanColuna";`;
+  await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Treinamento"', 'id'), COALESCE(MAX(id), 1)) FROM "Treinamento";`;
 
   console.log(`✔️ Catálogo de ${dadosTreinamentosfakes.length} históricos acadêmicos gerado com paginação intacta no PostgreSQL!`);
   console.log('=== 🎉 ENGENHARIA DE SEED FINALIZADA COM SUCESSO COBRINDO A PAGINAÇÃO ===');

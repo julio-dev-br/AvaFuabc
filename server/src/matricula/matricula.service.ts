@@ -72,7 +72,6 @@ export class MatriculaService {
   }
 
   async atualizarProgressoAula(userId: number, aulaId: number, tempoAssistido: number, concluida: boolean) {
-    // 1. Encontra a aula e descobre a qual treinamento ela pertence
     const aula = await this.prisma.aula.findUnique({
       where: { id: aulaId },
       include: {
@@ -109,7 +108,7 @@ export class MatriculaService {
         data: {
           tempo_assistido: tempoAssistido,
           concluida: concluida,
-          percentual: concluida ? 100 : 50, // Exemplo simples de percentual
+          percentual: concluida ? 100 : 50, 
           ultima_visualizacao: new Date()
         }
       });
@@ -155,5 +154,4 @@ export class MatriculaService {
       }
     });
   }
-
 }

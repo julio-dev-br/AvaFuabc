@@ -693,7 +693,7 @@
             [class.sala-ativa]="salaChatSelecionada?.id === sala.id" (click)="selecionarSalaSuporte(sala)">
 
             <div class="avatar-wrapper">
-              <img [src]="sala.user?.avatar_url || 'assets/images/default-avatar.jpg'" alt="Avatar"
+              <img [src]="sala.user?.avatar_url || 'assets/default-avatar.jpg'" alt="Avatar"
                 class="avatar-aluno-img">
               <span class="status-indicator online"></span>
             </div>
@@ -725,7 +725,7 @@
         <div class="janela-chat-ativa-wrapper">
           <div class="header-conversa-ativa">
             <div class="header-avatar-box">
-              <img [src]="salaChatSelecionada.user?.avatar_url || 'assets/images/default-avatar.jpg'"
+              <img [src]="salaChatSelecionada.user?.avatar_url || 'assets/default-avatar.jpg'"
                 class="avatar-header-img">
             </div>
             <div class="header-info-box">

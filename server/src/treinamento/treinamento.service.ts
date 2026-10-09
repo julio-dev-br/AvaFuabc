@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class TreinamentoService {
   constructor(private prisma: PrismaService) { }
-
   // Busca treinamentos disponíveis baseados nas regras de negócio de RH
   async findAvailableForUser(user: any) {
     const filtrosPublico: any[] = [];
@@ -61,7 +60,6 @@ export class TreinamentoService {
       },
     });
   }
-
   // Grava um novo Treinamento Base no banco
   async criar(data: { titulo: string; descricao?: string; carga_horaria: number; obrigatorio: boolean }) {
     return this.prisma.treinamento.create({
@@ -75,7 +73,6 @@ export class TreinamentoService {
       }
     });
   }
-
   // Grava um Módulo associado ao Treinamento
   async criarModulo(data: { treinamentoId: number; titulo: string; ordem: number }) {
     return this.prisma.modulo.create({
@@ -86,23 +83,19 @@ export class TreinamentoService {
       }
     });
   }
-
-  // Grava uma Aula vinculada a um Módulo programático
-  // 📺 PURIFICAÇÃO DA URL: Isola o ID do vídeo e grava o link canônico /embed/ para o player do Git!
   async criarAula(data: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) {
     const urlCrua = data.videoUrl ? String(data.videoUrl).trim() : '';
-    
-    // 🌟 REGEX UNIVERSAL: Caça os 11 caracteres legítimos do ID do YouTube em qualquer formato de link (comum, embed, encurtado)
     const regexYoutube = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/)([a-zA-Z0-9_-]{11})/;
     const resultadoMatch = urlCrua.match(regexYoutube);
-    
+
     // Fallback: Se o usuário colar só as letras ou o link vier cortado do front, isola os últimos 11 caracteres limpos
-    const idVideoPuro = resultadoMatch 
-      ? resultadoMatch[1] 
+    const idVideoPuro = resultadoMatch
+      ? resultadoMatch[1]
       : urlCrua.replace(/[^a-zA-Z0-9_-]/g, '').slice(-11);
+    // const urlFinal = `https://youtube.com/embed/${idVideoPuro.trim()}`;
     
-    // 🚀 O FORMATO DA VITÓRIA: Constrói a URL de incorporação oficial aceita pelo iframe do Angular!
-    const urlFinal = `https://youtube.com/embed/${idVideoPuro.trim()}`;
+    const urlFinal = `https://youtube.com/embed/${idVideoPuro.trim()}?enablejsapi=1`;
+
 
     return this.prisma.aula.create({
       data: {
@@ -114,9 +107,6 @@ export class TreinamentoService {
       }
     });
   }
-
-
-  // Vincula a regra de público-alvo e matricula compulsoriamente os funcionários enquadrados!
   async vincularPublico(data: {
     treinamentoId: number;
     tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO';
@@ -167,8 +157,6 @@ export class TreinamentoService {
     }
     return novaRegra;
   }
-
-  // Agrega contagens e dados estatísticos
   async obterMetricasPainel() {
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
@@ -201,8 +189,6 @@ export class TreinamentoService {
       }
     };
   }
-
-  // Consolida métricas antigos e novos gráficos direto do Postgres via Prisma
   async obterMetricasAnaliticas() {
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
@@ -282,8 +268,6 @@ export class TreinamentoService {
       }
     };
   }
-
-  // Calcula o Ranking de Alunos e Medalhas via PostgreSQL
   async obterDadosGamificacao(usuarioId: number) {
     const rankingGeral = await this.prisma.user.findMany({
       select: { id: true, name: true },
@@ -337,8 +321,6 @@ export class TreinamentoService {
       medalhas: medalhas
     };
   }
-
-  // Traz o catálogo completo com a contagem de módulos para o Painel do Gestor
   async listarTreinamentosGerencial() {
     const treinamentos = await this.prisma.treinamento.findMany({
       orderBy: { id: 'desc' },
@@ -350,8 +332,6 @@ export class TreinamentoService {
       totalModulos: t.modulos.length
     }));
   }
-
-  // Busca o curso isolado por ID trazendo os módulos, aulas e a tabela Material
   async obterConteudoCurso(id: number) {
     return this.prisma.treinamento.findUnique({
       where: { id: id },
@@ -368,8 +348,6 @@ export class TreinamentoService {
       }
     });
   }
-
-  // Lista todos os treinamentos/projetos com dados de auditoria estruturados no Kanban Admin
   async listarProjetosAdmin() {
     const projetos = await this.prisma.treinamento.findMany({
       include: {
@@ -404,8 +382,6 @@ export class TreinamentoService {
       };
     });
   }
-
-  // Deleta fisicamente uma regra de público-alvo (Lixeira Vermelha)
   async removerVinculoPublico(vinculoId: number) {
     const vinculoExistente = await this.prisma.treinamentoPublico.findUnique({
       where: { id: Number(vinculoId) },
@@ -424,10 +400,7 @@ export class TreinamentoService {
       message: 'Vínculo de público-alvo removido com sucesso do ecossistema!'
     };
   }
-
-  // Finaliza a esteira e força o card a nascer com coluna_id = 3
   async finalizarEPublicarTreinamento(treinamentoId: number, usuarioId: number) {
-    // 1. Verifica se o curso de fato existe no Postgres antes de iniciar o processo
     const curso = await this.prisma.treinamento.findUnique({
       where: { id: Number(treinamentoId) }
     });
@@ -436,7 +409,6 @@ export class TreinamentoService {
       throw new NotFoundException('Treinamento não localizado para fechamento de esteira.');
     }
 
-    // 🌟 A JOGADA MESTRE GLOBAL: Caça a coluna na posição 3 de forma aberta (Imune a trocas de IDs de usuários!)
     let colunaDestino = await this.prisma.kanbanColuna.findFirst({
       where: {
         ordem: 3 // ➔ Caça cirurgicamente o estágio 3 (Cursos Publicados) na tabela global

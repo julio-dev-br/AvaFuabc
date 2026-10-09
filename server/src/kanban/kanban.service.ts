@@ -15,14 +15,14 @@ export class KanbanService {
       where: { usuario_id: userId, NOT: { titulo: { contains: 'Treinamento', mode: 'insensitive' } } },
       include: {
         cards: {
-          where: { treinamento_id: null }, // 🌟 Aluno só gerencia tarefas que ele mesmo criou!
+          where: { treinamento_id: null }, 
           orderBy: { ordem: 'asc' },
         },
       },
       orderBy: { ordem: 'asc' },
     });
 
-    // 2. SEED DE INFRAESTRUTURA AUTOMÁTICO: Se o banco resetou e veio vazio, monta o quadro clássico do Aluno!
+    // Se o banco resetou e veio vazio, monta o quadro clássico do Aluno!
     if (colunas.length === 0) {
       await this.prisma.kanbanColuna.createMany({
         data: [
@@ -48,7 +48,6 @@ export class KanbanService {
     return colunas;
   }
 
-
   // Cria uma nova coluna (Adaptada para aceitar a cor personalizada do Admin)
   async criarColuna(userId: number, dto: { titulo: string; cor?: string }) {
     const colunasContagem = await this.prisma.kanbanColuna.count({
@@ -60,7 +59,7 @@ export class KanbanService {
         usuario_id: userId,
         titulo: dto.titulo,
         ordem: colunasContagem + 1,
-        cor: dto.cor || '#cbd5e1', // 🎨 Grava a cor selecionada pelo gestor no painel
+        cor: dto.cor || '#cbd5e1', 
       },
     });
   }
@@ -114,8 +113,6 @@ export class KanbanService {
   }
 
   // Altera ou inicializa o card do curso no Kanban avançado de forma física
-  // 🚀 MOVER CARD ADMIN DEFINITIVO: Recalcula o empilhamento matemático e blinda o Kanban contra resets de F5!
-  // 🚀 MOVER CARD ADMIN INDESTRUTÍVEL: Localiza a coluna gerencial pela posição de ordem matemática global!
   async moverCardAdmin(cardIdOuTreinamentoId: number, dto: { colunaId: number; ordem: number }) {
     let card = await this.prisma.kanbanCard.findUnique({
       where: { id: Number(cardIdOuTreinamentoId) }
@@ -213,5 +210,4 @@ export class KanbanService {
 
     return { message: 'Tarefa removida com sucesso do banco de dados!' };
   }
-
 }

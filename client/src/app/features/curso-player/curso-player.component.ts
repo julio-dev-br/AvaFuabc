@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TreinamentoService } from '../../core/services/treinamento.service';
@@ -15,6 +15,13 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ChatApiService } from '../../core/services/chat.service';
+
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: (() => void) | undefined;
+  }
+}
+declare var YT: any;
 
 @Component({
   selector: 'app-curso-player',
@@ -41,6 +48,9 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
   private chatApiService = inject(ChatApiService);
   public idAulaAtualInstanciada: number | null = null;
+
+  public player: any;
+  private intervalMonitor: any;
 
   videoUrlBlindada!: SafeResourceUrl;
 
