@@ -38,7 +38,7 @@ export class TreinamentoController {
   @Post('admin/aulas')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
-  async criarAula(@Body() body: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) { 
+  async criarAula(@Body() body: { moduloId: number; titulo: string; descricao?: string; videoUrl: string; ordem: number }) {
     return this.treinamentosService.criarAula(body);
   }
 
@@ -49,15 +49,24 @@ export class TreinamentoController {
     return this.treinamentosService.vincularPublico(body);
   }
 
+  // 📊 CIRCUITO 1: Métricas resumidas do painel de controle principal
   @Get('admin/metricas')
   @UseGuards(RolesGuard)
-  @Roles('admin', 'manager') 
+  @Roles('admin', 'manager')
   async obterMetricasAdmin() {
     return this.treinamentosService.obterMetricasPainel();
   }
 
+  // 📈 CIRCUITO 2: Métricas profundas do BI (Gráficos de linhas, hospital e pizza)
+  // 🚀 AJUSTADO: Rota estendida para evitar a colisão de endereços no NestJS!
+  @Get('admin/metricas/analiticas')
+  async obterMetricasAnaliticas() {
+    return this.treinamentosService.obterMetricasAnaliticas();
+  }
+
+
   @Get('gerencial')
-  @Roles(Role.ADMIN, Role.MANAGER) 
+  @Roles(Role.ADMIN, Role.MANAGER)
   async obterCatalogoGerencial() {
     return this.treinamentosService.listarTreinamentosGerencial();
   }
@@ -72,20 +81,15 @@ export class TreinamentoController {
     return this.treinamentosService.listarProjetosAdmin();
   }
 
-  @Get('admin/metricas')
-  async obterMetricasAnaliticas() {
-    return this.treinamentosService.obterMetricasAnaliticas();
-  }
-
   @Delete('admin/vincular-publico/:id')
   async removerVinculoPublico(@Param('id') id: string) {
     return this.treinamentosService.removerVinculoPublico(Number(id));
   }
 
-    @Post('admin/publicar/:id')
+  @Post('admin/publicar/:id')
   async publicarTreinamentoComKanban(@Param('id') id: string, @Req() req: any) {
     // Captura o ID do administrador direto do payload do JWT pelo AuthGuard
-    const usuarioId = req.user.id; 
+    const usuarioId = req.user.id;
     return this.treinamentosService.finalizarEPublicarTreinamento(Number(id), usuarioId);
   }
 

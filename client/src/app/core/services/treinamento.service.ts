@@ -68,12 +68,16 @@ export class TreinamentoService {
     return this.http.delete<any>(`${environment.apiUrl}/treinamentos/admin/vincular-publico/${vinculoId}`, { headers: this.obterHeaders() });
   }
 
-  obterMetricasAnaliticas(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/admin/metricas`, { headers: this.obterHeaders() });
-  }
-
   obterDadosGamificacao(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/aluno/gamificacao`, { headers: this.obterHeaders() });
+  }
+
+  obterMetricasPainel(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/treinamentos/admin/metricas`, { headers: this.obterHeaders() });
+  }
+
+  obterMetricasAnaliticas(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/treinamentos/admin/metricas/analiticas`, { headers: this.obterHeaders() });
   }
 
   obterMateriaisApoio(aulaId: number): Observable<any[]> {

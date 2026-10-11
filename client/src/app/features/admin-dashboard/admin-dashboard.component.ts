@@ -189,11 +189,27 @@ export class AdminDashboardComponent implements OnInit {
 
   // BI
   public pieChartType: ChartType = 'pie';
-  public pieChartOptions: ChartConfiguration['options'] = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } };
-  public pieChartData: ChartData<'pie', number[], string | string[]> = { labels: ['Concluídos', 'Em Andamento'], datasets: [{ data: [], backgroundColor: ['#10b981', '#f59e0b'] }] };
-
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top'
+      }
+    }
+  };
+  public pieChartData: ChartData<'pie', number[], string | string[]> = {
+    labels: ['Concluídos', 'Em Andamento', 'Reprovados'],
+    datasets: [{
+      data: [],
+      backgroundColor: [
+        '#10b981',
+        '#f59e0b',
+        '#f50b55'
+      ]
+    }]
+  };
   public barChartType: ChartType = 'bar';
-
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
     scales: {
@@ -219,29 +235,26 @@ export class AdminDashboardComponent implements OnInit {
   public lineChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true, position: 'top' }
-    },
-    scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } }
-    }
+    plugins: { legend: { display: true, position: 'top' } },
+    scales: { y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } } }
   };
+
+  // 🚀 ATUALIZADO: Labels expandidas até Dezembro para dar match com o ano corrente de 2026!
   public lineChartData: ChartData<'line'> = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago'],
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
     datasets: [
       {
-        // ✅ CORRIGIDO: Array populado com números simulados para o TypeScript compilar
-        data: [20, 30, 21, 10, 10, 5, 3, 6],
+        data: Array(12).fill(0), // Nasce totalmente zerado no boot inicial de segurança
         label: 'Novos Alunos Matriculados',
-        // Atualize no seu lineChartData:
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37, 99, 235, 0.04)',
-
         fill: true,
-        tension: 0.3 // Deixa a linha suave/curvada estilo Trello
+        tension: 0.3
       }
     ]
   };
+
+
   public unidadeBarChartType: ChartType = 'bar';
   public unidadeBarChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -264,6 +277,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     ]
   };
+
   get cursosGerenciaisExibidos(): any[] {
     const busca = this.filtroTextoAdmin.toLowerCase().trim();
 
@@ -328,45 +342,51 @@ export class AdminDashboardComponent implements OnInit {
 
     this.treinamentoService.obterMetricasAnaliticas().subscribe({
       next: (res: any) => {
+        // 1. Alimenta os Cards Gerenciais do topo (Total de Cursos, Alunos, etc.)
         if (res.cards) {
           this.cardsMetricas = res.cards;
         }
-        if (res.graficoPizza && res.graficoPizza.dados && this.pieChartData && this.pieChartData.datasets && this.pieChartData.datasets[0]) {
+
+        // 📊 2. GRÁFICO DE PIZZA (Aprovados vs Em Andamento vs Reprovados)
+        if (res.graficoPizza && res.graficoPizza.dados && this.pieChartData?.datasets?.[0]) {
           this.pieChartData.datasets[0].data = res.graficoPizza.dados;
-          this.pieChartData.labels = res.graficoPizza.labels || ['Concluídos', 'Em Andamento'];
+          // Alinha de forma dinâmica as 3 labels retornadas pelo back-end!
+          this.pieChartData.labels = res.graficoPizza.labels || ['Concluídos', 'Em Andamento', 'Reprovados'];
         }
-        if (res.graficoBarras && res.graficoBarras.dados && this.barChartData && this.barChartData.datasets && this.barChartData.datasets[0]) {
+
+        // 📊 3. GRÁFICO DE BARRAS CENTRAL (Engajamento e Ranking de Cursos)
+        if (res.graficoBarras && res.graficoBarras.dados && this.barChartData?.datasets?.[0]) {
           this.barChartData.labels = res.graficoBarras.labels || [];
           this.barChartData.datasets[0].data = res.graficoBarras.dados;
         }
-        if (this.lineChartData && this.lineChartData.datasets && this.lineChartData.datasets[0]) {
-          const volumeCursos = res.cards ? Number(res.cards.totalTreinamentos) * 5 : 40;
-          this.lineChartData.datasets[0].data = [
-            Math.round(volumeCursos * 0.2),
-            Math.round(volumeCursos * 0.4),
-            Math.round(volumeCursos * 0.55),
-            Math.round(volumeCursos * 0.7),
-            Math.round(volumeCursos * 0.8),
-            Math.round(volumeCursos * 0.9),
-            Math.round(volumeCursos * 0.95),
-            volumeCursos
-          ];
+
+        // 📈 4. GRÁFICO DE LINHAS (Histórico Acumulado Cronológico Real do Postgres)
+        // 📈 4. GRÁFICO DE LINHAS (Evolução Acumulada Real do Postgres)
+        if (res.graficoLinhaMatriculas && this.lineChartData?.datasets?.[0]) {
+          // 🚀 PURIFICADO: Injeta o array cheio de 12 meses vindo do NestJS sem nenhum corte (.slice)!
+          this.lineChartData.datasets[0].data = res.graficoLinhaMatriculas;
         }
-        if (this.unidadeBarChartData && this.unidadeBarChartData.datasets && this.unidadeBarChartData.datasets[0]) {
-          let taxaReal = res.cards ? String(res.cards.taxaConformidadeGeral).replace('%', '') : '85';
-          const notaBase = Number(taxaReal);
-          this.unidadeBarChartData.labels = ['Hospital Mário Covas', 'CHM Santo André', 'Ame Mauá', 'Fundação ABC'];
-          this.unidadeBarChartData.datasets[0].data = [
-            Math.min(notaBase + 5, 100),
-            Math.max(notaBase - 10, 0),
-            Math.min(notaBase + 2, 100),
-            notaBase
-          ];
+
+
+
+
+        // 🏢 5. GRÁFICO DE UNIDADES HOSPITALARES (Compliance por Filial do Protheus)
+        if (res.graficoBarrasUnidades && this.unidadeBarChartData?.datasets?.[0]) {
+          // 🚀 CORRIGIDO: Insere as etiquetas oficiais e as porcentagens físicas reais de cada hospital!
+          this.unidadeBarChartData.labels = res.graficoBarrasUnidades.labels || [];
+          this.unidadeBarChartData.datasets[0].data = res.graficoBarrasUnidades.valores || [];
         }
+
+        // Força a re-renderização completa do ecossistema do Chart.js com os dados purificados
+        this.pieChartData = { ...this.pieChartData };
+        this.barChartData = { ...this.barChartData };
+        this.lineChartData = { ...this.lineChartData };
+        this.unidadeBarChartData = { ...this.unidadeBarChartData };
+
         this.isLoadingMetrics = false;
       },
       error: (err) => {
-        console.error('Erro na carga do BI:', err);
+        console.error('❌ Falha na carga do barramento do BI Analítico:', err);
         this.isLoadingMetrics = false;
       }
     });

@@ -65,8 +65,9 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   historicoMensagens: any[] = [];
   novaMensagemText = '';
 
-  public videoTocandoLocal = false; // 🌟 FLAG MESTRE: Monitora se o vídeo está rodando de verdade
+  public videoTocandoLocal = false;
   public videoJaTevePlayReal = false;
+  private ultimoPercentualSalvoNoBanco = -1;
 
 
   alunoLogado = {
@@ -95,51 +96,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       clearInterval(this.intervalMonitor);
     }
   }
-
-  private escutarEventosGlobaisDoIframeDoYouTube(): void {
-    window.addEventListener('message', (event) => {
-      if (!event.origin.includes('youtube.com')) return;
-
-      try {
-        let dadosDoEvento = event.data;
-
-        // Se a mensagem vier em formato string stringificada, descriptografa para objeto
-        if (typeof dadosDoEvento === 'string') {
-          dadosDoEvento = JSON.parse(dadosDoEvento);
-        }
-
-        // 🌟 CAPTURA MULTI-CAMADA: Tenta ler o estado em todas as variações que o YouTube pode arremessar
-        let statusVideo: number | null = null;
-
-        if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
-          statusVideo = dadosDoEvento.info.playerState;
-        } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
-          statusVideo = dadosDoEvento.info.playerState;
-        } else if (dadosDoEvento?.event === 'onStateChange') {
-          // Captura a assinatura direta de hooks de eventos do Google
-          statusVideo = Number(dadosDoEvento.info);
-        }
-
-        // 📊 PROCESSAMENTO DO STATUS SEGURO:
-        // 1 = PLAYING (Vídeo rodando de verdade)
-        // 2 = PAUSED (Vídeo pausado)
-        // 0 = ENDED (Vídeo finalizado)
-        if (statusVideo !== null) {
-          if (statusVideo === 1) {
-            console.log('📈 TELEMETRIA ATIVA: Vídeo tocando! Retomando contagem de mídias.');
-            this.videoJaTevePlayReal = true;
-          } else if (statusVideo === 2 || statusVideo === 0 || statusVideo === -1) {
-            console.log('📉 TELEMETRIA ATIVA: Vídeo pausado ou parado! Congelando barra.');
-            this.videoJaTevePlayReal = false;
-          }
-        }
-      } catch (e) {
-        // Silencia dados de infraestrutura irrelevantes do postMessage
-      }
-    });
-  }
-
-
 
   carregarDadosCurso(id: number): void {
     this.treinamentoService.obterConteudoCurso(id).subscribe({
@@ -278,27 +234,26 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('🚀 TIMER NEUTRO ATIVADO: Telemetria híbrida aguardando play real do colaborador...');
 
     let progressoSimuladoContingencia = (this.aulaAtiva?.progresso_aulas?.[0]?.percentual || 0);
+    
+    // Sincroniza a trava inicial com o que já veio carregado do banco para não re-enviar no boot
+    this.ultimoPercentualSalvoNoBanco = progressoSimuladoContingencia;
 
     this.zone.runOutsideAngular(() => {
       this.intervalMonitor = setInterval(() => {
         if (!this.aulaAtiva) return;
 
-        // 🌟 ESTÍMULO MECÂNICO ANTI-ADBLOCK: Força o Iframe do DOM a responder seu status atual!
+        if (!this.videoJaTevePlayReal) return;
+
+        // 🌟 ESTÍMULO MECÂNICO ANTI-ADBLOCK
         try {
           const iframeFisico = document.getElementById('player-video-iframe') as HTMLIFrameElement;
           if (iframeFisico && iframeFisico.contentWindow) {
-            // Dispara um ping padrão da API do YouTube para o frame acordar e se reportar
             iframeFisico.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
             iframeFisico.contentWindow.postMessage(JSON.stringify({ command: 'getPlayerState', id: 1 }), '*');
           }
-        } catch (err) {
-          // Ignora pequenas falhas de barramento assíncrono de janelas cross-origin
-        }
+        } catch (err) {}
 
-        // 🛡️ COMPLIANCE COMPLETO: Se o radar global detectou pausa ou o play inicial não foi dado, congela!
-        if (!this.videoJaTevePlayReal) return;
-
-        // CENÁRIO A: SE O ADBLOCK NÃO BLOQUEOU (Usa a telemetria precisa do Google)
+        // CENÁRIO A: API DO GOOGLE RESPONDENDO
         if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.getDuration === 'function') {
           try {
             const tempoAtual = this.player.getCurrentTime();
@@ -314,11 +269,11 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
 
-        // CENÁRIO B: CONTINGÊNCIA ATÔMICA (uBlock ativo impedindo a criação do YT.Player)
+        // CENÁRIO B: CONTINGÊNCIA ATÔMICA (uBlock ativo)
         if (!this.player || typeof this.player.getCurrentTime !== 'function') {
           try {
             if (progressoSimuladoContingencia < 100) {
-              progressoSimuladoContingencia += 0.5; // Avanço controlado por segundo assistido real
+              progressoSimuladoContingencia += 0.5; // Incremento controlado
               this.atualizarProgressoEInterfaceIndividual(Math.round(progressoSimuladoContingencia));
             }
           } catch (error) {
@@ -330,51 +285,39 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  public executarPlayCortinaSegura(): void {
-    console.log('🖱️ CORTINA COMPLIANCE: Aluno acionou o player de vídeo! Destravando cronômetro.');
-    this.videoJaTevePlayReal = true;
-    this.iniciarMonitoramentoTempo();
-
-    // Tenta forçar o play nativo se a biblioteca do Google estiver acessível por baixo da malha
-    if (this.player && typeof this.player.playVideo === 'function') {
-      try { this.player.playVideo(); } catch (e) { }
-    }
-  }
-
-  public dispararPlayManualNativo(): void {
-    console.log('🖱️ CLIQUE DETECTADO: Aluno ativou a mídia! Ligando cronômetro...');
-    this.videoTocandoLocal = !this.videoTocandoLocal; // Alterna entre Play e Pause
-    if (this.videoTocandoLocal) {
-      this.iniciarMonitoramentoTempo();
-    }
-  }
-
-  // 🌟 NOVO MÉTODO AUXILIAR: Isola a renderização na zona do Angular para a barra verde crescer na hora!
   private atualizarProgressoEInterfaceIndividual(percentualCalculado: number): void {
     if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
     if (this.aulaAtiva.progresso_aulas.length === 0) this.aulaAtiva.progresso_aulas.push({ percentual: 0, concluida: false });
 
     if (percentualCalculado > (this.aulaAtiva.progresso_aulas[0].percentual || 0)) {
       this.zone.run(() => {
-        // Grava no índice zero exatamente onde o seu HTML está escutando!
         this.aulaAtiva.progresso_aulas[0].percentual = percentualCalculado;
-        console.log(`📈 SUCESSO: Barra reativa atualizada para [${percentualCalculado}%]`);
+        console.log(`📈 TELEMETRIA LOCAL: Posição do vídeo atualizada para [${percentualCalculado}%]`);
 
-        // Envia o Patch para salvar no Postgres a cada 10%
+        // 🛡️ VACINA DE DISPARO ÚNICO POR FAIXA: Só envia se for uma nova dezena e não foi enviada ainda!
         if (percentualCalculado % 10 === 0 && percentualCalculado < 100) {
-          this.forçarConclusaoProgressoIndividual(percentualCalculado);
+          if (percentualCalculado !== this.ultimoPercentualSalvoNoBanco) {
+            this.ultimoPercentualSalvoNoBanco = percentualCalculado; // Trava a porteira imediatamente!
+            this.forçarConclusaoProgressoIndividual(percentualCalculado);
+          }
         }
 
-        // Se bater 100%, estoura a vitória e abre o Quiz na hora!
+        // Se bater 100% assistido ou arrastado, crava a conclusão definitiva
         if (percentualCalculado >= 100) {
           this.aulaAtiva.progresso_aulas[0].percentual = 100;
           this.aulaAtiva.progresso_aulas[0].concluida = true;
-          this.forçarConclusaoProgressoIndividual(100);
+          
+          if (this.ultimoPercentualSalvoNoBanco !== 100) {
+            this.ultimoPercentualSalvoNoBanco = 100; // Trava a porteira final
+            this.forçarConclusaoProgressoIndividual(100);
+          }
+          
           if (this.intervalMonitor) clearInterval(this.intervalMonitor);
         }
       });
     }
   }
+
 
   private forçarConclusaoProgressoIndividual(percentual: number): void {
     const idDaAulaAtiva = Number(this.aulaAtiva?.id);
@@ -403,7 +346,25 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // 🎮 MÁGICA DE APRESENTAÇÃO: Força o progresso em 100% instantaneamente para homologar o Quiz na frente do RH
+  public executarPlayCortinaSegura(): void {
+    console.log('🖱️ CORTINA COMPLIANCE: Aluno acionou o player de vídeo! Destravando cronômetro.');
+    this.videoJaTevePlayReal = true;
+    this.iniciarMonitoramentoTempo();
+
+    // Tenta forçar o play nativo se a biblioteca do Google estiver acessível por baixo da malha
+    if (this.player && typeof this.player.playVideo === 'function') {
+      try { this.player.playVideo(); } catch (e) { }
+    }
+  }
+
+  public dispararPlayManualNativo(): void {
+    console.log('🖱️ CLIQUE DETECTADO: Aluno ativou a mídia! Ligando cronômetro...');
+    this.videoTocandoLocal = !this.videoTocandoLocal; // Alterna entre Play e Pause
+    if (this.videoTocandoLocal) {
+      this.iniciarMonitoramentoTempo();
+    }
+  }
+
   public simularConclusaoInstantaneaDEV(): void {
     console.log('🎮 DEV MODE: Forçando conclusão instantânea da videoaula activa...');
 
@@ -422,6 +383,49 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.forçarConclusaoProgressoIndividual(100);
+  }
+
+  private escutarEventosGlobaisDoIframeDoYouTube(): void {
+    window.addEventListener('message', (event) => {
+      if (!event.origin.includes('youtube.com')) return;
+
+      try {
+        let dadosDoEvento = event.data;
+
+        // Se a mensagem vier em formato string stringificada, descriptografa para objeto
+        if (typeof dadosDoEvento === 'string') {
+          dadosDoEvento = JSON.parse(dadosDoEvento);
+        }
+
+        // 🌟 CAPTURA MULTI-CAMADA: Tenta ler o estado em todas as variações que o YouTube pode arremessar
+        let statusVideo: number | null = null;
+
+        if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+          statusVideo = dadosDoEvento.info.playerState;
+        } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+          statusVideo = dadosDoEvento.info.playerState;
+        } else if (dadosDoEvento?.event === 'onStateChange') {
+          // Captura a assinatura direta de hooks de eventos do Google
+          statusVideo = Number(dadosDoEvento.info);
+        }
+
+        // 📊 PROCESSAMENTO DO STATUS SEGURO:
+        // 1 = PLAYING (Vídeo rodando de verdade)
+        // 2 = PAUSED (Vídeo pausado)
+        // 0 = ENDED (Vídeo finalizado)
+        if (statusVideo !== null) {
+          if (statusVideo === 1) {
+            console.log('📈 TELEMETRIA ATIVA: Vídeo tocando! Retomando contagem de mídias.');
+            this.videoJaTevePlayReal = true;
+          } else if (statusVideo === 2 || statusVideo === 0 || statusVideo === -1) {
+            console.log('📉 TELEMETRIA ATIVA: Vídeo pausado ou parado! Congelando barra.');
+            this.videoJaTevePlayReal = false;
+          }
+        }
+      } catch (e) {
+        // Silencia dados de infraestrutura irrelevantes do postMessage
+      }
+    });
   }
 
   // ==========================================
