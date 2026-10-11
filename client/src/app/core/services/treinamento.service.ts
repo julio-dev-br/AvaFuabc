@@ -121,6 +121,10 @@ export class TreinamentoService {
     });
   }
 
+  salvarProgressoVideoaula(aulaId: number, payload: { tempoAssistido: number; concluida: boolean }) {
+    return this.http.patch(`${environment.apiUrl}/aulas/${aulaId}/progresso`, payload, { headers: this.obterHeaders() });
+  }
+
   // Dispara a rota do NestJS para ativar o curso e criar o card no Kanban Admin
   publicarTreinamentoComKanban(treinamentoId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admin/publicar/${treinamentoId}`, {}, { headers: this.obterHeaders() });

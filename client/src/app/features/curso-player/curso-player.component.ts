@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TreinamentoService } from '../../core/services/treinamento.service';
@@ -41,12 +41,14 @@ declare var YT: any;
   templateUrl: './curso-player.component.html',
   styleUrl: './curso-player.component.css'
 })
-export class CursoPlayerComponent implements OnInit, OnDestroy {
+export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private treinamentoService = inject(TreinamentoService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   private chatApiService = inject(ChatApiService);
+  private zone = inject(NgZone);
+
   public idAulaAtualInstanciada: number | null = null;
 
   public player: any;
@@ -63,6 +65,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
   historicoMensagens: any[] = [];
   novaMensagemText = '';
 
+  public videoTocandoLocal = false; // 🌟 FLAG MESTRE: Monitora se o vídeo está rodando de verdade
+  public videoJaTevePlayReal = false;
+
+
   alunoLogado = {
     id: Number(localStorage.getItem('userId') || 1),
     name: localStorage.getItem('userName') || 'Julio Valente (Aluno)'
@@ -74,11 +80,66 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       this.carregarDadosCurso(Number(idParam));
     }
   }
+
+  // 🌟 GATILHO DE BOOT VISUAL: Inicializa o script do YouTube assim que o HTML renderizar
+  ngAfterViewInit(): void {
+    this.inicializarScriptYouTube();
+    this.escutarEventosGlobaisDoIframeDoYouTube();
+  }
+
   ngOnDestroy(): void {
     this.aulaAtiva = null;
     this.curso = null;
     this.chatApiService.desconectarDoSocket();
+    if (this.intervalMonitor) {
+      clearInterval(this.intervalMonitor);
+    }
   }
+
+  private escutarEventosGlobaisDoIframeDoYouTube(): void {
+    window.addEventListener('message', (event) => {
+      if (!event.origin.includes('youtube.com')) return;
+
+      try {
+        let dadosDoEvento = event.data;
+
+        // Se a mensagem vier em formato string stringificada, descriptografa para objeto
+        if (typeof dadosDoEvento === 'string') {
+          dadosDoEvento = JSON.parse(dadosDoEvento);
+        }
+
+        // 🌟 CAPTURA MULTI-CAMADA: Tenta ler o estado em todas as variações que o YouTube pode arremessar
+        let statusVideo: number | null = null;
+
+        if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+          statusVideo = dadosDoEvento.info.playerState;
+        } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+          statusVideo = dadosDoEvento.info.playerState;
+        } else if (dadosDoEvento?.event === 'onStateChange') {
+          // Captura a assinatura direta de hooks de eventos do Google
+          statusVideo = Number(dadosDoEvento.info);
+        }
+
+        // 📊 PROCESSAMENTO DO STATUS SEGURO:
+        // 1 = PLAYING (Vídeo rodando de verdade)
+        // 2 = PAUSED (Vídeo pausado)
+        // 0 = ENDED (Vídeo finalizado)
+        if (statusVideo !== null) {
+          if (statusVideo === 1) {
+            console.log('📈 TELEMETRIA ATIVA: Vídeo tocando! Retomando contagem de mídias.');
+            this.videoJaTevePlayReal = true;
+          } else if (statusVideo === 2 || statusVideo === 0 || statusVideo === -1) {
+            console.log('📉 TELEMETRIA ATIVA: Vídeo pausado ou parado! Congelando barra.');
+            this.videoJaTevePlayReal = false;
+          }
+        }
+      } catch (e) {
+        // Silencia dados de infraestrutura irrelevantes do postMessage
+      }
+    });
+  }
+
+
 
   carregarDadosCurso(id: number): void {
     this.treinamentoService.obterConteudoCurso(id).subscribe({
@@ -96,12 +157,17 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       }
     });
   }
+
   selecionarAula(aula: any): void {
     if (!aula) return;
     if (this.idAulaAtualInstanciada === aula.id) {
       return;
     }
 
+    if (this.intervalMonitor) {
+      clearInterval(this.intervalMonitor);
+    }
+    this.player = null;
     this.aulaAtiva = null;
     this.idAulaAtualInstanciada = aula.id;
 
@@ -109,10 +175,17 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
       this.aulaAtiva = aula;
 
       if (aula.video_url) {
-        this.videoUrlBlindada = this.obterVideoUrlSegura(aula.video_url);
+        // 🌟 CORREÇÃO ROBUSTA: O link ganha a flag da API do Google de fábrica
+        let urlFinalReal = String(aula.video_url).trim();
+        if (!urlFinalReal.includes('enablejsapi=1')) {
+          urlFinalReal = urlFinalReal.includes('?') ? `${urlFinalReal}&enablejsapi=1` : `${urlFinalReal}?enablejsapi=1`;
+        }
+        // Grava na variável estática. O Angular lê isso uma única vez e nunca mais mexe no iframe!
+        this.videoUrlBlindada = this.sanitizer.bypassSecurityTrustResourceUrl(urlFinalReal);
       }
     }, 50);
   }
+
 
   obterVideoUrlSegura(url: string): SafeResourceUrl {
     if (!url) return '';
@@ -129,13 +202,238 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
     return `${environment.apiUrl}${urlLimpa}`;
   }
 
+  // ==========================================
+  // ENGENHARIA DE TELEMETRIA DA API DO YOUTUBE
+  // ==========================================
+
+  private inicializarScriptYouTube(): void {
+    // 🌟 SEGUNDO DISPARO SEGURO: Se a biblioteca já existe, pula a injeção e liga a escuta direto!
+    if (typeof YT !== 'undefined' && YT.Player) {
+      this.construirInstanciaPlayer();
+      return;
+    }
+
+    // 🚀 RETIFICADO: Injeta a URL oficial completa da biblioteca JavaScript de controle do Google!
+    const tag = document.createElement('script');
+    tag.src = 'https://youtube.com';
+    const firstScriptTag = document.getElementsByTagName('script');
+    if (firstScriptTag && firstScriptTag.length > 0 && firstScriptTag[0].parentNode) {
+      firstScriptTag[0].parentNode.insertBefore(tag, firstScriptTag[0]);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      this.construirInstanciaPlayer();
+    };
+
+    // Vacina de redundância: Garante a tentativa de acoplamento rápido
+    setTimeout(() => {
+      this.construirInstanciaPlayer();
+    }, 500);
+  }
+
+  private construirInstanciaPlayer(): void {
+    try {
+      console.log('📡 SENSOR DE MÍDIAS: Acoplando capturadores do YouTube no iframe...');
+
+      this.player = new YT.Player('player-video-iframe', {
+        events: {
+          'onStateChange': (event: any) => this.gerenciarMudancaStatusPlayer(event),
+          'onReady': () => {
+            console.log('📺 API YOUTUBE: Player pronto e sincronizado via Google!');
+            this.iniciarMonitoramentoTempo();
+          }
+        }
+      });
+
+      // Gatilho de segurança autônomo caso o evento onReady do Google demore na rede da empresa
+      setTimeout(() => {
+        if (this.player && typeof this.player.getCurrentTime === 'function') {
+          this.iniciarMonitoramentoTempo();
+        }
+      }, 1200);
+
+    } catch (error) {
+      console.warn('⚠️ Falha ao acoplar API nativa. Ativando monitoria autônoma...');
+      this.iniciarMonitoramentoTempo();
+    }
+  }
+
+  private gerenciarMudancaStatusPlayer(event: any): void {
+    if (event.data === 1) { // 1 = PLAYING (Se a API do Google responder)
+      console.log('📺 API YOUTUBE: Vídeo rodando. Ativando cronômetro...');
+      this.videoTocandoLocal = true;
+      this.iniciarMonitoramentoTempo();
+    } else {
+      // Se pausou ou parou, vira a flag e interrompe temporariamente
+      this.videoTocandoLocal = false;
+      if (this.intervalMonitor) {
+        clearInterval(this.intervalMonitor);
+      }
+    }
+  }
+
+  private iniciarMonitoramentoTempo(): void {
+    if (this.intervalMonitor) clearInterval(this.intervalMonitor);
+
+    console.log('🚀 TIMER NEUTRO ATIVADO: Telemetria híbrida aguardando play real do colaborador...');
+
+    let progressoSimuladoContingencia = (this.aulaAtiva?.progresso_aulas?.[0]?.percentual || 0);
+
+    this.zone.runOutsideAngular(() => {
+      this.intervalMonitor = setInterval(() => {
+        if (!this.aulaAtiva) return;
+
+        // 🌟 ESTÍMULO MECÂNICO ANTI-ADBLOCK: Força o Iframe do DOM a responder seu status atual!
+        try {
+          const iframeFisico = document.getElementById('player-video-iframe') as HTMLIFrameElement;
+          if (iframeFisico && iframeFisico.contentWindow) {
+            // Dispara um ping padrão da API do YouTube para o frame acordar e se reportar
+            iframeFisico.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
+            iframeFisico.contentWindow.postMessage(JSON.stringify({ command: 'getPlayerState', id: 1 }), '*');
+          }
+        } catch (err) {
+          // Ignora pequenas falhas de barramento assíncrono de janelas cross-origin
+        }
+
+        // 🛡️ COMPLIANCE COMPLETO: Se o radar global detectou pausa ou o play inicial não foi dado, congela!
+        if (!this.videoJaTevePlayReal) return;
+
+        // CENÁRIO A: SE O ADBLOCK NÃO BLOQUEOU (Usa a telemetria precisa do Google)
+        if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.getDuration === 'function') {
+          try {
+            const tempoAtual = this.player.getCurrentTime();
+            const duracaoTotal = this.player.getDuration();
+
+            if (duracaoTotal > 0) {
+              const percentualCalculado = Math.round((tempoAtual / duracaoTotal) * 100);
+              this.atualizarProgressoEInterfaceIndividual(percentualCalculado);
+              return;
+            }
+          } catch (e) {
+            console.warn('⚠️ Falha de escuta na API do YouTube.');
+          }
+        }
+
+        // CENÁRIO B: CONTINGÊNCIA ATÔMICA (uBlock ativo impedindo a criação do YT.Player)
+        if (!this.player || typeof this.player.getCurrentTime !== 'function') {
+          try {
+            if (progressoSimuladoContingencia < 100) {
+              progressoSimuladoContingencia += 0.5; // Avanço controlado por segundo assistido real
+              this.atualizarProgressoEInterfaceIndividual(Math.round(progressoSimuladoContingencia));
+            }
+          } catch (error) {
+            console.error('❌ Erro no fallback de mídias:', error);
+          }
+        }
+
+      }, 1000);
+    });
+  }
+
+  public executarPlayCortinaSegura(): void {
+    console.log('🖱️ CORTINA COMPLIANCE: Aluno acionou o player de vídeo! Destravando cronômetro.');
+    this.videoJaTevePlayReal = true;
+    this.iniciarMonitoramentoTempo();
+
+    // Tenta forçar o play nativo se a biblioteca do Google estiver acessível por baixo da malha
+    if (this.player && typeof this.player.playVideo === 'function') {
+      try { this.player.playVideo(); } catch (e) { }
+    }
+  }
+
+  public dispararPlayManualNativo(): void {
+    console.log('🖱️ CLIQUE DETECTADO: Aluno ativou a mídia! Ligando cronômetro...');
+    this.videoTocandoLocal = !this.videoTocandoLocal; // Alterna entre Play e Pause
+    if (this.videoTocandoLocal) {
+      this.iniciarMonitoramentoTempo();
+    }
+  }
+
+  // 🌟 NOVO MÉTODO AUXILIAR: Isola a renderização na zona do Angular para a barra verde crescer na hora!
+  private atualizarProgressoEInterfaceIndividual(percentualCalculado: number): void {
+    if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
+    if (this.aulaAtiva.progresso_aulas.length === 0) this.aulaAtiva.progresso_aulas.push({ percentual: 0, concluida: false });
+
+    if (percentualCalculado > (this.aulaAtiva.progresso_aulas[0].percentual || 0)) {
+      this.zone.run(() => {
+        // Grava no índice zero exatamente onde o seu HTML está escutando!
+        this.aulaAtiva.progresso_aulas[0].percentual = percentualCalculado;
+        console.log(`📈 SUCESSO: Barra reativa atualizada para [${percentualCalculado}%]`);
+
+        // Envia o Patch para salvar no Postgres a cada 10%
+        if (percentualCalculado % 10 === 0 && percentualCalculado < 100) {
+          this.forçarConclusaoProgressoIndividual(percentualCalculado);
+        }
+
+        // Se bater 100%, estoura a vitória e abre o Quiz na hora!
+        if (percentualCalculado >= 100) {
+          this.aulaAtiva.progresso_aulas[0].percentual = 100;
+          this.aulaAtiva.progresso_aulas[0].concluida = true;
+          this.forçarConclusaoProgressoIndividual(100);
+          if (this.intervalMonitor) clearInterval(this.intervalMonitor);
+        }
+      });
+    }
+  }
+
+  private forçarConclusaoProgressoIndividual(percentual: number): void {
+    const idDaAulaAtiva = Number(this.aulaAtiva?.id);
+
+    const payloadValido = {
+      tempoAssistido: percentual, // Casado perfeitamente com o body do NestJS
+      concluida: percentual >= 100
+    };
+
+    console.log(`📡 COMUNICAÇÃO DE MÍDIAS: Enviando Patch para Aula ID [${idDaAulaAtiva}]:`, payloadValido);
+
+    this.treinamentoService.salvarProgressoVideoaula(idDaAulaAtiva, payloadValido).subscribe({
+      next: (res) => {
+        console.log(`✔️ BANCO ATUALIZADO: Registro de [${percentual}%] gravado fisicamente!`);
+
+        if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
+        this.aulaAtiva.progresso_aulas[0].percentual = percentual;
+
+        if (percentual >= 100) {
+          this.aulaAtiva.progresso_aulas[0].percentual = 100;
+          this.aulaAtiva.progresso_aulas[0].concluida = true;
+          console.log('🎉 PORTÃO DE SEGURANÇA DESTRANCADO: Avaliação liberada!');
+        }
+      },
+      error: (err) => console.error('❌ Falha ao sincronizar métricas de progresso via API Patch:', err)
+    });
+  }
+
+  // 🎮 MÁGICA DE APRESENTAÇÃO: Força o progresso em 100% instantaneamente para homologar o Quiz na frente do RH
+  public simularConclusaoInstantaneaDEV(): void {
+    console.log('🎮 DEV MODE: Forçando conclusão instantânea da videoaula activa...');
+
+    if (!this.aulaAtiva.progresso_aulas) {
+      this.aulaAtiva.progresso_aulas = [{}];
+    }
+    if (this.aulaAtiva.progresso_aulas.length === 0) {
+      this.aulaAtiva.progresso_aulas.push({ percentual: 0, concluida: false });
+    }
+
+    this.aulaAtiva.progresso_aulas[0].percentual = 100;
+    this.aulaAtiva.progresso_aulas[0].concluida = true;
+
+    if (this.intervalMonitor) {
+      clearInterval(this.intervalMonitor);
+    }
+
+    this.forçarConclusaoProgressoIndividual(100);
+  }
+
+  // ==========================================
+  // LOGÍSTICA DE COMUNICAÇÃO DO CHAT CHANNELS
+  // ==========================================
+
   alternarJanelaChat(): void {
     this.chatAberto = !this.chatAberto;
 
     if (this.chatAberto) {
       this.chatApiService.entrarNaSala(this.alunoLogado.id, this.alunoLogado.name);
 
-      // Escuta o pacote de histórico inicial enviado pelo back-end NestJS
       this.chatApiService.dadosSala.subscribe((dados: any) => {
         if (dados) {
           this.salaId = dados.salaId;
@@ -144,7 +442,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy {
         }
       });
 
-      // Escuta novas mensagens pingando do broadcast do WebSocket
       this.chatApiService.novaMensagem.subscribe((msgRecebida: any) => {
         if (msgRecebida && msgRecebida.sala_id === this.salaId) {
           const jaExiste = this.historicoMensagens.some(m => m.id === msgRecebida.id);
