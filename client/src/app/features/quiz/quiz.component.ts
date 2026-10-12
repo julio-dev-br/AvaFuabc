@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 // Angular Material Components
@@ -22,6 +22,7 @@ import { AlertsService } from '../../core/services/alerts.service';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule, // 🚀 Adicionado suporte a routerLink no HTML de resultados
     MatCardModule,
     MatRadioModule,
     MatButtonModule,
@@ -36,7 +37,7 @@ export class QuizComponent implements OnInit {
   private quizService = inject(QuizService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private alerts = inject(AlertsService); // 🌟 INJETADO MOTOR DE POP-UPS REATIVOS
+  private alerts = inject(AlertsService);
 
   aulaId!: number;
   quiz: any = null;
@@ -47,6 +48,11 @@ export class QuizComponent implements OnInit {
 
   resultadoEnvio: any = null;
   foiEnviado = false;
+  
+  // 🚀 ADICIONADO: Flags de estado visuais para o HTML acoplar os cards reativos
+  aprovado = false;
+  notaFinal = 0;
+  notaMinimaExigida = 7;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -68,6 +74,11 @@ export class QuizComponent implements OnInit {
         } else {
           this.quiz = dados;
         }
+        
+        if (this.quiz) {
+          this.notaMinimaExigida = this.quiz.notaMinima !== undefined ? Number(this.quiz.notaMinima) : 7;
+        }
+        
         this.isLoading = false;
         console.log('Quiz carregado com sucesso:', this.quiz);
       },
@@ -118,15 +129,14 @@ export class QuizComponent implements OnInit {
 
         console.log('=== RESPOSTA RECEBIDA DO NESTJS ===', respostaServidor);
 
-        // ✅ CORRIGIDO: Lê as propriedades reais que o seu service do NestJS devolve!
-        const notaExibida = respostaServidor.notaFinal !== undefined ? Number(respostaServidor.notaFinal) : 0;
-        const statusAprovado = respostaServidor.aprovado;
+        // 🚀 SINCRONIZADO: Alimenta as propriedades da instância para destravar os cards visuais!
+        this.notaFinal = respostaServidor.notaFinal !== undefined ? Number(respostaServidor.notaFinal) : 0;
+        this.aprovado = respostaServidor.aprovado === true;
 
-        // Usa o booleano de aprovação direto da inteligência do servidor
-        if (statusAprovado) {
-          this.alerts.sucesso(`Parabéns! Você foi Aprovado! Nota: ${notaExibida}. Seu certificado já está disponível no Perfil! 🏆`);
+        if (this.aprovado) {
+          this.alerts.sucesso(`Parabéns! Você foi Aprovado! Nota: ${this.notaFinal}. Seu certificado já está disponível! 🏆`);
         } else {
-          this.alerts.erro(`Nota: ${notaExibida}. Você ficou abaixo da média mínima exigida. Tente novamente! 📝`);
+          this.alerts.erro(`Nota: ${this.notaFinal}. Você ficou abaixo da média mínima (${this.notaMinimaExigida}). Tente novamente! 📝`);
         }
       },
       error: (err: HttpErrorResponse) => {
@@ -138,9 +148,18 @@ export class QuizComponent implements OnInit {
     });
   }
 
+  // 🚀 ADICIONADO: Método mestre que limpa a memória permitindo ao aluno refazer a prova na hora
+  refazerAvaliacao(): void {
+    this.respostasSelecionadas = {};
+    this.resultadoEnvio = null;
+    this.foiEnviado = false;
+    this.aprovado = false;
+    this.notaFinal = 0;
+    console.log('🔄 AVALIAÇÃO REINICIADA: Gabarito local limpo com sucesso.');
+  }
+
   voltarParaAula(): void {
-    // Busca o treinamento_id seguro ou recua para a rota base do dashboard do aluno
-    const treinamentoId = this.quiz?.aula?.modulo?.treinamento_id || 4;
+    const treinamentoId = this.quiz?.aula?.modulo?.treinamento_id || this.quiz?.treinamento_id || 4;
     this.router.navigate(['/curso', treinamentoId]);
   }
 }
