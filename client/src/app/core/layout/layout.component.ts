@@ -162,12 +162,24 @@ export class LayoutComponent implements OnInit {
       error: (err) => console.error('Erro no layout master ao buscar usuário:', err)
     });
   }
+
   carregarNotificacoes(): void {
     this.notificationService.buscarNaoLidas().subscribe({
       next: (dados: any[]) => this.notificacoes = dados,
       error: (err) => console.error('Erro ao carregar notificações no layout:', err)
     });
+    setInterval(() => {
+      this.notificationService.buscarNaoLidas().subscribe({
+        next: (dados: any[]) => {
+          if (dados) {
+            this.notificacoes = dados;
+          }
+        },
+        error: (err) => console.error('Erro no pooling silencioso de notificações:', err)
+      });
+    }, 30000); // 30000 ms = 30 segundos de intervalo
   }
+
   estaNoPainelAdmin(): boolean {
     return this.router.url.includes('/admin');
   }

@@ -193,11 +193,12 @@ export class PerfilComponent implements OnInit, AfterViewInit {
     this.userService.atualizarFotoPerfil(arquivo).subscribe({
       next: (res) => {
         this.usuario.avatarUrl = res.avatar_url;
-        this.snackBar.open('Foto de perfil atualizada com sucesso!', 'Fechar', { duration: 3000, verticalPosition: 'top' });
+        const msgSucesso = res.message || res.mensagem || 'Foto de perfil atualizada!';
+        this.alerts.sucesso(msgSucesso);
       },
       error: (err: HttpErrorResponse) => {
-        const msg = err.error?.message || 'Erro ao fazer upload da imagem.';
-        this.snackBar.open(msg, 'Fechar', { duration: 4000, verticalPosition: 'top' });
+        const msgErro = err.error?.message || 'Erro ao fazer upload da imagem.';
+        this.alerts.erro(msgErro);
       }
     });
   }

@@ -34,7 +34,7 @@ export class NotificationService {
     return this.http.post<any>(`${this.apiUrl}/admin/disparar`, payload, { headers: this.getHeaders() });
   }
 
-  // 💼 ROTA DO GESTOR: Busca a lista consolidada de comunicados antigos para auditoria
+  // Busca a lista consolidada de comunicados antigos para auditoria
   obterHistoricoAdmin(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/historico`, { headers: this.getHeaders() });
   }

@@ -1,18 +1,23 @@
-import { Controller, Get, Post, Body, UseGuards, Patch, UseInterceptors, UploadedFile, BadRequestException, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post, Patch, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/roles.enum';
-
+import { CurrentUser } from '../auth/current-user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CurrentUser } from 'src/auth/current-user.decorator';
-import { PrismaService } from '../prisma/prisma.service';
-
-// Importação da nossa Interface de Contrato
 import * as bcrypt from 'bcrypt';
-import type { CriarUsuarioInput } from './interfaces/criar-usuario.interface';
+
+// Interface de entrada ajustada para receber o CPF de validação do Protheus
+interface CriarUsuarioInput {
+  name: string;
+  email: string;
+  cpf: string; 
+  role: Role;
+  password?: string;
+}
 
 @Controller('user')
 @UseGuards(AuthGuard, RolesGuard)
@@ -23,18 +28,15 @@ export class UserController {
   @Get()
   @Roles(Role.ADMIN, Role.MANAGER)
   async findAll() {
-    // 📋 Traz a listagem crua do PostgreSQL sem travar na serialização do BigInt
     const usuarios = await this.prisma.user.findMany({
       orderBy: { name: 'asc' },
     });
-
     return usuarios.map(u => ({
       id: u.id,
       name: u.name || 'Usuário Sem Nome',
       email: u.email,
       role: u.role,
       ativo: u.ativo,
-      // Fallbacks amigáveis para a tabela do Angular ler enquanto o ERP não preenche
       unidade: { nome: u.unidade_id ? `Unidade ${u.unidade_id.toString()}` : 'Aguardando Integração ERP' },
       departamento: { nome: u.departamento_id ? `Depto ${u.departamento_id.toString()}` : 'Geral / RH' },
       cargo: { nome: u.cargo_id ? `Cargo ${u.cargo_id.toString()}` : 'Colaborador' }
@@ -50,7 +52,11 @@ export class UserController {
     if (!body.email || !body.email.includes('@')) {
       throw new BadRequestException('O e-mail informado é inválido.');
     }
+    if (!body.cpf || body.cpf.trim() === '') {
+      throw new BadRequestException('O CPF do colaborador é obrigatório para validação no Protheus.');
+    }
 
+    // 🛡️ TRAVA 1: Verifica se o e-mail já está em uso no portal
     const usuarioExiste = await this.prisma.user.findUnique({
       where: { email: body.email },
     });
@@ -59,15 +65,42 @@ export class UserController {
       throw new BadRequestException('Este e-mail já está cadastrado no sistema.');
     }
 
+    // 🚀 INTEGRAÇÃO PROTHEUS MOCK SÍNCRONA: Varre o array em memória exportado pelo ProtheusMockController
+    const cpfLimpo = body.cpf.replace(/\D/g, '');
+
+    const { MOCK_FUNCIONARIOS_PROTHEUS } = require('../integracao/protheus/protheus.controller');
+
+    const funcionarioErp = MOCK_FUNCIONARIOS_PROTHEUS.find(f => f.cpf === cpfLimpo);
+
+    if (!funcionarioErp) {
+      throw new BadRequestException('Atenção: CPF não localizado na folha de colaboradores ativos do Protheus da Fundação ABC.');
+    }
+
+    // Convertemos os IDs do ERP para BigInt para rodar a checagem cruzada de segurança
+    const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
+    const unidadeId = funcionarioErp.unidade_id ? BigInt(funcionarioErp.unidade_id) : null;
+    const deptoId = funcionarioErp.departamento_id ? BigInt(funcionarioErp.departamento_id) : null;
+    const cargoId = funcionarioErp.cargo_id ? BigInt(funcionarioErp.cargo_id) : null;
+
+    // Como o schema do User não guarda a string 'cpf', barramos se o mesmo funcionário do ERP tentar criar outra conta
+    if (unidadeId && cargoId) {
+      const vinculoExiste = await this.prisma.user.findFirst({
+        where: {
+          unidade_id: unidadeId,
+          cargo_id: cargoId,
+          departamento_id: deptoId,
+          name: funcionarioErp.nome
+        }
+      });
+
+      if (vinculoExiste) {
+        throw new BadRequestException(`Atenção: O colaborador ${funcionarioErp.nome} já possui uma conta ativa registrada para este CPF/Lotação.`);
+      }
+    }
+
     const senhaPadrao = body.password || 'Fuabc@2026';
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(senhaPadrao, salt);
-
-    // 🌟 TRATAMENTO DE NULOS DO ERP: Se o campo vier em branco ou undefined, grava NULL com segurança
-    const empresaId = body.empresa_id ? BigInt(body.empresa_id) : null;
-    const unidadeId = body.unidade_id ? BigInt(body.unidade_id) : null;
-    const deptoId = body.departamento_id ? BigInt(body.departamento_id) : null;
-    const cargoId = body.cargo_id ? BigInt(body.cargo_id) : null;
 
     const novoUsuario = await this.prisma.user.create({
       data: {
@@ -84,7 +117,7 @@ export class UserController {
       select: { id: true, name: true, email: true }
     });
 
-    console.log('✅ GRAVADO NO POSTGRESQL COM SUCESSO! ID:', novoUsuario.id);
+    console.log('✅ VALIDADO NO MOCK PROTHEUS E GRAVADO NO POSTGRESQL COM VALIDAÇÃO DUPLA! ID:', novoUsuario.id);
     return novoUsuario;
   }
 
@@ -106,6 +139,7 @@ export class UserController {
   }
 
   @Patch('perfil/avatar')
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -116,7 +150,10 @@ export class UserController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+        // 🚀 CORRIGIDO: Validação direta por lista de strings (Inviolável e livre de quebras de Regex!)
+        const formatosPermitidos = ['image/jpeg', 'image/jpg', 'image/png'];
+
+        if (!formatosPermitidos.includes(file.mimetype)) {
           return cb(new BadRequestException('Apenas arquivos JPG, JPEG ou PNG são permitidos!'), false);
         }
         cb(null, true);
@@ -124,20 +161,27 @@ export class UserController {
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
+
   async uploadAvatar(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Arquivo não enviado.');
     const linkPublico = `http://localhost:3000/uploads/avatars/${file.filename}`;
 
-    return this.prisma.user.update({
+    const usuarioAtualizado = await this.prisma.user.update({
       where: { id: user.id },
       data: { avatar_url: linkPublico },
       select: { id: true, name: true, email: true, avatar_url: true }
     });
+
+    return { 
+      message: 'Foto de perfil atualizada com sucesso no ecossistema!',
+      avatar_url: usuarioAtualizado.avatar_url 
+    };
   }
 
 
-  // 👤 1. BUSCA O PERFIL DO USUÁRIO LOGADO DIRETO DO POSTGRESQL VIA JWT
   @Get('perfil/me')
+  // 🚀 LIBERADO: Alunos, Líderes e Admins podem puxar seus próprios dados sincronizados do JWT
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   async obterPerfilLogado(@CurrentUser() user: any) {
     const usuario = await this.prisma.user.findUnique({
       where: { id: user.id }
@@ -147,7 +191,6 @@ export class UserController {
       throw new BadRequestException('Usuário não localizado no ecossistema.');
     }
 
-    // Retorna o JSON higienizado lendo as colunas exatas do seu Schema Prisma!
     return {
       id: usuario.id,
       nome: usuario.name || 'Colaborador',
@@ -159,8 +202,8 @@ export class UserController {
     };
   }
 
-  // 🔒 2. ATUALIZA APENAS A SENHA CRIPTOGRAFADA DO ALUNO COM VALIDAÇÃO SEGURA
   @Patch('perfil/senha')
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   async atualizarSenha(@CurrentUser() user: any, @Body() body: any) {
     const { senhaAtual, novaSenha } = body;
 
@@ -171,7 +214,6 @@ export class UserController {
     const usuarioDB = await this.prisma.user.findUnique({ where: { id: user.id } });
     if (!usuarioDB) throw new BadRequestException('Usuário não localizado.');
 
-    // Valida se a senha atual digitada bate com o hash criptografado do banco
     const senhaValida = await bcrypt.compare(senhaAtual, usuarioDB.password);
     if (!senhaValida) {
       throw new BadRequestException('A senha atual informada está incorreta.');
@@ -181,7 +223,6 @@ export class UserController {
       throw new BadRequestException('A nova senha deve conter no mínimo 6 caracteres.');
     }
 
-    // Gera o novo hash bcrypt com total segurança corporativa
     const salt = await bcrypt.genSalt(10);
     const novoPasswordHash = await bcrypt.hash(novaSenha, salt);
 
@@ -192,8 +233,4 @@ export class UserController {
 
     return { message: 'Senha atualizada com sucesso no ecossistema!' };
   }
-
-
-
 }
-

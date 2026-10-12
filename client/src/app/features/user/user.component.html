@@ -38,7 +38,7 @@
   </div>
 
   <mat-card-content style="padding: 24px !important; box-sizing: border-box;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; width: 100%;">
 
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>Nome Completo</mat-label>
@@ -50,6 +50,13 @@
         <mat-label>E-mail Corporativo</mat-label>
         <input matInput type="email" [(ngModel)]="novoUsuario.email" placeholder="Ex: julio@fuabc.org">
         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
+      </mat-form-field>
+
+      <!-- 🚀 NOVO: Campo de CPF para Integração Síncrona do Protheus Mock -->
+      <mat-form-field appearance="outline" class="compact-form">
+        <mat-label>CPF do Colaborador</mat-label>
+        <input matInput [(ngModel)]="novoUsuario.cpf" placeholder="000.000.000-00" maxlength="14">
+        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">badge</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="compact-form">
@@ -64,25 +71,27 @@
 
     </div>
 
-    <!-- Rodapé de Ações com Efeito de Opacidade Azul Suave no Estado Desabilitado -->
+    <!-- Rodapé de Ações Ajustado com a Trava do CPF Dinâmico -->
     <div
       style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
       <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
         (click)="resetarFormulario()">Cancelar</button>
 
       <button mat-raised-button
-        [style.background]="!novoUsuario.name || !novoUsuario.email || isSalvando ? 'rgba(0, 51, 102, 0.35)' : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'"
-        [style.color]="!novoUsuario.name || !novoUsuario.email || isSalvando ? 'rgba(255, 255, 255, 0.6)' : '#ffffff'"
+        [style.background]="!novoUsuario.name || !novoUsuario.email || !novoUsuario.cpf || isSalvando ? 'rgba(0, 51, 102, 0.35)' : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'"
+        [style.color]="!novoUsuario.name || !novoUsuario.email || !novoUsuario.cpf || isSalvando ? 'rgba(255, 255, 255, 0.6)' : '#ffffff'"
         style="padding: 0 24px; height: 40px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.05);"
-        [disabled]="!novoUsuario.name || !novoUsuario.email || isSalvando" (click)="salvarUsuario()">
+        [disabled]="!novoUsuario.name || !novoUsuario.email || !novoUsuario.cpf || isSalvando"
+        (click)="salvarUsuario()">
         <mat-icon *ngIf="!isSalvando"
           style="font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">check_circle</mat-icon>
-        {{ isSalvando ? 'Gravando...' : 'Confirmar e Registrar' }}
+        {{ isSalvando ? 'Validando no ERP...' : 'Confirmar e Admitir' }}
       </button>
     </div>
   </mat-card-content>
 </mat-card>
 }
+
 <!-- Tabela de Monitoramento das Contas do Postgres (Design Suavizado SaaS) -->
 <mat-card
   style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02) !important; border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
@@ -99,7 +108,6 @@
       <mat-icon matSuffix style="color: #64748b;">search</mat-icon>
     </mat-form-field>
   </div>
-
   <mat-card-content style="padding: 0 !important; box-sizing: border-box; width: 100%;">
 
     <!-- 🔄 OVERLAY DE SINCRONIZAÇÃO DA MALHA DE DADOS -->
