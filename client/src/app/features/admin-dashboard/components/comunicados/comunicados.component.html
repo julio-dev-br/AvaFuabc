@@ -1,27 +1,22 @@
-<div
-    style="padding: 24px; max-width: 1400px; margin: 0 auto; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; animation: fadeIn 0.3s ease; box-sizing: border-box; width: 100%;">
-    <div style="flex: 1; min-width: 380px; box-sizing: border-box;">
-        <mat-card
-            style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden; height: 100%; background: #ffffff;">
-            <div
-                style="background: #ffffff; padding: 24px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px;">
-                <div
-                    style="background-color: #eff6ff; color: #003366; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0;">
-                    <mat-icon
-                        style="font-size: 22px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;">campaign</mat-icon>
+<div class="comunicados-layout-container">
+    
+    <!-- CARD ESQUERDO: Formulário de Disparo -->
+    <div style="flex: 1; min-width: 380px; box-shrink: 0; box-sizing: border-box;">
+        <mat-card class="card-comunicado-premium">
+            
+            <div style="background: #ffffff; padding: 24px 20px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 14px;">
+                <div class="icon-box-azul">
+                    <mat-icon style="font-size: 22px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;">campaign</mat-icon>
                 </div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #003366; letter-spacing: -0.3px;">
-                        Transmitir Alerta em Massa
-                    </h2>
-                    <p style="margin: 2px 0 0 0; color: #64748b; font-size: 12px; font-weight: 500; line-height: 1.4;">
-                        Dispare comunicados regulatórios via Protheus para a Fundação ABC.
-                    </p>
+                    <h2 style="margin: 0; font-size: 15px; font-weight: 700; color: #003366; letter-spacing: -0.3px;">Transmitir Alerta em Massa</h2>
+                    <p style="margin: 2px 0 0 0; color: #64748b; font-size: 12px; font-weight: 500; line-height: 1.4;">Dispare comunicados regulatórios via Protheus para a Fundação ABC.</p>
                 </div>
             </div>
-            <mat-card-content
-                style="padding: 24px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+
+            <mat-card-content style="padding: 24px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+                
                 <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Enviar Comunicado Para:</mat-label>
                     <mat-select [(ngModel)]="comunicadoForm.escopo" (selectionChange)="aoMudarEscopo()">
@@ -31,52 +26,45 @@
                         <mat-option value="DEPARTAMENTO">📂 Por Departamento / Setor</mat-option>
                     </mat-select>
                 </mat-form-field>
+
                 @if (comunicadoForm.escopo !== 'GERAL') {
-                <mat-form-field appearance="outline" style="width: 100%; animation: fadeIn 0.2s ease;"
-                    class="compact-form">
+                <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Selecione o Alvo Específico</mat-label>
                     <mat-select [(ngModel)]="comunicadoForm.referenciaId">
                         @if (comunicadoForm.escopo === 'EMPRESA') {
-                        @for (emp of listaEmpresas; track emp.id) {
-                        <mat-option [value]="emp.id">{{ emp.nome }}</mat-option>
-                        }
+                            @for (emp of listaEmpresas; track emp.id) {
+                                <mat-option [value]="emp.id">{{ emp.nome }}</mat-option>
+                            }
                         }
                         @if (comunicadoForm.escopo === 'UNIDADE') {
-                        @for (uni of listaUnidades; track uni.id) {
-                        <mat-option [value]="uni.id">{{ uni.nome }}</mat-option>
-                        }
+                            @for (uni of listaUnidades; track uni.id) {
+                                <mat-option [value]="uni.id">{{ uni.nome }}</mat-option>
+                            }
                         }
                         @if (comunicadoForm.escopo === 'DEPARTAMENTO') {
-                        @for (dep of listaDepartamentos; track dep.id) {
-                        <mat-option [value]="dep.id">{{ dep.nome }}</mat-option>
+                            @for (dep of listaDepartamentos; track dep.id) {
+                                <mat-option [value]="dep.id">{{ dep.nome }}</mat-option>
+                            }
                         }
-                        }
-
                     </mat-select>
                 </mat-form-field>
                 }
 
-                <!-- Título e Texto do Alerta -->
                 <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Título do Alerta</mat-label>
-                    <input matInput [(ngModel)]="comunicadoForm.titulo"
-                        placeholder="Ex: Importante: Reciclagem Obrigatória NR-32" maxlength="100">
+                    <input matInput [(ngModel)]="comunicadoForm.titulo" placeholder="Ex: Importante: Reciclagem Obrigatória NR-32" maxlength="100">
                     <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">title</mat-icon>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                     <mat-label>Conteúdo da Mensagem</mat-label>
-                    <textarea matInput [(ngModel)]="comunicadoForm.mensagem" rows="5"
-                        placeholder="Digite o texto oficial..." maxlength="500"></textarea>
+                    <textarea matInput [(ngModel)]="comunicadoForm.mensagem" rows="5" placeholder="Digite o texto oficial..." maxlength="500"></textarea>
                     <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">chat</mat-icon>
                 </mat-form-field>
 
             </mat-card-content>
 
-            <!-- Rodapé de Ações de Transmissão -->
-            <!-- 🚀 CORRIGIDO: Removida a quebra de linha interna e simplificado o binding de estilo -->
-            <mat-card-actions
-                style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0; box-sizing: border-box; width: 100%;">
+            <mat-card-actions style="padding: 16px 24px; justify-content: flex-end; display: flex; background: #f8fafc; border-top: 1px solid #e2e8f0; margin: 0; box-sizing: border-box; width: 100%;">
                 <button mat-raised-button 
                     [style.background]="comunicadoForm.titulo.trim() && comunicadoForm.mensagem.trim() && !isEnviandoComunicado ? '#003366' : '#cbd5e1'" 
                     [style.color]="comunicadoForm.titulo.trim() && comunicadoForm.mensagem.trim() && !isEnviandoComunicado ? '#ffffff' : '#94a3b8'"
@@ -91,74 +79,48 @@
         </mat-card>
     </div>
 
+    <!-- CARD DIREITO: Tabela de Auditoria Histórica -->
     <div style="flex: 1.5; min-width: 500px; box-sizing: border-box;">
-        <mat-card
-            style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff; height: 100%;">
+        <mat-card class="card-comunicado-premium">
 
-            <!-- Painel Informativo da Tabela -->
-            <div
-                style="background: #f8fafc; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <h3
-                    style="margin: 0; color: #003366; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px;">
+            <div style="background: #f8fafc; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <h3 style="margin: 0; color: #003366; font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px;">
                     <mat-icon style="color: #64748b; font-size: 20px; width: 20px; height: 20px;">history</mat-icon>
                     Registro de Envios Institucionais
                 </h3>
-                <span
-                    style="background: #e2e8f0; color: #003366; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px;">
-                    Auditoria Ativa
-                </span>
+                <span class="badge-auditoria-ativa">Auditoria Ativa</span>
             </div>
 
-            <!-- Tabela Fluida do Material Design -->
             <div style="overflow-x: auto; width: 100%; box-sizing: border-box;">
-                <table mat-table [dataSource]="historicoComunicados" class="mat-elevation-z0"
-                    style="width: 100%; background: transparent;">
-
+                <table mat-table [dataSource]="historicoComunicados" class="mat-elevation-z0" style="width: 100%; background: transparent;">
 
                     <ng-container matColumnDef="data">
-                        <th mat-header-cell *matHeaderCellDef
-                            style="padding: 14px 20px; font-weight: 700; color: #475569; width: 140px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
-                            Horário </th>
-                        <td mat-cell *matCellDef="let row"
-                            style="padding: 14px 20px; color: #64748b; font-size: 13px; font-weight: 500;">
+                        <th mat-header-cell *matHeaderCellDef style="padding: 14px 20px; font-weight: 700; color: #475569; width: 140px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">Horário</th>
+                        <td mat-cell *matCellDef="let row" style="padding: 14px 20px; color: #64748b; font-size: 13px; font-weight: 500;">
                             {{ row.created_at | date:'dd/MM HH:mm' }}
                         </td>
                     </ng-container>
 
-
                     <ng-container matColumnDef="titulo">
-                        <th mat-header-cell *matHeaderCellDef
-                            style="padding: 14px 20px; font-weight: 700; color: #475569; width: 220px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
-                            Assunto / Título </th>
-                        <td mat-cell *matCellDef="let row"
-                            style="padding: 14px 20px; font-weight: 700; color: #003366; font-size: 13px; word-break: break-word;">
+                        <th mat-header-cell *matHeaderCellDef style="padding: 14px 20px; font-weight: 700; color: #475569; width: 220px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">Assunto / Título</th>
+                        <td mat-cell *matCellDef="let row" style="padding: 14px 20px; font-weight: 700; color: #003366; font-size: 13px; word-break: break-word;">
                             {{ row.titulo }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="mensagem">
-                        <th mat-header-cell *matHeaderCellDef
-                            style="padding: 14px 20px; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">
-                            Mensagem Transmitida </th>
-                        <td mat-cell *matCellDef="let row"
-                            style="padding: 14px 20px; color: #475569; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                            [title]="row.mensagem">
+                        <th mat-header-cell *matHeaderCellDef style="padding: 14px 20px; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;">Mensagem Transmitida</th>
+                        <td mat-cell *matCellDef="let row" style="padding: 14px 20px; color: #475569; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" [title]="row.mensagem">
                             {{ row.mensagem }}
                         </td>
                     </ng-container>
 
-                    <!-- Renderizadores de Linhas Estruturais do Material -->
-                    <tr mat-header-row *matHeaderRowDef="colunasComunicados"
-                        style="background: #f8fafc; height: 46px; border-bottom: 1px solid #e2e8f0;"></tr>
-                    <tr mat-row *matRowDef="let row; columns: colunasComunicados;"
-                        style="border-bottom: 1px solid #f1f5f9; height: 52px; transition: background 0.2s;"
-                        class="linha-tabela-comunicado"></tr>
+                    <tr mat-header-row *matHeaderRowDef="colunasComunicados" style="background: #f8fafc; height: 46px; border-bottom: 1px solid #e2e8f0;"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colunasComunicados;" class="linha-tabela-comunicado"></tr>
                 </table>
             </div>
 
-            <!-- Paginador Corporativo -->
-            <mat-paginator #comunicadosPaginator [pageSize]="5" showFirstLastButtons
-                style="background: #ffffff; border-top: 1px solid #e2e8f0; font-size: 13px; color: #475569;"></mat-paginator>
+            <mat-paginator #comunicadosPaginator [pageSize]="5" showFirstLastButtons style="background: #ffffff; border-top: 1px solid #e2e8f0; font-size: 13px; color: #475569;"></mat-paginator>
         </mat-card>
     </div>
 </div>

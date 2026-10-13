@@ -1,0 +1,70 @@
+
+.comunicados-layout-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+}
+.card-comunicado-premium {
+  border-radius: 16px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.01) !important;
+  border: 1px solid #e2e8f0 !important;
+  overflow: hidden;
+  background: #ffffff;
+  height: 100%;
+  animation: fadeIn 0.4s ease;
+}
+.icon-box-azul {
+  background-color: #eff6ff;
+  color: #003366;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.badge-auditoria-ativa {
+  background: #e2e8f0;
+  color: #003366;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.linha-tabela-comunicado {
+  border-bottom: 1px solid #f1f5f9;
+  height: 52px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out !important;
+}
+.linha-tabela-comunicado:hover {
+  background-color: #f8fafc !important;
+  box-shadow: inset 4px 0 0 0 #003366;
+}
+::v-deep .compact-form .mat-mdc-text-field-wrapper {
+  background-color: #ffffff !important;
+  transition: all 0.2s ease;
+}
+
+::v-deep .compact-form .mat-mdc-form-field-subscript-wrapper {
+  margin-bottom: 2px !important;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
