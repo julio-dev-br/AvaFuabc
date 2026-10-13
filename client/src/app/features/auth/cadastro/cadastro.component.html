@@ -1,0 +1,96 @@
+<div
+    style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 24px; box-sizing: border-box; font-family: sans-serif;">
+    <div style="max-width: 450px; width: 100%; box-sizing: border-box; animation: fadeIn 0.4s ease;">
+
+        <!-- 🏥 LOGO INFORMATIVO DA FUNDAÇÃO ABC -->
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div
+                style="background-color: #003366; color: #ffffff; width: 54px; height: 54px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.2);">
+                <mat-icon
+                    style="font-size: 28px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">school</mat-icon>
+            </div>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Portal de
+                Treinamentos FUABC</h2>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px; font-weight: 500;">Auto-admissão digital
+                integrada ao Protheus ERP</p>
+        </div>
+
+        <!-- 🛡️ CARD PRINCIPAL DE CADASTRO -->
+        <mat-card
+            style="border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01) !important; border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
+
+            <!-- Linha de Progresso Reativa -->
+            <mat-progress-bar *ngIf="isProcessando" mode="indeterminate"
+                style="height: 4px; margin-bottom: -4px; position: relative; z-index: 10;"></mat-progress-bar>
+
+            <div style="padding: 32px 24px 24px 24px; box-sizing: border-box;">
+                <form (ngSubmit)="executarAutoCadastro()"
+                    style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+
+                    <!-- Campo: Nome Completo -->
+                    <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                        <mat-label>Nome Completo</mat-label>
+                        <input matInput [(ngModel)]="formularioCadastro.name" name="name" [disabled]="isProcessando"
+                            placeholder="Digite seu nome completo" required>
+                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">person</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Campo: E-mail Corporativo -->
+                    <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                        <mat-label>E-mail Institucional</mat-label>
+                        <input matInput type="email" [(ngModel)]="formularioCadastro.email" name="email"
+                            [disabled]="isProcessando" placeholder="exemplo@fuabc.org.br" required>
+                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
+                    </mat-form-field>
+                    <!-- 🚀 CAMPO MESTRE: CPF de Validação Regulamentar no Protheus Mock -->
+                    <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                        <mat-label>CPF do Funcionário</mat-label>
+                        <input matInput [(ngModel)]="formularioCadastro.cpf" name="cpf" [disabled]="isProcessando"
+                            placeholder="000.000.000-00" maxlength="14" required>
+                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">badge</mat-icon>
+                        <mat-hint style="color: #64748b; font-size: 11px;">Identificaremos seu hospital e cargo de forma
+                            automática.</mat-hint>
+                    </mat-form-field>
+
+                    <!-- Campo: Nova Senha de Acesso -->
+                    <mat-form-field appearance="outline" style="width: 100%; margin-top: 6px;" class="compact-form">
+                        <mat-label>Criar Senha de Acesso</mat-label>
+                        <input matInput type="password" [(ngModel)]="formularioCadastro.password" name="password"
+                            [disabled]="isProcessando" placeholder="Mínimo 6 caracteres" required>
+                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">lock</mat-icon>
+                    </mat-form-field>
+
+                    <!-- Campo: Confirmação de Senha -->
+                    <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
+                        <mat-label>Confirmar Nova Senha</mat-label>
+                        <input matInput type="password" [(ngModel)]="formularioCadastro.confirmarPassword"
+                            name="confirmarPassword" [disabled]="isProcessando" placeholder="Digite a senha novamente"
+                            required>
+                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">lock_reset</mat-icon>
+                    </mat-form-field>
+
+                    <!-- 🚀 BOTÃO SUPREMO DE AUTO-ADMISSÃO SÍNCRONA -->
+                    <button mat-raised-button type="submit"
+                        [style.background]="isProcessando || !formularioCadastro.name || !formularioCadastro.email || !formularioCadastro.cpf || !formularioCadastro.password ? 'rgba(0, 51, 102, 0.35)' : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'"
+                        [style.color]="isProcessando || !formularioCadastro.name || !formularioCadastro.email || !formularioCadastro.cpf || !formularioCadastro.password ? 'rgba(255, 255, 255, 0.6)' : '#ffffff'"
+                        style="width: 100%; height: 44px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1); transition: all 0.3s ease; margin-top: 10px;"
+                        [disabled]="isProcessando || !formularioCadastro.name || !formularioCadastro.email || !formularioCadastro.cpf || !formularioCadastro.password">
+                        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">how_to_reg</mat-icon>
+                        {{ isProcessando ? 'Validando no Protheus...' : 'Criar Minha Conta Acadêmica' }}
+                    </button>
+
+                    <!-- Link de Redirecionamento Amigável -->
+                    <div
+                        style="text-align: center; margin-top: 14px; font-size: 13px; color: #64748b; font-weight: 500;">
+                        Já possui uma conta ativa?
+                        <a routerLink="/login"
+                            style="color: #003366; font-weight: 700; text-decoration: none; transition: color 0.2s;"
+                            onmouseover="this.style.color='#0a2540'" onmouseout="this.style.color='#003366'">Faça login
+                            aqui</a>
+                    </div>
+
+                </form>
+            </div>
+        </mat-card>
+    </div>
+</div>

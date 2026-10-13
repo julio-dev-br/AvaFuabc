@@ -25,8 +25,13 @@ export class AuthService {
     return localStorage.getItem('userRole');
   }
 
-  signup(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, userData);
+  // signup(userData: any): Observable<any> {
+  //   return this.http.post(`${this.apiUrl}/signup`, userData);
+  // }
+
+   // 🚀 NOVO: Método de Auto-Cadastro Público integrado ao Protheus
+  signup(payload: { name: string; email: string; cpf: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/auth/signup`, payload);
   }
 
   getToken(): string | null {
