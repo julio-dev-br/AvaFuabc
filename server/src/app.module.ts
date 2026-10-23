@@ -32,7 +32,9 @@ import { ProtheusMockController } from './integracao/protheus/protheus.controlle
     GeminiModule,
     ChatModule,   
   ],
+  
   controllers: [UserController, NotificacoesController, ProtheusMockController],
   providers: [PrismaService, NotificacoesService],
 })
+
 export class AppModule {}

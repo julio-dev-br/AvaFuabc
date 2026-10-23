@@ -2,7 +2,6 @@
 <div class="content-header"
   style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; box-sizing: border-box; width: 100%; flex-wrap: wrap; gap: 16px;">
   <div style="display: flex; align-items: center; gap: 14px;">
-    <!-- Círculo de Destaque Sutil para o Ícone -->
     <div
       style="background-color: #eff6ff; color: #003366; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0;">
       <mat-icon
@@ -27,8 +26,6 @@
   </button>
   }
 </div>
-
-<!-- Formulário de Inclusão de Funcionário Premium -->
 @if (exibirFormularioCadastro) {
 <mat-card
   style="margin-bottom: 32px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02) !important; overflow: hidden; background: #ffffff; animation: fadeIn 0.3s ease;">
@@ -36,7 +33,6 @@
     <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #003366;">Matricular e Registrar Novo Funcionário
     </h3>
   </div>
-
   <mat-card-content style="padding: 24px !important; box-sizing: border-box;">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; width: 100%;">
 
@@ -51,14 +47,11 @@
         <input matInput type="email" [(ngModel)]="novoUsuario.email" placeholder="Ex: julio@fuabc.org">
         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
       </mat-form-field>
-
-      <!-- 🚀 NOVO: Campo de CPF para Integração Síncrona do Protheus Mock -->
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>CPF do Colaborador</mat-label>
         <input matInput [(ngModel)]="novoUsuario.cpf" placeholder="000.000.000-00" maxlength="14">
         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">badge</mat-icon>
       </mat-form-field>
-
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>Nível de Perfil de Acesso</mat-label>
         <mat-select [(ngModel)]="novoUsuario.role">
@@ -68,10 +61,8 @@
         </mat-select>
         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">admin_panel_settings</mat-icon>
       </mat-form-field>
-
     </div>
 
-    <!-- Rodapé de Ações Ajustado com a Trava do CPF Dinâmico -->
     <div
       style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
       <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
@@ -92,11 +83,9 @@
 </mat-card>
 }
 
-<!-- Tabela de Monitoramento das Contas do Postgres (Design Suavizado SaaS) -->
 <mat-card
   style="border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02) !important; border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
 
-  <!-- Cabeçalho Limpo da Tabela com Filtro Alinhado -->
   <div
     style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid #f1f5f9; background-color: #ffffff; box-sizing: border-box; width: 100%;">
     <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #003366; letter-spacing: -0.2px;">Colaboradores
@@ -109,8 +98,6 @@
     </mat-form-field>
   </div>
   <mat-card-content style="padding: 0 !important; box-sizing: border-box; width: 100%;">
-
-    <!-- 🔄 OVERLAY DE SINCRONIZAÇÃO DA MALHA DE DADOS -->
     @if (isLoading) {
     <div
       style="padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; width: 100%; box-sizing: border-box;">
@@ -126,12 +113,8 @@
       </div>
     </div>
     } @else {
-
-    <!-- Tabela Estilizada Premium do Angular Material -->
     <div style="width: 100%; overflow-x: auto; box-sizing: border-box;">
       <table mat-table [dataSource]="userDataSource" style="width: 100%; background: white;">
-
-        <!-- Coluna: Nome Completo -->
         <ng-container matColumnDef="nome">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; height: 48px; background: #f8fafc; padding-left: 24px; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -141,8 +124,6 @@
             {{ user.name || 'Usuário Sem Nome' }}
           </td>
         </ng-container>
-
-        <!-- Coluna: E-mail -->
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -151,8 +132,6 @@
             {{ user.email }}
           </td>
         </ng-container>
-
-        <!-- Coluna: Lotação (Unidade) protegida contra nulos -->
         <ng-container matColumnDef="lotacao">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -164,8 +143,6 @@
             <small style="color: #64748b; font-weight: 500;">{{ user.departamento?.nome || 'Geral / RH' }}</small>
           </td>
         </ng-container>
-
-        <!-- Coluna: Cargo protegida contra nulos -->
         <ng-container matColumnDef="cargo">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -174,8 +151,6 @@
             {{ user.cargo?.nome || 'Não Configurado' }}
           </td>
         </ng-container>
-
-        <!-- Coluna: Perfil (Badges Pastéis de Alto Padrão SaaS) -->
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -190,8 +165,6 @@
             </span>
           </td>
         </ng-container>
-
-        <!-- Coluna: Status Toggle -->
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: #475569; font-size: 12px; text-align: center; background: #f8fafc; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -200,7 +173,6 @@
             <mat-slide-toggle [checked]="user.ativo" color="primary" (change)="mudarStatus(user)"></mat-slide-toggle>
           </td>
         </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="colunasTabela"
           style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;"></tr>
         <tr mat-row *matRowDef="let row; columns: colunasTabela;"

@@ -1,15 +1,12 @@
-/* Configuração base da janela do navegador */
 html {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
   overflow: hidden;
-  /* Trava o HTML externo contra barras duplas */
   box-sizing: border-box;
 }
 
-/* Configuração do Corpo do Sistema */
 body {
   margin: 0;
   padding: 0;
@@ -17,12 +14,8 @@ body {
   width: 100%;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background-color: #f4f6f8;
-  /* Fundo cinza claro corporativo */
-
-  /* 🌟 O SEGREDO ESTÁ AQUI: Libera a rolagem vertical nativa no corpo da página */
   overflow-y: auto !important;
   overflow-x: hidden;
-  /* Bloqueia permanentemente o scroll para os lados */
 }
 
 *,
@@ -31,20 +24,15 @@ body {
   box-sizing: inherit;
 }
 
-/* 🌟 RESOLUÇÃO ABSOLUTA: Remove a capa escura nativa do Google Material MDC em todo o ecossistema */
 body .snackbar-container-limpo .mat-mdc-snack-bar-container .mdc-snackbar__surface {
   background-color: #2e7d32 !important;
-  /* Força o verde oficial na casca externa */
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
   border-radius: 6px !important;
   padding: 0 !important;
-  /* Zera os paddings nativos para o nosso HTML inline dominar */
 }
 
-/* CORREÇÃO DO ALERTA DE ERRO: Garante o vermelho corporativo idêntico na tela de login */
 body .snackbar-erro-MDC .mat-mdc-snack-bar-container .mdc-snackbar__surface {
   background-color: #c62828 !important;
-  /* Vermelho escuro de atenção */
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
   border-radius: 6px !important;
 }
@@ -66,7 +54,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   color: #003366 !important;
 }
 
-/* 🌌 CONTAINER MESTRE BLINDADO (Cobre a área de conteúdo) */
 .loading-overlay-container {
   position: fixed;
   top: 0;
@@ -74,18 +61,14 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   width: 100vw;
   height: 100vh;
   background-color: rgba(248, 250, 252, 0.65);
-  /* Fundo sutilmente esmaecido para dar foco */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  /* 🌟 Sobrepõe qualquer menu, card ou elemento da tela */
   backdrop-filter: blur(2px);
-  /* Efeito de desfoque premium no fundo */
   animation: fadeIn 0.2s ease-out;
 }
 
-/* 📦 CARD CENTRALIZADO DE PROGRESSO */
 .loading-progress-box {
   width: 90%;
   max-width: 450px;
@@ -97,8 +80,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   text-align: center;
 }
 
-
-/* O EFEITO PULSANTE SHIMMER ENTERPRISE */
 .shimmer-placeholder {
   background: linear-gradient(90deg, #f0f2f5 25%, #e6e8eb 50%, #f0f2f5 75%);
   background-size: 200% 100%;
@@ -106,7 +87,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   border-radius: 8px;
 }
 
-/* 🌬️ ANIMAÇÃO DE ENTRADA SUAVE ESTILO TOASTR */
 @keyframes toastrFadeIn {
   from {
     opacity: 0;
@@ -119,7 +99,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   }
 }
 
-/* ⏳ ANIMAÇÃO DA BARRINHA DE TEMPO DECORRIDO */
 @keyframes toastrProgress {
   from {
     width: 100%;
@@ -130,7 +109,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   }
 }
 
-/* 📦 CASCA CONTAINER DO TOASTR PERSONALIZADO */
 .toastr-card-custom {
   position: relative;
   background: #ffffff !important;
@@ -141,28 +119,22 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   overflow: hidden !important;
 }
 
-/* 🟢 BARRINHA DE PROGRESSO DO SUCESSO */
 .toastr-progress-sucesso {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 4px;
   background-color: #10b981;
-  /* Verde esmeralda premium */
   animation: toastrProgress 4000ms linear forwards;
-  /* 4000ms casa com a duration do seu service */
 }
 
-/* 🔴 BARRINHA DE PROGRESSO DO ERRO */
 .toastr-progress-erro {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 4px;
   background-color: #ef4444;
-  /* Vermelho escarlate premium */
   animation: toastrProgress 5000ms linear forwards;
-  /* 5000ms casa com a duration do seu service */
 }
 
 @keyframes loadingShimmer {

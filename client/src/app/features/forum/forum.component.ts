@@ -41,10 +41,9 @@ export class ForumComponent implements OnInit {
 
   aulaId!: number;
   topicos: any[] = [];
-  topicoAtivo: any = null; // Guarda o tópico aberto com suas respostas
+  topicoAtivo: any = null; 
   isLoading = true;
 
-  // Modelos para os formulários de entrada
   novoTitulo = '';
   novoConteudo = '';
   novaResposta = '';
@@ -96,7 +95,7 @@ export class ForumComponent implements OnInit {
         this.novoTitulo = '';
         this.novoConteudo = '';
         this.exibindoFormularioCriacao = false;
-        this.carregarTopicos(); // Atualiza a lista geral de perguntas
+        this.carregarTopicos(); 
       }
     });
   }
@@ -107,12 +106,12 @@ export class ForumComponent implements OnInit {
     this.forumService.responderTopico(this.topicoAtivo.id, this.novaResposta).subscribe({
       next: () => {
         this.novaResposta = '';
-        this.abrirTopico(this.topicoAtivo.id); // Recarrega a conversa atualizada
+        this.abrirTopico(this.topicoAtivo.id); 
       }
     });
   }
 
   voltarParaCurso(): void {
-    this.router.navigate(['/dashboard']); // Redireciona com segurança
+    this.router.navigate(['/dashboard']); 
   }
 }

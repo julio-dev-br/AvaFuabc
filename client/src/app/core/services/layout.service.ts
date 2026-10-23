@@ -6,7 +6,6 @@ import { Injectable, signal } from '@angular/core';
 export class LayoutService {
   public isLoadingGlobal = signal<boolean>(false);
 
-  // Métodos auxiliares para ligar/desligar com segurança
   showLoader(): void {
     this.isLoadingGlobal.set(true);
   }

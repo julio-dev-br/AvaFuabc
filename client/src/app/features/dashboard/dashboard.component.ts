@@ -9,7 +9,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
-// Angular Material Components para o Dashboard de Alta Performance
+// Angular Material Components para o Dashboard
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';

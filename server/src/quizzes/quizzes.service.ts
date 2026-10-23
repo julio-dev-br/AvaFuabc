@@ -5,7 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class QuizzesService {
   constructor(private prisma: PrismaService) { }
 
-  // 1. ROTA DO ALUNO: Busca o Quiz ocultando o gabarito oficial ('correta') para evitar fraudes
   async obterQuizPorAula(aulaId: number) {
     const quiz = await this.prisma.quiz.findFirst({
       where: { aula_id: aulaId },
@@ -31,7 +30,6 @@ export class QuizzesService {
     return quiz;
   }
 
-  // 2. SISTEMA DE AVALIAÇÃO: Computa notas, valida tentativas e amarra o rastro à Matrícula do Postgres
   async responderQuiz(userId: number, quizId: number, dto: any) {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: quizId },
@@ -50,7 +48,6 @@ export class QuizzesService {
       throw new BadRequestException('Este quiz não possui perguntas cadastradas.');
     }
 
-    // 🌟 CIRCUITO DE SEGURANÇA: Localiza o Treinamento ID ao qual a prova pertence
     let treinamentoId: number | null = null;
     if (quiz.aula?.modulo?.treinamento_id) {
       treinamentoId = Number(quiz.aula.modulo.treinamento_id);
@@ -71,7 +68,6 @@ export class QuizzesService {
       throw new BadRequestException('Não foi possível determinar o treinamento vinculado a este quiz.');
     }
 
-    // 🌟 GARANTE A EXISTÊNCIA DA MATRÍCULA (Vínculo obrigatório prévio)
     let matriculaAtiva = await this.prisma.matricula.findFirst({
       where: {
         usuario_id: Number(userId),
@@ -90,7 +86,6 @@ export class QuizzesService {
       });
     }
 
-    // 🌟 CÁLCULO REATIVO DO NÚMERO DA TENTATIVA COM A COLUNA NOVA
     const idPrimeiraPergunta = quiz.perguntas[0].id;
     const historicoRespostasAnteriores = await this.prisma.quizResponse.count({
       where: {
@@ -109,7 +104,6 @@ export class QuizzesService {
     let totalAcertos = 0;
     const respostasDetalhadas: any[] = [];
 
-    // 🌟 LAÇO DE GRAVAÇÃO DAS RESPOSTAS VINCULADAS À MATRÍCULA
     for (const enviado of dto.respostas) {
       const pergunta = quiz.perguntas.find((p) => p.id === enviado.perguntaId);
       if (!pergunta) continue;
@@ -120,7 +114,6 @@ export class QuizzesService {
         totalAcertos++;
       }
 
-      // Gravando com integridade referencial cravada no Postgres
       await this.prisma.quizResponse.create({
         data: {
           matricula_id: Number(matriculaAtiva.id), 
@@ -140,7 +133,6 @@ export class QuizzesService {
       });
     }
 
-    // 🌟 PROCESSAMENTO MATEMÁTICO DA NOTA FINAL (MÉDIA DE EXIGÊNCIA)
     const notaFinalRaw = (totalAcertos / totalPerguntas) * 10;
     const notaFinal = parseFloat(notaFinalRaw.toFixed(2));
 
@@ -153,7 +145,6 @@ export class QuizzesService {
     const notaAnterior = matriculaAtiva.nota ? Number(matriculaAtiva.nota) : 0;
     const maiorNotaCalculada = Math.max(notaAnterior, notaFinal);
 
-    // Atualiza o veredito acadêmico da matrícula
     await this.prisma.matricula.update({
       where: { id: Number(matriculaAtiva.id) },
       data: {
@@ -179,7 +170,6 @@ export class QuizzesService {
     };
   }
 
-  // 3. EXCLUSIVO DO GESTOR: Criação manual completa de avaliações via Wizard
   async criarQuizCompleto(data: {
     aulaId: number;
     titulo: string;
@@ -212,7 +202,6 @@ export class QuizzesService {
     });
   }
 
-  // 4. MOTOR INTELIGENTE: Gravação de Quizzes montados por Inteligência Artificial (Gemini)
   async salvarQuizGeradoPorIA(data: {
     aulaId: number;
     titulo: string;
@@ -221,7 +210,6 @@ export class QuizzesService {
     perguntas: any[];
   }) {
     try {
-      console.log(`🧩 Processando inserção do Quiz de IA para a Aula ID [${data.aulaId}]...`);
       return await this.prisma.quiz.create({
         data: {
           aula_id: Number(data.aulaId),
@@ -248,7 +236,6 @@ export class QuizzesService {
         },
       });
     } catch (error: any) {
-      console.error('🚨 ERRO AO PERSISTIR O QUIZ DA IA NO PRISMA:', error);
       throw new BadRequestException('Falha interna ao persistir o banco relacional de perguntas de IA.');
     }
   }

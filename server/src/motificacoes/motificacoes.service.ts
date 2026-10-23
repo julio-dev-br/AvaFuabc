@@ -5,7 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class NotificacoesService {
   constructor(private readonly prisma: PrismaService) { }
 
-  // 👤 1. ROTA DO ALUNO: Lista todos os alertas ativos e não lidos do colaborador
   async listarDoUsuario(usuarioId: number) {
     return this.prisma.notification.findMany({
       where: {
@@ -18,7 +17,7 @@ export class NotificacoesService {
     });
   }
 
-  // 👤 2. ROTA DO ALUNO: Marca um comunicado específico como lido (Zera o Badge do sininho)
+
   async marcarComoLida(notificacaoId: number) {
     const notificacao = await this.prisma.notification.findUnique({
       where: { id: Number(notificacaoId) },
@@ -34,18 +33,15 @@ export class NotificacoesService {
     });
   }
 
-  // 💼 3. ROTA DO GESTOR: Localiza os funcionários pelos filtros do Protheus e cria as notificações em massa
   async dispararComunicadoEmMassa(dados: { escopo: string; referenciaId?: number; titulo: string; mensagem: string }) {
     const { escopo, referenciaId, titulo, mensagem } = dados;
 
-    // Monta o filtro condicional para buscar apenas colaboradores ativos nas chaves organizacionais
     const filtroUsuario: any = { ativo: true };
 
     if (escopo === 'EMPRESA' && referenciaId) filtroUsuario.empresa_id = BigInt(referenciaId);
     if (escopo === 'UNIDADE' && referenciaId) filtroUsuario.unidade_id = BigInt(referenciaId);
     if (escopo === 'DEPARTAMENTO' && referenciaId) filtroUsuario.departamento_id = BigInt(referenciaId);
 
-    // Busca em lote no PostgreSQL todos os IDs que batem com a lotação de RH selecionada
     const usuariosAlvo = await this.prisma.user.findMany({
       where: filtroUsuario,
       select: { id: true }
@@ -59,7 +55,7 @@ export class NotificacoesService {
       };
     }
 
-    // Estrutura o array de objetos para a inserção em alta performance (Bulk Insert)
+
     const cargaNotificacoes = usuariosAlvo.map(usuario => ({
       usuario_id: usuario.id,
       titulo: titulo.trim(),
@@ -67,7 +63,6 @@ export class NotificacoesService {
       lida: false
     }));
 
-    // Executa a transação de bloco no Postgres criando todos os registros de uma só vez
     await this.prisma.notification.createMany({
       data: cargaNotificacoes
     });
@@ -79,9 +74,9 @@ export class NotificacoesService {
     };
   }
 
-  // HISTÓRICO DO GESTOR: Busca os comunicados enviados em lote (Distinct por título)
+
   async listarHistoricoAdmin() {
-    // Busca os registros agrupando por título e mensagem para não repetir linhas na tabela de auditoria
+
     const notificacoes = await this.prisma.notification.findMany({
       distinct: ['titulo', 'mensagem'],
       select: {

@@ -8,7 +8,6 @@ import { environment } from '../../../environments/environment';
 
 import { filter } from 'rxjs/operators';
 
-// Angular Material
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -35,6 +34,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   ],
   templateUrl: './layout.component.html'
 })
+
 export class LayoutComponent implements OnInit {
   private http = inject(HttpClient);
   private notificationService = inject(NotificationService);
@@ -47,10 +47,9 @@ export class LayoutComponent implements OnInit {
 
   protected readonly window = window;
 
-  // Propriade reativa que guardará os pedaços do nosso Breadcrumb
   breadcrumbs: Array<{ texto: string, url: string }> = [];
   notificacoes: any[] = [];
-  // Objeto central do usuário carregado direto do Postgres
+
   usuario: any = {
     nome: 'Carregando...',
     email: '',
@@ -72,7 +71,7 @@ export class LayoutComponent implements OnInit {
     this.gerarBreadcrumbs();
   }
   private gerarBreadcrumbs(): void {
-    const urlAtual = this.router.url; // Pega ex: "/dashboard/forum/aula/12" ou "/dashboard/quiz/aula/5"
+    const urlAtual = this.router.url; 
 
     const ehAdmin = urlAtual.includes('/admin');
 
@@ -97,7 +96,7 @@ export class LayoutComponent implements OnInit {
       });
     } else {
       this.breadcrumbs = [{ texto: 'Portal do Aluno', url: '/dashboard' }];
-      // Quebra todas as partes da URL (ex: ['', 'dashboard', 'forum', 'aula', '12'])
+
       const segmentos = urlAtual.split('/').filter(p => p);
       const idString = segmentos.find(s => !isNaN(Number(s)));
       const idNum = idString ? Number(idString) : null;
@@ -111,7 +110,7 @@ export class LayoutComponent implements OnInit {
         const termoFinal = urlAtual.includes('/forum/aula') ? 'Fórum de Dúvidas' : 'Avaliação Regulamentar';
         this.breadcrumbs.push({
           texto: termoFinal,
-          url: urlAtual // Mantém a URL cheia por segurança
+          url: urlAtual 
         });
 
       } else {
@@ -138,7 +137,6 @@ export class LayoutComponent implements OnInit {
   marcarLida(id: number): void {
     this.notificationService.marcarComoLida(id).subscribe({
       next: () => {
-        // Remove a notificação reativamente da lista da Master Page
         this.notificacoes = this.notificacoes.filter(n => n.id !== id);
       },
       error: (err: any) => {
@@ -146,10 +144,12 @@ export class LayoutComponent implements OnInit {
       }
     });
   }
+
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
+
   carregarDadosPerfilReal(): void {
     this.http.get<any>(`${this.apiUrl}/user/perfil/me`, { headers: this.getHeaders() }).subscribe({
       next: (dados) => {
@@ -177,26 +177,26 @@ export class LayoutComponent implements OnInit {
         },
         error: (err) => console.error('Erro no pooling silencioso de notificações:', err)
       });
-    }, 30000); // 30000 ms = 30 segundos de intervalo
+    }, 30000); 
   }
 
   estaNoPainelAdmin(): boolean {
     return this.router.url.includes('/admin');
   }
-  // Método que será chamado ao clicar no ícone de Hambúrguer / Setinha
+
   alternarSidebar(): void {
-    // Se for Desktop, colapsa/recolhe a barra lateral
     if (window.innerWidth > 1024) {
       this.sidebarColapsada = !this.sidebarColapsada;
     } else {
-      // Se for Mobile, abre e fecha o menu flutuante por completo
       this.menuMobileAberto = !this.menuMobileAberto;
     }
   }
+
   isAdmin(): boolean {
     const role = this.authService.getUserRole();
     return role === 'admin' || role === 'manager';
   }
+  
   logout(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);

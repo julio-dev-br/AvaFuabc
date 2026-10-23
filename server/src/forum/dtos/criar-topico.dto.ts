@@ -1,5 +1,5 @@
 export interface CriarTopicoDTO {
-  aulaId?: number; // Opcional, caso queiram criar um tópico geral sem vincular a uma aula
+  aulaId?: number; 
   titulo: string;
   conteudo: string;
 }

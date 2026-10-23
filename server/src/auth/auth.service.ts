@@ -24,7 +24,6 @@ export class AuthService {
             throw new BadRequestException('O CPF é obrigatório para validação no Protheus.');
         }
 
-        // Verifica se o e-mail já está em uso no portal
         const userAlreadyExists = await this.prismaService.user.findUnique({
             where: {
                 email: data.email
@@ -35,7 +34,6 @@ export class AuthService {
             throw new UnauthorizedException('Este e-mail já está cadastrado no sistema.');
         }
 
-        // INTEGRAÇÃO PROTHEUS MOCK SÍNCRONA: Varre o array em memória do ProtheusMockController
         const cpfLimpo = data.cpf.replace(/\D/g, '');
         
         const { MOCK_FUNCIONARIOS_PROTHEUS } = require('../integracao/protheus/protheus.controller');
@@ -46,13 +44,11 @@ export class AuthService {
             throw new UnauthorizedException('Atenção: CPF não localizado na folha de colaboradores ativos do Protheus da Fundação ABC. Procure o RH institucional.');
         }
 
-        // Convertemos os IDs estáveis de 16 dígitos do ERP para BigInt
         const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
         const unidadeId = funcionarioErp.unidade_id ? BigInt(funcionarioErp.unidade_id) : null;
         const deptoId = funcionarioErp.departamento_id ? BigInt(funcionarioErp.departamento_id) : null;
         const cargoId = funcionarioErp.cargo_id ? BigInt(funcionarioErp.cargo_id) : null;
 
-        // CHECAGEM DE CPF DUPLICADO VIA ASSINATURA ORGANIZACIONAL
         if (unidadeId && cargoId) {
             const vinculoExiste = await this.prismaService.user.findFirst({
                 where: {
@@ -70,7 +66,6 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(data.password, 10);
 
-        // CARGA AUTOMÁTICA DE RH: Grava no Postgres herdando as filiais BigInt automáticas do Protheus
         const user = await this.prismaService.user.create({
             data: {
                 email: data.email,

@@ -8,4 +8,5 @@ import { JwtService } from '@nestjs/jwt';
   controllers: [TreinamentoController],
   providers: [TreinamentoService, PrismaService, JwtService], 
 })
+
 export class TreinamentoModule {}

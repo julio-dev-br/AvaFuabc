@@ -15,7 +15,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 // Serviços Globais do Core
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AlertsService } from '../../../../core/services/alerts.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http'; // 🚀 Adicionado suporte HTTP local para o Protheus
+import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -39,15 +39,15 @@ import { environment } from '../../../../../environments/environment';
 export class ComunicadosComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private alerts = inject(AlertsService);
-  private http = inject(HttpClient); // 🚀 Injetado barramento HTTP para caçar as filiais do ERP
+  private http = inject(HttpClient); 
 
-  // 📢 FORMULÁRIO REATIVO SINTONIZADO COM O TEMPLATE SAAS
   comunicadoForm = {
     escopo: 'GERAL' as 'GERAL' | 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO',
-    referenciaId: null as string | null, // Alterado para string/null para suportar chaves BigInt com segurança
+    referenciaId: null as string | null, 
     titulo: '',
     mensagem: ''
   };
+
   isEnviandoComunicado = false;
   historicoComunicados = new MatTableDataSource<any>([]);
   colunasComunicados: string[] = ['data', 'titulo', 'mensagem'];
@@ -72,21 +72,17 @@ export class ComunicadosComponent implements OnInit {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  // CARGA DINÂMICA: Consome os dados reais do barramento do Protheus Mock
   carregarCombosDoProtheus(): void {
-    // 1. Busca as empresas estruturais
     this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/empresas`, { headers: this.obterHeaders() }).subscribe({
       next: (dados) => this.listaEmpresas = dados,
       error: () => console.error('Falha ao carregar empresas do Protheus no combo.')
     });
 
-    // 2. Busca as unidades físicas (Mário Covas, CHM Santo André legitimados do seed)
     this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/unidades`, { headers: this.obterHeaders() }).subscribe({
       next: (dados) => this.listaUnidades = dados,
       error: () => console.error('Falha ao carregar unidades organizacionais do Protheus.')
     });
 
-    // 3. Busca a tabela de departamentos de saúde
     this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/departamentos`, { headers: this.obterHeaders() }).subscribe({
       next: (dados) => this.listaDepartamentos = dados,
       error: () => console.error('Falha ao carregar departamentos do Protheus.')
@@ -118,7 +114,6 @@ export class ComunicadosComponent implements OnInit {
 
     const payload = {
       escopo: this.comunicadoForm.escopo,
-      // Envia o BigInt como Number ou string de segurança para bater com o recebimento do NestJS
       referenciaId: this.comunicadoForm.escopo === 'GERAL' ? null : Number(this.comunicadoForm.referenciaId),
       titulo: this.comunicadoForm.titulo,
       mensagem: this.comunicadoForm.mensagem

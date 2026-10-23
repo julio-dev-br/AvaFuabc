@@ -9,41 +9,31 @@
                 <mat-icon
                     style="font-size: 28px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">school</mat-icon>
             </div>
-            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Portal de
-                Treinamentos FUABC</h2>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">AVA Fuabc
+            </h2>
             <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px; font-weight: 500;">Ambiente Virtual de
-                Aprendizagem Regulamentar</p>
+                Aprendizagem </p>
         </div>
-
-        <!-- 🛡️ CARD PRINCIPAL DE AUTENTICAÇÃO -->
         <mat-card
             style="border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01) !important; border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
-
-            <!-- Linha de Progresso Reativa de Autenticação -->
             <mat-progress-bar *ngIf="isLoading" mode="indeterminate"
                 style="height: 4px; margin-bottom: -4px; position: relative; z-index: 10;"></mat-progress-bar>
 
             <div style="padding: 32px 24px 24px 24px; box-sizing: border-box;">
                 <form (ngSubmit)="onSubmit()" #loginForm="ngForm"
                     style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
-
-                    <!-- Campo: E-mail -->
                     <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                         <mat-label>E-mail</mat-label>
                         <input matInput type="email" name="email" [(ngModel)]="email" [disabled]="isLoading"
                             placeholder="exemplo@fuabc.org.br" required>
                         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
                     </mat-form-field>
-
-                    <!-- Campo: Senha -->
                     <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
                         <mat-label>Senha</mat-label>
                         <input matInput type="password" name="password" [(ngModel)]="password" [disabled]="isLoading"
                             placeholder="Digite sua senha" required>
                         <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">lock</mat-icon>
                     </mat-form-field>
-
-                    <!-- Botão de Ação e Redirecionamento Público -->
                     <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 16px; width: 100%;">
                         <button mat-raised-button type="submit"
                             [style.background]="isLoading || !email || !password ? 'rgba(0, 51, 102, 0.35)' : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'"
@@ -53,7 +43,6 @@
                             <mat-icon style="font-size: 18px; width: 18px; height: 18px;">login</mat-icon>
                             {{ isLoading ? 'Autenticando...' : 'Entrar na Conta' }}
                         </button>
-
                         <div
                             style="text-align: center; font-size: 13px; color: #64748b; font-weight: 500; margin-top: 4px; width: 100%;">
                             Não possui uma conta acadêmica?
@@ -63,7 +52,6 @@
                                 onmouseout="this.style.color='#003366'">Cadastre-se aqui</a>
                         </div>
                     </div>
-
                 </form>
             </div>
         </mat-card>

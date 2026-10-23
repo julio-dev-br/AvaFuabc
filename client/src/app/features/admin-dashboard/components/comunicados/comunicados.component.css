@@ -54,7 +54,6 @@
   background-color: #ffffff !important;
   transition: all 0.2s ease;
 }
-
 ::v-deep .compact-form .mat-mdc-form-field-subscript-wrapper {
   margin-bottom: 2px !important;
 }

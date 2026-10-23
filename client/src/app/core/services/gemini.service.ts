@@ -8,9 +8,8 @@ import { environment } from '../../../environments/environment';
 })
 export class GeminiService {
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/gemini`; // Chaveia perfeitamente para nosso endpoint NestJS
+  private readonly apiUrl = `${environment.apiUrl}/gemini`;
 
-  // 🔒 CENTRALIZADOR DE SEGURANÇA: Herda a fiação padrão do token JWT de Autenticação
   private obterHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({ 

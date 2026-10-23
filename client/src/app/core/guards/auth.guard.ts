@@ -7,7 +7,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     if (token) {
         return true;
     }
-    console.warn('⚠️ Acesso negado! Redirecionando para a tela de login corporativo.');
+    console.warn('Acesso negado! Redirecionando para a tela de login corporativo.');
     router.navigate(['/login']);
     return false;
 };

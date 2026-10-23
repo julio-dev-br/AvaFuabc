@@ -53,7 +53,6 @@ export class KanbanBoardComponent implements OnInit {
   novoCardDescricao = ''; 
   colunaIdSendoAdicionada: number | null = null;
 
-  // CONTROLADORES DE EDIÇÃO EM TEMPO REAL PARA O CLICK INLINE
   cardIdSendoEditado: number | null = null;
   tituloEdicaoInput: string = '';
   descricaoEdicaoInput: string = '';
@@ -77,7 +76,6 @@ export class KanbanBoardComponent implements OnInit {
   }
   
   onCardDrop(event: CdkDragDrop<any[]>, colunaDestinoId: number): void {
-    // Guarda o estado anterior para o caso de precisarmos dar Rollback se o banco falhar!
     const colunaOrigemId = Number(event.previousContainer.id.replace('cdk-drop-list-', ''));
     const indexOrigem = event.previousIndex;
     const indexDestino = event.currentIndex;
@@ -85,10 +83,8 @@ export class KanbanBoardComponent implements OnInit {
     const ehMesmaColuna = event.previousContainer === event.container;
 
     if (ehMesmaColuna) {
-      // Se moveu dentro da mesma coluna
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      // Se moveu para outra coluna
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -96,24 +92,19 @@ export class KanbanBoardComponent implements OnInit {
         event.currentIndex
       );
     }
-
-    // Pega o card movido e calcula a nova ordem matemática no Postgres
     const cardMovido = event.container.data[event.currentIndex];
     const novaOrdem = event.currentIndex + 1;
 
-    // Dispara a rota PATCH para o NestJS via Prisma
     this.kanbanService.moverCard(cardMovido.id, colunaDestinoId, novaOrdem).subscribe({
       next: () => {
-        // APENAS SE MUDOU DE COLUNA: Dispara o pop-up discreto de sucesso no topo direito
         if (!ehMesmaColuna) {
-          this.alerts.sucesso('Posição da tarefa atualizada! 📋');
+          this.alerts.sucesso('Posição da tarefa atualizada!');
         }
       },
       error: (err) => {
         console.error('Erro ao atualizar posição do card no servidor:', err);
         this.alerts.erro('Não foi possível salvar a nova posição da tarefa.');
 
-        // REATIVIDADE DE ROLLBACK: O banco falhou? Desfaz o movimento na tela na hora!
         if (ehMesmaColuna) {
           moveItemInArray(event.container.data, indexDestino, indexOrigem);
         } else {
@@ -133,14 +124,14 @@ export class KanbanBoardComponent implements OnInit {
     const payload = {
       colunaId,
       titulo: this.novoCardTitulo.trim(),
-      descricao: this.novoCardDescricao.trim() || undefined // Envia apenas se não estiver em branco
+      descricao: this.novoCardDescricao.trim() || undefined 
     };
 
     this.kanbanService.criarCard(payload).subscribe({
       next: (novoCard) => {
         const coluna = this.colunas.find(c => c.id === colunaId);
         if (coluna) {
-          coluna.cards.push(novoCard); // Alimenta a grade reativamente
+          coluna.cards.push(novoCard); 
         }
         
         this.alerts.sucesso('Tarefa adicionada ao seu quadro!');
@@ -205,7 +196,6 @@ export class KanbanBoardComponent implements OnInit {
       }
     });
 
-    // Escuta o clique dos botões da modal de forma reativa
     dialogRef.afterClosed().subscribe((confirmado: boolean) => {
       if (confirmado) {
         this.executarExclusaoFisica(cardId, colunaId);
@@ -220,7 +210,7 @@ export class KanbanBoardComponent implements OnInit {
         if (coluna) {
           coluna.cards = coluna.cards.filter((c: any) => c.id !== cardId);
         }
-        this.alerts.sucesso('Tarefa removida do seu quadro!'); // Seu pop-up verde lindo do topo direito!
+        this.alerts.sucesso('Tarefa removida do seu quadro!'); 
       },
       error: (err) => {
         console.error('Erro ao excluir card no Postgres:', err);

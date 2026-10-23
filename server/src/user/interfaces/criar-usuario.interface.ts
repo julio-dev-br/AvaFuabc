@@ -7,4 +7,5 @@ export interface CriarUsuarioInput {
   unidade_id: number;
   departamento_id: number;
   cargo_id: number;
+  
 }

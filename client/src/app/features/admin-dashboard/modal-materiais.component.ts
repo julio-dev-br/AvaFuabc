@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select'; // 🌟 ADICIONADO
+import { MatSelectModule } from '@angular/material/select'; 
 import { TreinamentoService } from '../../core/services/treinamento.service';
 
 @Component({
@@ -25,9 +25,6 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
       <p style="color: #64748b; font-size: 13px; margin: 0 0 16px 0;">
         Gerencie os arquivos complementares para: <strong>{{ data.titulo }}</strong>
       </p>
-
-      <!-- 🌟 SELETOR DE AULAS CRUCIAL: Mapeia as aulas contidas nos módulos do curso -->
-      <!-- 🌟 SELETOR DE AULAS CRUCIAL: Ajustado de mat-option-group para mat-optgroup -->
       <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
         <mat-label>Selecione a Aula Destino</mat-label>
         <mat-select [(ngModel)]="aulaIdSelecionada" (selectionChange)="carregarMateriaisDoAula()">
@@ -38,9 +35,6 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
           </mat-optgroup>
         </mat-select>
       </mat-form-field>
-
-
-      <!-- LISTAGEM DE MATERIAIS JÁ EXISTENTES DA AULA SELECIONADA -->
       <div *ngIf="aulaIdSelecionada" style="max-height: 140px; overflow-y: auto; margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
         <div *ngFor="let mat of listaMateriais" 
              style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
@@ -113,12 +107,11 @@ export class ModalMateriaisComponent implements OnInit {
 
   cursoDetalhado: any = null;
   aulaIdSelecionada: number | null = null;
-  listaMaterials: any[] = []; // Fallback seguro para o template ler
+  listaMaterials: any[] = []; 
   tipoEnvio: 'link' | 'arquivo' = 'link';
   novoMaterial = { nome: '', url: '' };
   arquivoSelecionado: File | null = null;
 
-  // Getter reativo para contornar qualquer variação de nome de variável no template
   get listaMateriais(): any[] {
     return this.listaMaterials;
   }
@@ -131,11 +124,9 @@ export class ModalMateriaisComponent implements OnInit {
   }
 
   carregarEstruturaAulasCurso(): void {
-    // 🌟 DE OURO: Busca o curso completo trazendo os módulos e os IDs das aulas de dentro dele!
     this.treinamentoService.obterConteudoCurso(this.data.id).subscribe({
       next: (dados) => {
         this.cursoDetalhado = dados;
-        // Atalho reativo: se o curso só tiver uma única aula no total, já deixa ela pré-selecionada!
         if (dados?.modulos?.[0]?.aulas?.[0] && dados.modulos.length === 1 && dados.modulos[0].aulas.length === 1) {
           this.aulaIdSelecionada = dados.modulos[0].aulas[0].id;
           this.carregarMateriaisDoAula();

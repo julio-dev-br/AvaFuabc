@@ -17,19 +17,16 @@ export class KanbanController {
     return this.kanbanService.obterQuadro(user.id);
   }
 
-  // Criar uma nova coluna: POST /kanban/colunas
   @Post('colunas')
   async criarColuna(@CurrentUser() user: { id: number }, @Body() body: CriarColunaDTO) {
     return this.kanbanService.criarColuna(user.id, body);
   }
 
-  // 3. Criar um novo cartão: POST /kanban/cards
   @Post('cards')
   async criarCard(@CurrentUser() user: { id: number }, @Body() body: CriarCardDTO) {
     return this.kanbanService.criarCard(user.id, body);
   }
 
-  // Mover ou reordenar um cartão: PATCH /kanban/cards/:id/mover
   @Patch('cards/:id/mover')
   async moverCard(
     @CurrentUser() user: { id: number },
@@ -39,7 +36,6 @@ export class KanbanController {
     return this.kanbanService.moverCard(user.id, cardId, body);
   }
 
-  //  Mover card
   @Patch('admin/mover-card/:id')
   async moverCardAdmin(
     @Param('id', ParseIntPipe) cardId: number,
@@ -56,7 +52,6 @@ export class KanbanController {
     return this.kanbanService.atualizarCardReal(id, dados);
   }
 
-  // Exclusão definitiva do card via prisma
   @Delete('cards/:id')
   async excluirCard(@Param('id', ParseIntPipe) id: number) {
     return this.kanbanService.excluirCardReal(id);

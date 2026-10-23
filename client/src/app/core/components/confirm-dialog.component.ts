@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-confirm-dialog',
   standalone: true,
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  
   template: `
     <div style="padding: 24px; text-align: center; max-width: 380px; font-family: 'Inter', sans-serif;">
       <!-- Ícone Alerta Corporativo -->
@@ -15,11 +16,9 @@ import { MatIconModule } from '@angular/material/icon';
         <mat-icon style="color: #dc2626; font-size: 28px; width: 28px; height: 28px;">warning_outline</mat-icon>
       </div>
 
-      <!-- Título e Mensagem -->
       <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px;">{{ data.titulo }}</h2>
       <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b; line-height: 1.5;">{{ data.mensagem }}</p>
 
-      <!-- Botões de Ação Simétricos -->
       <div style="display: flex; gap: 12px; justify-content: center;">
         <button mat-stroked-button style="border-color: #cbd5e1; color: #475569; font-weight: 600; padding: 0 20px; border-radius: 6px; height: 40px;" (click)="dialogRef.close(false)">
           Cancelar
@@ -33,5 +32,5 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ConfirmDialogComponent {
   public dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
-  public data = inject(MAT_DIALOG_DATA); // Recebe { titulo, mensagem } vindo da chamada
+  public data = inject(MAT_DIALOG_DATA);
 }

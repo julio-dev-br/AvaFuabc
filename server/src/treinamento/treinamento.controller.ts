@@ -6,6 +6,7 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from 'src/auth/roles.enum';
 
+
 @Controller('treinamentos')
 @UseGuards(AuthGuard)
 export class TreinamentoController {
@@ -49,7 +50,6 @@ export class TreinamentoController {
     return this.treinamentosService.vincularPublico(body);
   }
 
-  // 📊 CIRCUITO 1: Métricas resumidas do painel de controle principal
   @Get('admin/metricas')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
@@ -57,13 +57,10 @@ export class TreinamentoController {
     return this.treinamentosService.obterMetricasPainel();
   }
 
-  // 📈 CIRCUITO 2: Métricas profundas do BI (Gráficos de linhas, hospital e pizza)
-  // 🚀 AJUSTADO: Rota estendida para evitar a colisão de endereços no NestJS!
   @Get('admin/metricas/analiticas')
   async obterMetricasAnaliticas() {
     return this.treinamentosService.obterMetricasAnaliticas();
   }
-
 
   @Get('gerencial')
   @Roles(Role.ADMIN, Role.MANAGER)
@@ -88,7 +85,6 @@ export class TreinamentoController {
 
   @Post('admin/publicar/:id')
   async publicarTreinamentoComKanban(@Param('id') id: string, @Req() req: any) {
-    // Captura o ID do administrador direto do payload do JWT pelo AuthGuard
     const usuarioId = req.user.id;
     return this.treinamentosService.finalizarEPublicarTreinamento(Number(id), usuarioId);
   }

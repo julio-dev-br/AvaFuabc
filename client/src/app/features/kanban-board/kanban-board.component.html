@@ -29,7 +29,6 @@
     regulamentares você executará hoje.
   </p>
 </div>
-
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 4px;">
   <div class="kanban-board" cdkDropListGroup style="padding: 10px;">
     @for (coluna of colunas; track coluna.id) {
@@ -37,17 +36,14 @@
       style="border-top-left-radius: 4px; border-top-right-radius: 4px;">
       <h3 class="column-title" style="padding-top: 10px;">{{ coluna.titulo }}</h3>
 
-      <!-- Zona onde os cartões podem cair -->
       <div class="card-list" cdkDropList [cdkDropListData]="coluna.cards"
         (cdkDropListDropped)="onCardDrop($event, coluna.id)">
 
-        <!-- LOOP DE CARTÕES DO KANBAN COM MUDANÇA DE ESTADO INLINE CORRIGIDO -->
         @for (card of coluna.cards; track card.id) {
         <mat-card class="kanban-card" cdkDrag [cdkDragDisabled]="cardIdSendoEditado === card.id"
           style="position: relative; margin-bottom: 10px; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;">
           <mat-card-content style="padding: 12px 14px;">
 
-            <!-- MODO DE EDIÇÃO ATIVO INLINE -->
             @if (cardIdSendoEditado === card.id) {
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
@@ -68,15 +64,12 @@
               </div>
             </div>
             } @else {
-            <!-- MODO DE VISUALIZAÇÃO PADRÃO SINTONIZADO NO ESCOPO CORRETO -->
             <div class="card-header-area"
               style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
               <span class="card-title"
                 style="font-size: 14px; font-weight: 600; color: #1e293b; flex: 1; word-break: break-word;">
                 {{ card.titulo }}
               </span>
-
-              <!-- BOTÃO DOS TRÊS PONTINHOS -->
               <button mat-icon-button [matMenuTriggerFor]="cardMenu"
                 style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; margin-top: -4px; margin-right: -6px; background: transparent; border: none; cursor: pointer;"
                 (click)="$event.stopPropagation();">
@@ -110,14 +103,12 @@
         </mat-card>
         }
 
-        <!-- Fallback caso a coluna fique sem cartões -->
         @if (coluna.cards.length === 0) {
         <div class="empty-column-placeholder">Nenhuma tarefa</div>
         }
 
-      </div> <!-- Fim da .card-list -->
+      </div> 
 
-      <!-- Área de criação de cartões rápidos (Rodapé da Coluna Otimizado com Descrição) -->
       <div class="column-footer">
         @if (colunaIdSendoAdicionada === coluna.id) {
         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
@@ -143,9 +134,8 @@
         </button>
         }
       </div>
-
-    </div> <!-- Fim da .kanban-column -->
+    </div> 
     }
-  </div> <!-- Fim da .kanban-board -->
+  </div> 
 </div>
 }

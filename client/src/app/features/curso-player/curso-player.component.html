@@ -21,11 +21,8 @@
 <div class="player-grid-container">
   <div class="video-section-wrapper">
     @if (aulaAtiva) {
-    <!-- 🌟 SENSOR INTEGRADO: Captura o play manual do colaborador mesmo se o uBlock ocultar o player -->
     <div class="video-wrapper"
       style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-
-      <!-- 🛡️ MALHA DE COMPLIANCE AD-BLOCK: Captura o play inicial e some da tela imediatamente -->
       <div *ngIf="!videoJaTevePlayReal" (click)="executarPlayCortinaSegura()"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(0,0,0,0.05); cursor: pointer; display: flex; justify-content: center; align-items: center;">
         <div
@@ -45,8 +42,6 @@
 
     <div class="card-progresso-premium"
       style="margin: 20px 0; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
-
-      <!-- 🎮 BOTÃO SECRETO CHEAT DEV: Exclusivo para apresentações e homologações rápidas -->
       <div
         style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
         <span
@@ -119,7 +114,7 @@
 
       <div
         style="margin-bottom: 32px; border-top: 1px solid #e2e8f0; padding-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
-        <!-- 🔒 TRAVA DO RODAPÉ ADICIONADA: Fica cinza e disabled se o progresso for menor que 100% -->
+       
         <button mat-raised-button [routerLink]="['/dashboard/quiz/aula', aulaAtiva?.id]"
           [disabled]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100"
           [style.backgroundColor]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? '#cbd5e1' : '#ff9800'"
@@ -187,7 +182,7 @@
             class="aula-list-button"
             style="border-radius: 6px; margin: 4px 0; transition: all 0.2s; border: none; cursor: pointer; text-align: left; width: 100%; box-sizing: border-box; display: flex; align-items: center;">
 
-            <!-- 🌟 REATIVIDADE DE ÍCONES NA SIDEBAR: Troca pelo check verde instantaneamente se bater 100% no array -->
+           
             <mat-icon matListItemIcon class="aula-status-icon"
               [style.color]="aula?.progresso_aulas?.[0]?.concluida ? '#10b981' : '#64748b'"
               style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0;">
@@ -210,14 +205,11 @@
 </div>
 }
 
-<!-- 💬 SUPORTE EM TEMPO REAL: Botão e Painel Flutuante do Chat WebSocket -->
 <div class="aluno-chat-wrapper">
-  <!-- Botão de headset que abre/fecha o bate-papo -->
   <button mat-fab color="primary" class="btn-chat-flutuante" (click)="alternarJanelaChat()">
     <mat-icon>{{ chatAberto ? 'close' : 'headset_mic' }}</mat-icon>
   </button>
 
-  <!-- Janela de Conversa Reativa (Só renderiza se chatAberto for true via Angular 17+) -->
   @if (chatAberto) {
   <mat-card class="janela-chat-aluno-card animate__animated animate__slideInUp">
 
@@ -229,8 +221,6 @@
         <p>Tutor do RH Online</p>
       </div>
     </div>
-
-    <!-- Área de Linha do Tempo das Mensagens -->
     <div id="aluno-chat-scroll-container" class="aluno-chat-body-messages">
       @if (historicoMensagens.length === 0) {
       <div class="msg-boas-vindas-box">
@@ -248,8 +238,6 @@
       }
       }
     </div>
-
-    <!-- Barra de Input e Envio Inferior -->
     <div class="aluno-chat-footer">
       <input type="text" class="input-aluno-chat-text" placeholder="Digite sua dúvida aqui..."
         [(ngModel)]="novaMensagemText" (keyup.enter)="enviarMensagemDoAluno()">
@@ -258,7 +246,6 @@
         <mat-icon>send</mat-icon>
       </button>
     </div>
-
   </mat-card>
   }
 </div>

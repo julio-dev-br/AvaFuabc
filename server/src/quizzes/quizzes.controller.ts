@@ -11,13 +11,11 @@ import { Roles } from 'src/auth/roles.decorator';
 export class QuizzesController {
   constructor(private readonly quizzesService: QuizzesService) { }
 
-  // 1. Pegar o questionário de uma aula: GET /quizzes/aula/4
   @Get('aula/:id')
   async obterPorAula(@Param('id', ParseIntPipe) aulaId: number) {
     return this.quizzesService.obterQuizPorAula(aulaId);
   }
 
-  // 2. Enviar o gabarito do aluno: POST /quizzes/1/responder
   @Post(':id/responder')
   async responder(
     @CurrentUser() user: { id: number },
@@ -27,7 +25,6 @@ export class QuizzesController {
     return this.quizzesService.responderQuiz(user.id, quizId, body);
   }
 
-  // 3. Método Auxiliar: Criação Completa via Admin Manual
   @Post('admin/criar')
   @UseGuards(RolesGuard)
   @Roles('admin', 'manager')
@@ -45,7 +42,6 @@ export class QuizzesController {
     return this.quizzesService.criarQuizCompleto(body);
   }
 
-  // 🌟 4. NOVO ENDPOINT: Grava as questões geradas pela Inteligência Artificial de forma blindada e restrita ao RH
   @Post('admin/criar-gerado-ia')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(RolesGuard)
@@ -63,7 +59,6 @@ export class QuizzesController {
       throw new BadRequestException('Payload incompleto. O campo aulaId e o array de perguntas são obrigatórios.');
     }
 
-    console.log(`📡 Rota POST /quizzes/admin/criar-gerado-ia acionada para a Aula ID: [${payload.aulaId}]`);
     return await this.quizzesService.salvarQuizGeradoPorIA(payload);
   }
 }

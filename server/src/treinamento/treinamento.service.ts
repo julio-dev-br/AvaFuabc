@@ -5,7 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class TreinamentoService {
   constructor(private prisma: PrismaService) { }
 
-  // Busca treinamentos disponíveis baseados nas regras de negócio de RH (Apenas ATIVOS)
   async findAvailableForUser(user: any) {
     const filtrosPublico: any[] = [];
 
@@ -27,7 +26,7 @@ export class TreinamentoService {
 
     return this.prisma.treinamento.findMany({
       where: {
-        ativo: true, // 🛡️ FILTRO ABSOLUTO: Aluno NUNCA enxerga rascunhos!
+        ativo: true, 
         OR: [
           {
             publicos: {
@@ -62,7 +61,6 @@ export class TreinamentoService {
     });
   }
 
-  // 🛡️ CORRIGIDO: O curso agora nasce como RASCUNHO (ativo: false) de forma segura
   async criar(data: { titulo: string; descricao?: string; carga_horaria: number; obrigatorio: boolean }) {
     return this.prisma.treinamento.create({
       data: {
@@ -70,7 +68,7 @@ export class TreinamentoService {
         descricao: data.descricao || null,
         carga_horaria: Number(data.carga_horaria),
         obrigatorio: data.obrigatorio,
-        ativo: false, // 🚀 NASCE COMO RASCUNHO OCULTO!
+        ativo: false, 
         certificado: true
       }
     });
@@ -123,14 +121,12 @@ export class TreinamentoService {
       }
     });
 
-    // Busca se o treinamento já está publicado no momento do vínculo
     const treinamento = await this.prisma.treinamento.findUnique({
       where: { id: Number(data.treinamentoId) },
       select: { ativo: true }
     });
 
-    // 🚀 COMPLIANCE: Se o curso ainda for um rascunho, NÃO gera matrículas no loop! 
-    // Elas serão geradas automaticamente em massa no método de publicação.
+
     if (treinamento && treinamento.ativo) {
       const queryFiltroUser: any = { ativo: true };
       const refIdBigInt = BigInt(data.referenciaId);
@@ -172,7 +168,6 @@ export class TreinamentoService {
     const totalTreinamentos = await this.prisma.treinamento.count({ where: { ativo: true } });
     const totalUsuarios = await this.prisma.user.count();
 
-    // 📊 SEPARAÇÃO REAL: Concluídos com sucesso vs Em Andamento vs Reprovados em avaliações
     const matriculasConcluidas = await this.prisma.matricula.count({ where: { status: 'CONCLUIDO' } });
     const matriculasEmAndamento = await this.prisma.matricula.count({ where: { status: 'EM_ANDAMENTO' } });
     const matriculasReprovadas = await this.prisma.matricula.count({ where: { status: 'REPROVADO' } });
@@ -196,7 +191,6 @@ export class TreinamentoService {
         taxaConformidadeGeral: totalMatriculasValidas > 0 ? Math.round((matriculasConcluidas / totalMatriculasValidas) * 100) : 0
       },
       graficoPizza: {
-        // Injeta a raia de reprovados para o painel de RH atuar
         dados: [matriculasConcluidas, matriculasEmAndamento, matriculasReprovadas],
         labels: ['Concluintes', 'Em Andamento', 'Reprovados']
       },
@@ -225,51 +219,40 @@ export class TreinamentoService {
       take: 5
     });
 
-    // 🚀 HISTÓRICO REAL INTEGRADO: Varre os 12 meses do calendário de forma dinâmica!
     const matriculasAnoCorrente = await this.prisma.matricula.findMany({
       select: { iniciado_em: true }
     });
 
-    // 1. Inicializa o array cobrindo todos os meses do ano (0 a 11)
     const contagemPorMes = Array(12).fill(0);
 
     matriculasAnoCorrente.forEach(mat => {
       if (mat.iniciado_em) {
-        const mes = new Date(mat.iniciado_em).getMonth(); // Jan = 0, Out = 9, Dez = 11
+        const mes = new Date(mat.iniciado_em).getMonth(); 
         if (mes >= 0 && mes <= 11) {
           contagemPorMes[mes]++;
         }
       }
     });
 
-    // 2. Monta o histórico acumulado real de Janeiro até Dezembro de forma sequencial limpa
-    // 2. Monta o histórico acumulado real cortando cirurgicamente no mês corrente do calendário
     const dadosHistoricoAcumulado = Array(12).fill(0);
     let acumuladorMatriculas = 0;
 
-    // Captura dinamicamente o número do mês atual em que estamos (Jan = 0, Out = 9, Dez = 11)
     const mesAtualDoSistema = new Date().getMonth();
 
     for (let m = 0; m < 12; m++) {
       acumuladorMatriculas += contagemPorMes[m];
 
-      // 🚀 A TRAVA GESTORA: Se o mês já passou ou é o mês atual, grava o acumulado.
-      // Se for um mês futuro (Novembro ou Dezembro), o array NÃO preenche e a linha morre na hora!
       if (m <= mesAtualDoSistema) {
         dadosHistoricoAcumulado[m] = acumuladorMatriculas;
       } else {
-        // Remove a posição para o Chart.js quebrar a linha e não projetar para o futuro
         dadosHistoricoAcumulado[m] = null;
       }
     }
-
-    // 🚀 EXTERMINADO: Removido o segundo loop fantasma e o .slice que causavam o travamento no 1.0!
 
     const todasMatriculas = await this.prisma.matricula.findMany({
       include: { user: true }
     }) as any[];
 
-    // 🚀 SINTONIZADO COM OS ID REAIS VINDOS DO SEED E DO MOCK PROTHEUS
     const hospitaisFuabc = [
       { id: 2000000000000001, nome: 'Hospital Mário Covas (PS)', concluidos: 0, total: 0 },
       { id: 2000000000000002, nome: 'CHM Santo André (UTI)', concluidos: 0, total: 0 },
@@ -303,7 +286,7 @@ export class TreinamentoService {
         labels: ['Concluídos', 'Em Andamento', 'Reprovados']
       },
       graficoBarras: { labels: rankingsCursos.map(c => c.titulo), dados: rankingsCursos.map(c => c._count.matriculas) },
-      graficoLinhaMatriculas: dadosHistoricoAcumulado, // 🚀 Viaja o vetor limpo de 12 posições reais!
+      graficoLinhaMatriculas: dadosHistoricoAcumulado, 
       graficoBarrasUnidades: {
         labels: hospitaisFuabc.map(h => h.nome),
         valores: valoresConformidade
@@ -408,7 +391,7 @@ export class TreinamentoService {
   async finalizarEPublicarTreinamento(treinamentoId: number, usuarioId: number) {
     const curso = await this.prisma.treinamento.findUnique({
       where: { id: Number(treinamentoId) },
-      include: { publicos: true } // Traz as regras salvas em rascunho
+      include: { publicos: true } 
     });
 
     if (!curso) throw new NotFoundException('Treinamento não localizado para fechamento.');
@@ -438,13 +421,11 @@ export class TreinamentoService {
     const proximaOrdem = (maiorOrdemCard._max.ordem || 0) + 1;
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Ativa o curso abrindo os portões do catálogo para os alunos afetados
       const cursoAtualizado = await tx.treinamento.update({
         where: { id: Number(treinamentoId) },
         data: { ativo: true }
       });
 
-      // 2. Insere o cartão de controle na coluna 3 (Publicados) do Kanban gerencial
       const novoCard = await tx.kanbanCard.create({
         data: {
           coluna_id: colunaDestino.id,
@@ -455,7 +436,6 @@ export class TreinamentoService {
         }
       });
 
-      // 3. 💥 DISPARO RETROATIVO: Varre as regras salvas e gera as matrículas legítimas em lote na ativação!
       for (const regra of curso.publicos) {
         const queryFiltroUser: any = { ativo: true };
         const refIdBigInt = BigInt(regra.referencia_id);
@@ -489,9 +469,7 @@ export class TreinamentoService {
           });
         }
       }
-
-      console.log(`🏆 KANBAN INTEGRADO COM MATRÍCULAS LOTE: [${novoCard.titulo}] publicado e liberado!`);
-
+      
       return {
         success: true,
         treinamentoId: cursoAtualizado.id,

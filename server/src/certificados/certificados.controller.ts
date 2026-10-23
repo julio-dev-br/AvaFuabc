@@ -5,12 +5,9 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { Response } from 'express';
 
 @Controller('certificados')
-// 🚀 LIBERADO: Removido o Guard global da classe para permitir métodos públicos!
 export class CertificadosController {
   constructor(private readonly certificadosService: CertificadosService) { }
 
-  //ROTA PRIVADA DO ALUNO (Download do PDF dentro do Portal)
-  // 🚀 ATUALIZADO: O Guard foi movido para cá, protegendo individualmente esta rota com o accessToken!
   @Get('treinamento/:id')
   @UseGuards(AuthGuard)
   async baixarCertificado(
@@ -20,7 +17,7 @@ export class CertificadosController {
   ) {
     return this.certificadosService.gerarPdfCertificado(user.id, treinamentoId, res);
   }
-  // Rota: GET /certificados/publico/validar/:codigo
+
   @Get('publico/validar/:codigo')
   async validarCertificadoPublico(@Param('codigo') codigo: string, @Res() res: Response) {
     try {
@@ -30,7 +27,6 @@ export class CertificadosController {
       const dataBruta = dados.emitidoEm ? String(dados.emitidoEm) : new Date().toISOString();
       const dataEmissao = new Date(dataBruta).toLocaleDateString('pt-BR');
 
-      // 2. Cospe o HTML com Estilos Incorporados Nativo (Sem dependências externas de CDN!)
       const htmlVisual = `
         <!DOCTYPE html>
         <html lang="pt-BR">
@@ -231,7 +227,6 @@ export class CertificadosController {
       return res.status(200).send(htmlVisual);
 
     } catch (error) {
-      // 🚨 CASO DE FRAUDE: Interface vermelha nativa de aviso de segurança
       const htmlErro = `
         <!DOCTYPE html>
         <html lang="pt-BR">

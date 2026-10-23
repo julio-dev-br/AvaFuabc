@@ -9,9 +9,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
   standalone: true,
   imports: [CommonModule, MatIconModule, MatButtonModule],
 
-  // No seu template, altere o background-color do div mestre:
-// No seu template, mude a tag <button> do lado direito para esta versão com mat-icon-button:
-template: `
+  template: `
   <div style="display: flex; align-items: center; justify-content: space-between; min-width: 320px; padding: 14px 16px; background-color: #10b981 !important; border-radius: 6px; margin: -14px -24px; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2); font-family: 'Roboto', sans-serif; position: relative; overflow: hidden;">
     <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 2px;">
       <mat-icon style="color: #ffffff !important; vertical-align: middle;">check_circle</mat-icon>
@@ -43,6 +41,7 @@ template: `
   }
 `]
 })
+
 export class SnackbarSucessoComponent {
   public data = inject(MAT_SNACK_BAR_DATA);
   public snackBarRef = inject(MatSnackBarRef<SnackbarSucessoComponent>);

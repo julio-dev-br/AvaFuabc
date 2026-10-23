@@ -16,12 +16,9 @@
   </div>
 </div>
 }
-
 @if (!isLoading) {
 <div class="quiz-container"
   style="max-width: 800px; margin: 0 auto; padding: 0 4px; box-sizing: border-box; width: 100%;">
-  
-  <!-- CIRCUITO A: EXIBIÇÃO DO FORMULÁRIO DE PERGUNTAS ATIVAS -->
   <div [style.display]="(!isLoading && quiz && !foiEnviado) ? 'block' : 'none'">
     <div style="margin-bottom: 24px; padding: 0 4px;">
       <h2
@@ -31,39 +28,38 @@
         Nota mínima para aprovação: <strong>{{ notaMinimaExigida }}</strong>
       </p>
     </div>
-    
+
     <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; box-sizing: border-box;">
       @if (quiz && quiz.perguntas) {
-        @for (pergunta of quiz.perguntas; track pergunta.id; let i = $index) {
-        <mat-card
-          style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; width: 100%; box-sizing: border-box; overflow: hidden; background: #ffffff;">
-          <mat-card-header style="padding: 16px 16px 0 16px;">
-            <mat-card-title
-              style="font-size: 15px !important; font-weight: 600; color: #1e293b; line-height: 1.4; margin: 0; word-break: break-word; padding: 0;">
-              Questão {{ i + 1 }}: {{ pergunta.pergunta }}
-            </mat-card-title>
-          </mat-card-header>
+      @for (pergunta of quiz.perguntas; track pergunta.id; let i = $index) {
+      <mat-card
+        style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.02) !important; width: 100%; box-sizing: border-box; overflow: hidden; background: #ffffff;">
+        <mat-card-header style="padding: 16px 16px 0 16px;">
+          <mat-card-title
+            style="font-size: 15px !important; font-weight: 600; color: #1e293b; line-height: 1.4; margin: 0; word-break: break-word; padding: 0;">
+            Questão {{ i + 1 }}: {{ pergunta.pergunta }}
+          </mat-card-title>
+        </mat-card-header>
 
-          <mat-card-content style="padding: 12px 16px 16px 16px !important; width: 100%; box-sizing: border-box;">
-            <mat-radio-group class="alternativas-grupo-premium"
-              style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px; width: 100%;"
-              (change)="selecionarAlternativa(pergunta.id, $event.value)">
-              @for (alternativa of pergunta.alternativas; track alternativa.id) {
-              <mat-radio-button class="quiz-option-row" style="font-size: 13px; color: #334155; width: 100%;"
-                [value]="alternativa.id">
-                <span
-                  style="white-space: normal; line-height: 1.4; display: inline-block; word-break: break-word; padding: 4px 0;">
-                  {{ alternativa.descricao }}
-                </span>
-              </mat-radio-button>
-              }
-            </mat-radio-group>
-          </mat-card-content>
-        </mat-card>
-        }
+        <mat-card-content style="padding: 12px 16px 16px 16px !important; width: 100%; box-sizing: border-box;">
+          <mat-radio-group class="alternativas-grupo-premium"
+            style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px; width: 100%;"
+            (change)="selecionarAlternativa(pergunta.id, $event.value)">
+            @for (alternativa of pergunta.alternativas; track alternativa.id) {
+            <mat-radio-button class="quiz-option-row" style="font-size: 13px; color: #334155; width: 100%;"
+              [value]="alternativa.id">
+              <span
+                style="white-space: normal; line-height: 1.4; display: inline-block; word-break: break-word; padding: 4px 0;">
+                {{ alternativa.descricao }}
+              </span>
+            </mat-radio-button>
+            }
+          </mat-radio-group>
+        </mat-card-content>
+      </mat-card>
+      }
       }
     </div>
-
     <div style="margin-top: 32px; text-align: right; padding-bottom: 50px; padding-right: 4px;">
       <button mat-raised-button color="primary"
         style="background-color: #003366; color: white; padding: 0 24px; height: 44px; font-size: 14px; font-weight: 600; border-radius: 6px; width: auto; max-width: 100%;"
@@ -72,29 +68,29 @@
       </button>
     </div>
   </div>
-
-  <!-- CIRCUITO B: PAINEL REATIVO DE MÉTRICAS E FEEDBACK PÓS-CORREÇÃO -->
   @if (!isLoading && foiEnviado && resultadoEnvio) {
   <mat-card [style.border]="aprovado ? '2px solid #10b981' : '2px solid #e11d48'"
     style="text-align: center; padding: 40px 16px; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important; width: 100%; box-sizing: border-box; overflow: hidden; margin-top: 8px;">
     <mat-card-content
       style="display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; padding: 0;">
-      
+
       <mat-icon [style.color]="aprovado ? '#10b981' : '#e11d48'"
         style="font-size: 64px; width: 64px; height: 64px; margin-bottom: 16px; line-height: 1;">
         {{ aprovado ? 'check_circle' : 'cancel' }}
       </mat-icon>
-      
+
       <h2
         style="font-size: 24px; font-weight: bold; margin-bottom: 8px; color: #1e293b; word-break: break-word; line-height: 1.2; padding: 0 8px;">
         {{ aprovado ? 'Aprovado!' : 'Não Atingiu a Nota Mínima' }}
       </h2>
-      
+
       <p
         style="color: #64748b; font-size: 14px; margin: 0 0 24px 0; max-width: 450px; line-height: 1.5; padding: 0 12px; word-break: break-word;">
-        {{ resultadoEnvio.mensagem || (aprovado ? 'Você cumpriu todas as diretrizes de conformidade regulamentar com sucesso!' : 'Recomendamos que você revise o conteúdo das videoaulas e materiais didáticos antes de realizar uma nova tentativa.') }}
+        {{ resultadoEnvio.mensagem || (aprovado ? 'Você cumpriu todas as diretrizes de conformidade regulamentar com
+        sucesso!' : 'Recomendamos que você revise o conteúdo das videoaulas e materiais didáticos antes de realizar uma
+        nova tentativa.') }}
       </p>
-      
+
       <div class="feedback-score-box"
         style="display: flex; gap: 32px; margin-bottom: 32px; background-color: #f8fafc; padding: 16px 24px; border-radius: 8px; border: 1px solid #e2e8f0; justify-content: center; align-items: center; box-sizing: border-box; max-width: 100%;">
         <div style="display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px;">
@@ -107,7 +103,7 @@
             {{ notaFinal }}
           </span>
         </div>
-        
+
         <div class="score-box-divider"
           style="display: flex; flex-direction: column; align-items: center; border-left: 1px solid #cbd5e1; padding-left: 32px; flex: 1; min-width: 120px;">
           <span
@@ -121,39 +117,33 @@
           </span>
         </div>
       </div>
-      
+
       <!-- BARRA DE AÇÕES COMPLIANCE DINÂMICAS PÓS-RESULTADO -->
       <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%;">
-        
-        <!-- 🟢 CASO APROVADO: Libera o atalho mestre para baixar o certificado -->
         @if (aprovado) {
-          <button mat-raised-button
-            style="height: 44px; padding: 0 24px; font-size: 14px; background-color: #10b981; color: white; font-weight: 600; border-radius: 6px;"
-            [routerLink]="['/dashboard/perfil']">
-            <mat-icon style="margin-right: 4px;">workspace_premium</mat-icon>
-            Emitir Certificado Digital
-          </button>
+        <button mat-raised-button
+          style="height: 44px; padding: 0 24px; font-size: 14px; background-color: #10b981; color: white; font-weight: 600; border-radius: 6px;"
+          [routerLink]="['/dashboard/perfil']">
+          <mat-icon style="margin-right: 4px;">workspace_premium</mat-icon>
+          Emitir Certificado Digital
+        </button>
         }
-
-        <!-- 🔴 CASO REPROVADO: Abre o gatilho reativo que limpa a prova e reinicia na hora sem F5 -->
         @if (!aprovado) {
-          <button mat-raised-button
-            style="height: 44px; padding: 0 24px; font-size: 14px; background-color: #e11d48; color: white; font-weight: 600; border-radius: 6px;"
-            (click)="refazerAvaliacao()">
-            <mat-icon style="margin-right: 4px;">refresh</mat-icon>
-            Tentar Novamente (Reciclagem)
-          </button>
+        <button mat-raised-button
+          style="height: 44px; padding: 0 24px; font-size: 14px; background-color: #e11d48; color: white; font-weight: 600; border-radius: 6px;"
+          (click)="refazerAvaliacao()">
+          <mat-icon style="margin-right: 4px;">refresh</mat-icon>
+          Tentar Novamente (Reciclagem)
+        </button>
         }
-
         <button mat-flat-button color="primary"
           style="height: 44px; padding: 0 24px; font-size: 14px; background-color: #003366 !important; font-weight: 600; border-radius: 6px;"
           (click)="voltarParaAula()">
           Voltar para o Fluxo do Curso
         </button>
       </div>
-
     </mat-card-content>
   </mat-card>
   }
-</div> 
+</div>
 }

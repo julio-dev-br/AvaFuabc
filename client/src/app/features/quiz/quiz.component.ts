@@ -22,7 +22,7 @@ import { AlertsService } from '../../core/services/alerts.service';
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule, // 🚀 Adicionado suporte a routerLink no HTML de resultados
+    RouterModule,
     MatCardModule,
     MatRadioModule,
     MatButtonModule,
@@ -43,13 +43,10 @@ export class QuizComponent implements OnInit {
   quiz: any = null;
   isLoading = true;
 
-  // Estrutura de chaves { [perguntaId]: alternativaId }
   respostasSelecionadas: { [key: number]: number } = {};
-
   resultadoEnvio: any = null;
   foiEnviado = false;
   
-  // 🚀 ADICIONADO: Flags de estado visuais para o HTML acoplar os cards reativos
   aprovado = false;
   notaFinal = 0;
   notaMinimaExigida = 7;
@@ -127,9 +124,6 @@ export class QuizComponent implements OnInit {
         this.foiEnviado = true;
         this.isLoading = false;
 
-        console.log('=== RESPOSTA RECEBIDA DO NESTJS ===', respostaServidor);
-
-        // 🚀 SINCRONIZADO: Alimenta as propriedades da instância para destravar os cards visuais!
         this.notaFinal = respostaServidor.notaFinal !== undefined ? Number(respostaServidor.notaFinal) : 0;
         this.aprovado = respostaServidor.aprovado === true;
 
@@ -148,14 +142,12 @@ export class QuizComponent implements OnInit {
     });
   }
 
-  // 🚀 ADICIONADO: Método mestre que limpa a memória permitindo ao aluno refazer a prova na hora
   refazerAvaliacao(): void {
     this.respostasSelecionadas = {};
     this.resultadoEnvio = null;
     this.foiEnviado = false;
     this.aprovado = false;
     this.notaFinal = 0;
-    console.log('🔄 AVALIAÇÃO REINICIADA: Gabarito local limpo com sucesso.');
   }
 
   voltarParaAula(): void {

@@ -8,7 +8,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
   selector: 'app-snackbar-erro',
   standalone: true,
   imports: [CommonModule, MatIconModule, MatButtonModule],
-  // No seu template, aplique a mesma alteração no botão do lado direito:
+
   template: `
   <div style="display: flex; align-items: center; justify-content: space-between; min-width: 320px; padding: 14px 16px; background-color: #e11d48 !important; border-radius: 6px; margin: -14px -24px; box-shadow: 0 6px 16px rgba(225, 29, 72, 0.2); font-family: 'Roboto', sans-serif; position: relative; overflow: hidden;">
     <div style="display: flex; align-items: center; gap: 10px; padding-bottom: 2px;">
@@ -25,7 +25,7 @@ import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar'
     </button>
     <div class="toastr-progress-erro"></div>
   </div>`,
-  // 2. Nos styles abaixo, deixe apenas a fiação da linha regressiva:
+
   styles: [`
   @keyframes toastrProgress {
     from { width: 100%; }

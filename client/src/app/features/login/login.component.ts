@@ -5,7 +5,6 @@ import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertsService } from '../../core/services/alerts.service';
 
-// Importa o serviço usando a nomenclatura padrão exata do Angular 17
 import { AuthService } from '../../core/services/auth.service';
 
 // Angular Material Components

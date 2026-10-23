@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 @Module({
   imports: [
     JwtModule.registerAsync({
-      global: true, // Mantém o JWT global para toda a aplicação
+      global: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),

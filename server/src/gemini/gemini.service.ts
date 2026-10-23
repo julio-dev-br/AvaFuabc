@@ -3,13 +3,9 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class GeminiService {
   async gerarQuestoesQuiz(contextoTexto: string): Promise<any[]> {
-    console.log('============= MODE DE SIMULAÇÃO DE IA ATIVO =============');
-    console.log('Conteúdo recebido para análise técnica da NR:', contextoTexto);
     
-    // Aguarda 1.5 segundos apenas para simular o tempo de resposta real da IA (UX elegante)
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Devolve um payload idêntico ao contrato exigido pelo Angular
     return [
       {
         enunciado: "De acordo com as diretrizes regulamentares da NR analisada, qual é a conduta obrigatória imediata em caso de exposição a riscos biológicos?",
@@ -104,10 +100,6 @@ export class GeminiService {
 
 //     for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
 //       try {
-//         console.log(`\n======================================================`);
-//         console.log(`🚀 [Tentativa ${tentativa}/${maxTentativas}] DISPARO EM PRODUÇÃO - GEMINI 2.5 FLASH`);
-//         console.log(`======================================================`);
-
 //         const response = await axios.post(url, payload, {
 //           headers: {
 //             'Content-Type': 'application/json',
@@ -126,8 +118,7 @@ export class GeminiService {
 //         throw new Error('Estrutura de resposta inesperada dos servidores centrais da Google.');
 
 //       } catch (error: any) {
-//         console.error(`🚨 Falha na tentativa de processamento ${tentativa}:`, error?.response?.data || error?.message || error);
-        
+//        
 //         if (error?.response?.status === 503 && tentativa < maxTentativas) {
 //           console.warn('[Aviso] Cluster ocupado. Aguardando 2s para re-tentar...');
 //           await new Promise(resolve => setTimeout(resolve, 2000));

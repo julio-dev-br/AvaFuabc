@@ -130,7 +130,6 @@ export class AdminDashboardComponent implements OnInit {
 
   listaUsuarios: any[] = [];
 
-  // Estados do Controle de Usuários (Aba 'usuarios')
   userDataSource = new MatTableDataSource<any>([]);
   isLoadingUsuarios = true;
   isSalvando = false;
@@ -138,7 +137,6 @@ export class AdminDashboardComponent implements OnInit {
   colunasTabela: string[] = ['nome', 'email', 'lotacao', 'cargo', 'role', 'status'];
   novoUsuario = { name: '', email: '', role: 'user', empresa_id: 1, unidade_id: 1, departamento_id: 1, cargo_id: 1 };
 
-  // Formulário de comunicados do RH (em massa)
   comunicadoForm = {
     escopo: 'GERAL' as 'GERAL' | 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO',
     referenciaId: null as number | null,
@@ -147,47 +145,38 @@ export class AdminDashboardComponent implements OnInit {
   };
   isEnviandoComunicado = false;
 
-  // Controladores do Menu e Assistente (Wizard)
-  // abaAtiva = 'bi';
-  passoAtual = 0; // Começa na listagem gerencial
+  passoAtual = 0; 
 
-  // Chaves de Persistência Física
   idCursoCriado: number | null = null;
   idModuloCriado: number | null = null;
   idAulaCriada: number | null = null;
 
-  // Modelos Reativos de Inserção (NgModel)
   curso = { titulo: '', descricao: '', cargaHoraria: 4, obrigatorio: false };
   modulo = { titulo: '', ordem: 1 };
   aula = { titulo: '', descricao: '', videoUrl: '', ordem: 1 };
 
-  // Modelos do Banco de Questões (Quiz)
   quizTitulo = '';
   quizNotaMinima = 7;
   perguntasQuiz: any[] = [];
   novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
 
-  // Estados de Dados do Dashboard de BI e Gráficos
   isLoadingMetrics = true;
   cardsMetricas = { totalTreinamentos: 0, totalUsuarios: 0, taxaConformidadeGeral: 0 };
   listaCursosGerencial: any[] = [];
   isLoadingCursos = false;
   cursoSelecionadoParaGerenciar: any = null;
 
-  // Sintonizado perfeitamente com o "A" maiúsculo do HTML!
   filtroTextoAdmin: string = '';
   paginaAtualAdmin: number = 1;
-  itensPorPaginaAdmin: number = 5; // Exibe 5 cursos por vez no catálogo do RH
+  itensPorPaginaAdmin: number = 5; 
 
-  // VARIÁVEIS DO PASSO 5: Integração de Público Alvo (ERP Protheus)
   tipoVinculoSelecionado: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO' = 'EMPRESA';
   idReferenciaSelecionado: number | null = null;
-  listaVinculosAtivos: any[] = []; // Guarda os públicos já amarrados ao curso ativo
+  listaVinculosAtivos: any[] = []; 
 
   listaProjetosAdmin: any[] = [];
   isLoadingProjetos = false;
 
-  // BI
   public pieChartType: ChartType = 'pie';
   public pieChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -239,12 +228,11 @@ export class AdminDashboardComponent implements OnInit {
     scales: { y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } } }
   };
 
-  // 🚀 ATUALIZADO: Labels expandidas até Dezembro para dar match com o ano corrente de 2026!
   public lineChartData: ChartData<'line'> = {
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
     datasets: [
       {
-        data: Array(12).fill(0), // Nasce totalmente zerado no boot inicial de segurança
+        data: Array(12).fill(0), 
         label: 'Novos Alunos Matriculados',
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37, 99, 235, 0.04)',
@@ -270,10 +258,9 @@ export class AdminDashboardComponent implements OnInit {
     labels: ['Hosp. Mário Covas', 'CHM Santo André', 'Ame Mauá', 'Matriz'],
     datasets: [
       {
-        // ✅ CORRIGIDO: Array populado com percentuais reais simulados para o gráfico subir
         data: [20, 30, 21, 10, 10, 5, 3, 6],
         label: 'Percentual de Conclusão',
-        backgroundColor: ['#4f46e5', '#06b6d4', '#0284c7', '#003366']// Cores variadas para UX elegante
+        backgroundColor: ['#4f46e5', '#06b6d4', '#0284c7', '#003366']
       }
     ]
   };
@@ -342,42 +329,29 @@ export class AdminDashboardComponent implements OnInit {
 
     this.treinamentoService.obterMetricasAnaliticas().subscribe({
       next: (res: any) => {
-        // 1. Alimenta os Cards Gerenciais do topo (Total de Cursos, Alunos, etc.)
         if (res.cards) {
           this.cardsMetricas = res.cards;
         }
 
-        // 📊 2. GRÁFICO DE PIZZA (Aprovados vs Em Andamento vs Reprovados)
         if (res.graficoPizza && res.graficoPizza.dados && this.pieChartData?.datasets?.[0]) {
           this.pieChartData.datasets[0].data = res.graficoPizza.dados;
-          // Alinha de forma dinâmica as 3 labels retornadas pelo back-end!
           this.pieChartData.labels = res.graficoPizza.labels || ['Concluídos', 'Em Andamento', 'Reprovados'];
         }
 
-        // 📊 3. GRÁFICO DE BARRAS CENTRAL (Engajamento e Ranking de Cursos)
         if (res.graficoBarras && res.graficoBarras.dados && this.barChartData?.datasets?.[0]) {
           this.barChartData.labels = res.graficoBarras.labels || [];
           this.barChartData.datasets[0].data = res.graficoBarras.dados;
         }
 
-        // 📈 4. GRÁFICO DE LINHAS (Histórico Acumulado Cronológico Real do Postgres)
-        // 📈 4. GRÁFICO DE LINHAS (Evolução Acumulada Real do Postgres)
         if (res.graficoLinhaMatriculas && this.lineChartData?.datasets?.[0]) {
-          // 🚀 PURIFICADO: Injeta o array cheio de 12 meses vindo do NestJS sem nenhum corte (.slice)!
           this.lineChartData.datasets[0].data = res.graficoLinhaMatriculas;
         }
 
-
-
-
-        // 🏢 5. GRÁFICO DE UNIDADES HOSPITALARES (Compliance por Filial do Protheus)
         if (res.graficoBarrasUnidades && this.unidadeBarChartData?.datasets?.[0]) {
-          // 🚀 CORRIGIDO: Insere as etiquetas oficiais e as porcentagens físicas reais de cada hospital!
           this.unidadeBarChartData.labels = res.graficoBarrasUnidades.labels || [];
           this.unidadeBarChartData.datasets[0].data = res.graficoBarrasUnidades.valores || [];
         }
 
-        // Força a re-renderização completa do ecossistema do Chart.js com os dados purificados
         this.pieChartData = { ...this.pieChartData };
         this.barChartData = { ...this.barChartData };
         this.lineChartData = { ...this.lineChartData };
@@ -386,7 +360,7 @@ export class AdminDashboardComponent implements OnInit {
         this.isLoadingMetrics = false;
       },
       error: (err) => {
-        console.error('❌ Falha na carga do barramento do BI Analítico:', err);
+        console.error('Falha na carga do barramento do BI Analítico:', err);
         this.isLoadingMetrics = false;
       }
     });
@@ -619,25 +593,19 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
   finalizarEsteiraTreinamento(): void {
-    // 1. Validação defensiva: Garante que temos um curso em edição na esteira
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum identificador de curso localizado para publicação.');
       return;
     }
 
-    this.isLoadingCursos = true; // Ativa o spinner visual de background
+    this.isLoadingCursos = true; 
 
-    // 2. Dispara a requisição física para o back-end NestJS
     this.treinamentoService.publicarTreinamentoComKanban(Number(this.idCursoCriado)).subscribe({
       next: (resposta) => {
-        // 3. Feedback premium de sucesso com os dados da transação do Kanban
         this.alerts.sucesso('Parabéns! Esteira de treinamento publicada, ativada e inserida no Kanban Admin com sucesso!');
 
-
-        // 4. Recarrega o grid gerencial com o novo curso ativo na listagem
         this.carregarCatalogoGerencial();
 
-        // 5. Reseta os estados reativos do formulário limpando a bancada do assistente
         this.passoAtual = 1;
         this.idCursoCriado = null;
         this.listaVinculosAtivos = [];
@@ -645,7 +613,7 @@ export class AdminDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.isLoadingCursos = false;
-        console.error('🚨 Erro crítico na publicação da esteira com Kanban:', err);
+        console.error('Erro crítico na publicação da esteira com Kanban:', err);
         this.alerts.erro('Falha de comunicação ao publicar e integrar o treinamento com o Kanban.');
       }
     });
@@ -660,16 +628,12 @@ export class AdminDashboardComponent implements OnInit {
   gerarQuizPorInteligenciaArtificial(): void {
     if (!this.textoBaseIA || !this.textoBaseIA.trim()) return;
 
-    // O loadingInterceptor de concorrência já liga o showLoader() aqui na rede de forma automática!
     this.geminiService.gerarQuestoesAutomaticas(this.textoBaseIA).subscribe({
       next: (questoesGeradas: any[]) => {
         if (questoesGeradas && questoesGeradas.length > 0) {
-          // Concatena ou substitui o array reativo do seu quiz com as perguntas cuspidas pela IA
           this.perguntasQuiz = [...this.perguntasQuiz, ...questoesGeradas];
-
-          // Dá o feedback de sucesso total corporativo para o RH
           this.alerts.sucesso(`Mágica concluída! ${questoesGeradas.length} questões regulamentares injetadas com sucesso via Google Gemini!`);
-          this.textoBaseIA = ''; // Limpa a caixa de texto base
+          this.textoBaseIA = '';
         }
       },
       error: (err) => {
@@ -682,12 +646,10 @@ export class AdminDashboardComponent implements OnInit {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);
   }
-  carregarProjetosKanbanAdmin(): void {
-    // this.abaAtiva = 'projetos'; 
-  }
-  carregarDicionariosRH(): void {
-    // IMPLEMENTAR AQUI
-  }
+  carregarProjetosKanbanAdmin(): void {   }
+
+  carregarDicionariosRH(): void { }
+
   salvarQuizDoWizard(): void {
     if (!this.idAulaCriada) {
       this.alerts.erro('Erro: Cadastre pelo menos uma videoaula no Passo 3 antes de consolidar o Quiz.');
@@ -699,29 +661,25 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
 
-    // Monta o payload no contrato exato que o novo endpoint admin/criar-gerado-ia espera receber
     const payloadFinal = {
       aulaId: Number(this.idAulaCriada),
       titulo: this.quizTitulo.trim() || `Avaliação de Conformidade Regulamentar`,
       notaMinima: Number(this.quizNotaMinima || 7),
       tentativas: 3,
-      perguntas: this.perguntasQuiz // Consome as 5 perguntas da nossa simulação do Gemini
+      perguntas: this.perguntasQuiz
     };
 
-    // Dispara a requisição HTTP contra a rota blindada do NestJS
     this.quizService.salvarQuizGeradoPorIA(payloadFinal).subscribe({
       next: (response) => {
-        this.alerts.sucesso('Banco de questões de IA consolidado com sucesso no Postgres! 🏆');
+        this.alerts.sucesso('Banco de questões de IA consolidado com sucesso no Postgres!');
 
-        // Limpa a esteira reativa local para os próximos cadastros
         this.quizTitulo = '';
         this.perguntasQuiz = [];
 
-        // Avança o gestor reativamente para o Passo 5 (Vínculo de Público-Alvo do RH)
         this.passoAtual = 5;
       },
       error: (err: HttpErrorResponse) => {
-        console.error('🚨 Falha na persistência relacional do Quiz da IA:', err);
+        console.error('Falha na persistência relacional do Quiz da IA:', err);
         this.alerts.erro('Não foi possível gravar as questões. Verifique o console do servidor.');
       }
     });
@@ -734,7 +692,7 @@ export class AdminDashboardComponent implements OnInit {
         this.isLoadingChats = false;
       },
       error: (err) => {
-        console.error('🚨 Erro ao buscar salas do chat:', err);
+        console.error('Erro ao buscar salas do chat:', err);
         this.isLoadingChats = false;
       }
     });
@@ -743,14 +701,10 @@ export class AdminDashboardComponent implements OnInit {
     this.salaChatSelecionada = sala;
     this.historicoMensagensChat = [];
 
-    // Injeta o ID fixo do gestor/tutor (pode puxar do AuthService) e o nome para o JoinRoom
     const tutorId = 1;
 
-
-    // Liga a fiação do WebSocket e entra no canal exclusivo daquela sala
     this.chatApiService.entrarNaSala(sala.usuario_id, sala.user?.name || 'Aluno');
 
-    // Escuta reativamente a carga inicial do histórico de mensagens antigas da sala
     this.chatApiService.dadosSala.subscribe((dados: any) => {
       if (dados && dados.salaId === sala.id) {
         this.historicoMensagensChat = dados.historico || [];
@@ -758,10 +712,8 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
 
-    // Escuta novas mensagens pingando em tempo real enviadas pelo aluno
     this.chatApiService.novaMensagem.subscribe((mensagem: any) => {
       if (mensagem && mensagem.sala_id === sala.id) {
-        // Blinda contra duplicidade na esteira reativa
         const jaExiste = this.historicoMensagensChat.some(m => m.id === mensagem.id);
         if (!jaExiste) {
           this.historicoMensagensChat.push(mensagem);
@@ -773,18 +725,17 @@ export class AdminDashboardComponent implements OnInit {
   enviarMensagemDoTutor(): void {
     if (!this.novaMensagemTutorText.trim() || !this.salaChatSelecionada) return;
 
-    const tutorId = 1; // Substitua pelo ID dinâmico do usuário logado se preferir
+    const tutorId = 1; 
     const conteudo = this.novaMensagemTutorText.trim();
 
-    // Emite o evento instantâneo via Socket.io marcando is_tutor = true
     this.chatApiService.enviarMensagemInstantanea(
       this.salaChatSelecionada.id,
       tutorId,
       conteudo,
-      true // isTutor
+      true 
     );
 
-    this.novaMensagemTutorText = ''; // Limpa a caixa de texto reativa
+    this.novaMensagemTutorText = ''; 
   }
   private rolarChatParaOFinal(): void {
     setTimeout(() => {
@@ -797,13 +748,10 @@ export class AdminDashboardComponent implements OnInit {
   deletarVinculoReal(vinculoId: number): void {
     if (!vinculoId) return;
 
-    // 1. Dispara o cano HTTP Delete para o back-end NestJS detonar o dado no Postgres
     this.treinamentoService.removerVinculoPublico(vinculoId).subscribe({
       next: (resposta) => {
-        // 2. FILTRO REATIVO SUPREMO: Remove o card da lista da tela instantaneamente sem dar nenhuma piscada!
         this.listaVinculosAtivos = this.listaVinculosAtivos.filter(v => v.id !== vinculoId);
 
-        // 3. Exibe o feedback visual premium de sucesso para o gestor do RH
         this.snackBar.open('Vínculo organizacional removido com sucesso!', 'Fechar', {
           duration: 3000,
           horizontalPosition: 'right',
@@ -811,7 +759,7 @@ export class AdminDashboardComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('🚨 Erro ao remover vínculo regulamentar do Passo 5:', err);
+        console.error('Erro ao remover vínculo regulamentar do Passo 5:', err);
         this.snackBar.open('Falha ao excluir o vínculo. Tente novamente.', 'Fechar', { duration: 4000 });
       }
     });

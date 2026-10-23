@@ -15,7 +15,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-// Injeção de Alertas Globais para emitir pop-ups de erro amigáveis do Protheus
 import { AlertsService } from '../../core/services/alerts.service';
 
 @Component({
@@ -40,7 +39,7 @@ import { AlertsService } from '../../core/services/alerts.service';
 })
 export class ControleUsuariosComponent implements OnInit {
   private userService = inject(UserService);
-  private alerts = inject(AlertsService); // 🚀 Injetado motor de feedbacks visuais
+  private alerts = inject(AlertsService); 
 
   // Estados de Controle da Tela
   userDataSource = new MatTableDataSource<any>([]);
@@ -48,24 +47,20 @@ export class ControleUsuariosComponent implements OnInit {
   isLoading = true;
   isSalvando = false;
 
-  // Cabeçalhos que a tabela do Material exige mapear no HTML
   colunasTabela: string[] = ['nome', 'email', 'lotacao', 'cargo', 'role', 'status'];
 
-  // 🚀 MODELO ATUALIZADO: Eliminado os IDs manuais fictícios chumbados!
-  // Agora o formulário trabalha focado na validação regulamentar por CPF!
   novoUsuario = {
     name: '',
     email: '',
-    cpf: '', // 🌟 Campo mestre de integração com o Protheus Mock
+    cpf: '', 
     role: 'user',
-    password: '' // Opcional (Se deixar vazio, o back-end assume a senha padrão)
+    password: ''
   };
 
   ngOnInit(): void {
     this.carregarColaboradores();
   }
 
-  // 📋 ROTA ADMINISTRATIVA: Busca os funcionários cadastrados no PostgreSQL
   carregarColaboradores(): void {
     this.isLoading = true;
     this.userService.listarTodosColaboradores().subscribe({
@@ -80,13 +75,11 @@ export class ControleUsuariosComponent implements OnInit {
     });
   }
 
-  // 🔍 Filtro de Pesquisa Inteligente em Tempo Real
   aplicarFiltro(event: Event): void {
     const valorFiltro = (event.target as HTMLInputElement).value;
     this.userDataSource.filter = valorFiltro.trim().toLowerCase();
   }
 
-  // 💾 ROTA ADMINISTRATIVA: Envia o payload com o CPF para a checagem síncrona do Protheus
   salvarUsuario(): void {
     if (!this.novoUsuario.name || !this.novoUsuario.email || !this.novoUsuario.cpf) {
       this.alerts.erro('Por favor, preencha todos os campos obrigatórios, incluindo o CPF.');
@@ -114,7 +107,6 @@ export class ControleUsuariosComponent implements OnInit {
     });
   }
 
-  // ⚡ ROTA ADMINISTRATIVA: Alterna a ativação lógica no PostgreSQL via Slide Toggle
   mudarStatus(usuario: any): void {
     this.userService.alternarStatusAcesso(usuario.id).subscribe({
       next: () => {
@@ -128,7 +120,6 @@ export class ControleUsuariosComponent implements OnInit {
     });
   }
 
-  // Limpa os campos do formulário redefinindo as propriedades para o novo contrato
   resetarFormulario(): void {
     this.novoUsuario = {
       name: '',

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 
-// Angular Material Components para Layout Premium
+// Angular Material Components
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -53,21 +53,17 @@ export class PerfilComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  // DataSource nativo que gerencia a tabela do histórico
   historicoMatriculas = new MatTableDataSource<any>([]);
 
   isLoading = true;
   colunasTabela = ['treinamento', 'progresso', 'nota', 'status', 'acoes'];
 
-  // Separa responsabilidades na interface
   abaPerfilAtiva: 'dados' | 'certificados' = 'dados';
 
-  // MODELOS REATIVOS DO FORMULÁRIO DE SEGURANÇA
   senhaAtual: string = '';
   novaSenha: string = '';
   confirmarSenha: string = '';
 
-  // Objeto recheado dinamicamente pelo PostgreSQL via Prisma
   usuario = {
     nome: '',
     email: '',

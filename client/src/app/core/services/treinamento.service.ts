@@ -118,7 +118,6 @@ export class TreinamentoService {
     });
   }
 
-  //BUSCA OS COLABORADORES DO ERP MOCK PARA MATRÍCULA AVULSA
   obterFuncionariosERP(): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/integracao/protheus/funcionarios`, {
       headers: this.obterHeaders()
@@ -129,7 +128,6 @@ export class TreinamentoService {
     return this.http.patch(`${environment.apiUrl}/aulas/${aulaId}/progresso`, payload, { headers: this.obterHeaders() });
   }
 
-  // Dispara a rota do NestJS para ativar o curso e criar o card no Kanban Admin
   publicarTreinamentoComKanban(treinamentoId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admin/publicar/${treinamentoId}`, {}, { headers: this.obterHeaders() });
   }

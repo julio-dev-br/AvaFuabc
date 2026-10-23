@@ -18,23 +18,19 @@ export class NotificationService {
     });
   }
 
-  // Busca as notificações não lidas para o sininho
   buscarNaoLidas(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
-  // Dispara a rota PATCH para marcar o alerta como lido e sumir com o badge
   marcarComoLida(id: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/ler`, {}, { headers: this.getHeaders() });
   }
 
-  // Dispara comunicados institucionais em massa cruzando filtros do Protheus
   dispararComunicadoAdmin(payload: { escopo: string; referenciaId: number | null; titulo: string; mensagem: string }): Observable<any> {
-    // Bate cirurgicamente no endpoint @Post('admin/disparar') em português do NestJS
     return this.http.post<any>(`${this.apiUrl}/admin/disparar`, payload, { headers: this.getHeaders() });
   }
 
-  // Busca a lista consolidada de comunicados antigos para auditoria
+
   obterHistoricoAdmin(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/historico`, { headers: this.getHeaders() });
   }

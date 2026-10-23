@@ -17,18 +17,13 @@
 </div>
 }
 @if (!isLoading) {
-<!-- ======================== ABA 1: SEU CATÁLOGO DE CURSOS ORIGINAL ==================== -->
 <div *ngIf="abaAtiva === 'cursos'" style="animation: fadeIn 0.3s ease;">
-
-  <!-- CABEÇALHO RESPONSIVO -->
   <div style="margin-bottom: 24px; padding: 0 4px;">
     <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Meus Treinamentos
       Disponíveis</h2>
     <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">Cursos liberados de acordo com sua
       empresa, unidade hospitalar ou cargo.</p>
   </div>
-
-  <!-- BARRA DE PESQUISA REATIVA E ELÁSTICA -->
   @if (!isLoading && treinamentos.length > 0) {
   <div style="margin: 0 0 24px 0; width: 100%; max-width: 460px; padding: 0 4px;">
     <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
@@ -39,15 +34,12 @@
     </mat-form-field>
   </div>
   }
-
-  <!-- GRID DE EXIBIÇÃO DE TREINAMENTOS AUTOMÁTICO (3x2, 2x2, 1xN) -->
   @if (!isLoading && treinamentos.length > 0) {
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding: 4px;">
     @for (curso of treinamentosExibidos; track curso.id) {
     <mat-card
       style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between; background: #ffffff;">
 
-      <!-- Cabeçalho com flex-wrap para evitar esmagamento em telas menores -->
       <mat-card-header style="padding: 16px 16px 0 16px; display: flex; align-items: flex-start;">
         <div class="course-icon-area"
           style="background-color: rgba(0, 51, 102, 0.05); padding: 8px; border-radius: 6px; color: #003366; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -68,8 +60,6 @@
         <p style="margin: 0; word-break: break-word;">{{ curso.descricao || 'Treinamento de qualificação institucional.'
           }}</p>
       </mat-card-content>
-
-      <!-- Ações adaptáveis com wrap automático -->
       <mat-card-actions class="course-actions"
         style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
         @if (curso.obrigatorio) {
@@ -87,8 +77,6 @@
     </mat-card>
     }
   </div>
-
-  <!-- CONTROLES EXECUTIVOS DE PAGINAÇÃO: Totalmente Responsivos com Flexbox Adaptável -->
   @if (totalPaginas > 1) {
   <div
     style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px; padding: 16px 4px 0 4px; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
@@ -97,12 +85,10 @@
       <mat-icon style="vertical-align: middle; margin: 0;">chevron_left</mat-icon>
       <span style="margin-left: 4px; font-size: 13px; font-weight: 600;">Anterior</span>
     </button>
-
     <span
       style="font-size: 13px; color: #475569; font-weight: 500; text-align: center; white-space: nowrap; padding: 0 8px;">
       Página <strong style="color: #003366;">{{ paginaAtual }}</strong> de {{ totalPaginas }}
     </span>
-
     <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()"
       style="border-color: #003366; color: #003366; min-width: auto; padding: 0 12px; height: 36px;">
       <span style="margin-right: 4px; font-size: 13px; font-weight: 600;">Próxima</span>
@@ -112,7 +98,6 @@
   }
   }
 
-  <!-- Fallback de nenhum curso disponível -->
   @if (!isLoading && treinamentos.length === 0) {
   <div class="empty-state"
     style="text-align: center; padding: 48px 16px; color: #888888; background: white; border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 16px;">
@@ -123,7 +108,7 @@
   </div>
   }
 </div>
-<!-- ==================== ABA 2: CENTRAL DE ENGAJAMENTO (GAMIFICAÇÃO) ==================== -->
+
 <div *ngIf="abaAtiva === 'progresso'" style="animation: fadeIn 0.3s ease;">
   <div style="margin-bottom: 24px; padding: 0 4px;">
     <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Seu Desempenho &
@@ -134,7 +119,6 @@
 
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 4px;">
 
-    <!-- QUADRO 1: MINHAS MEDALHAS (INSÍGNIAS COMPACTAS) -->
     <mat-card
       style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; box-sizing: border-box;">
       <h3
@@ -159,8 +143,6 @@
         }
       </div>
     </mat-card>
-
-    <!-- QUADRO 2: PODIUM / RANKING DE ACERTOS RESPONSIVO -->
     <mat-card
       style="border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; box-sizing: border-box;">
       <h3
@@ -188,8 +170,6 @@
 
   </div>
 </div>
-<!-- ==================== ABA 3: CENTRAL DE KANBAN ==================== -->
-<div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;">
 
-</div>
-} <!-- Fim do @if (!isLoading) -->
+<div *ngIf="abaAtiva === 'kanban'" style="animation: fadeIn 0.3s ease;"> </div>
+} 

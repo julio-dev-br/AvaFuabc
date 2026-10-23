@@ -8,4 +8,5 @@ import { JwtService } from '@nestjs/jwt';
   controllers: [QuizzesController],
   providers: [QuizzesService, PrismaService, JwtService],
 })
+
 export class QuizzesModule {}

@@ -5,21 +5,19 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { ProgressoAulaDTO } from './dtos/progresso-aula.dto';
 import type  { CriarMatriculaDTO } from './dtos/criar-matricula.dto';
 
-@Controller() // Deixamos o prefixo aberto para usar o plural por rota
+@Controller()
 @UseGuards(AuthGuard)
 export class MatriculaController {
   constructor(private readonly matriculaService: MatriculaService) { }
 
-  // 1 - Rota de Matrícula Atualizada com DTO
   @Post('matriculas')
   async matricular(
     @CurrentUser() user: { id: number },
-    @Body() body: CriarMatriculaDTO, // Recebe o objeto JSON completo
+    @Body() body: CriarMatriculaDTO, 
   ) {
     return this.matriculaService.matricular(user.id, body.treinamentoId);
   }
 
-  // 2. Ver as aulas do curso que estou matriculado
   @Get('matriculas/treinamentos/:id/conteudo')
   async obterConteudo(
     @CurrentUser() user: { id: number },
@@ -28,7 +26,6 @@ export class MatriculaController {
     return this.matriculaService.obterConteudoCurso(user.id, treinamentoId);
   }
 
-  // 3. Atualizar o progresso de uma aula assistida
   @Patch('aulas/:id/progresso')
   async atualizarProgresso(
     @CurrentUser() user: { id: number },

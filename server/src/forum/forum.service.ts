@@ -7,7 +7,6 @@ import type { CriarRespostaDTO } from './dtos/criar-resposta.dto';
 export class ForumService {
   constructor(private prisma: PrismaService) {}
 
-  // 1. Abre um novo tópico de discussão
   async criarTopico(userId: number, dto: CriarTopicoDTO) {
     return this.prisma.topicoForum.create({
       data: {
@@ -19,7 +18,6 @@ export class ForumService {
     });
   }
 
-  // 2. Lista os tópicos vinculados a uma aula específica
   async listarTopicosPorAula(aulaId: number) {
     return this.prisma.topicoForum.findMany({
       where: { aula_id: aulaId },
@@ -35,7 +33,6 @@ export class ForumService {
     });
   }
 
-  // 3. Abre um tópico específico trazendo todas as suas respostas ordenadas
   async obterTopicoComRespostas(topicoId: number) {
     const topico = await this.prisma.topicoForum.findUnique({
       where: { id: topicoId },
@@ -57,7 +54,7 @@ export class ForumService {
     return topico;
   }
 
-  // 4. Adiciona uma resposta a um tópico existente
+
   async responderTopico(userId: number, topicoId: number, dto: CriarRespostaDTO) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     const isTutor = user?.role === 'admin' || user?.role === 'manager';

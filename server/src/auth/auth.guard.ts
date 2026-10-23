@@ -5,7 +5,6 @@ import { Request } from "express";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    // Injetamos o ConfigService para ler o .env de forma segura
     constructor(
         private jwtService: JwtService,
         private configService: ConfigService,
@@ -20,7 +19,7 @@ export class AuthGuard implements CanActivate {
         }
 
         try {
-            // Buscamos o JWT_SECRET do arquivo .env
+            
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: this.configService.get<string>('JWT_SECRET'),
             });
@@ -39,7 +38,6 @@ export class AuthGuard implements CanActivate {
         if (!authHeader) return undefined;
 
         const [type, token] = authHeader.split(' ');
-        // Corrigido: Verificamos se o tipo é Bearer e retornamos o TOKEN
         return type === 'Bearer' ? token : undefined;
     }
 }

@@ -82,7 +82,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  // 🌟 GATILHO DE BOOT VISUAL: Inicializa o script do YouTube assim que o HTML renderizar
   ngAfterViewInit(): void {
     this.inicializarScriptYouTube();
     this.escutarEventosGlobaisDoIframeDoYouTube();
@@ -131,12 +130,11 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       this.aulaAtiva = aula;
 
       if (aula.video_url) {
-        // 🌟 CORREÇÃO ROBUSTA: O link ganha a flag da API do Google de fábrica
         let urlFinalReal = String(aula.video_url).trim();
         if (!urlFinalReal.includes('enablejsapi=1')) {
           urlFinalReal = urlFinalReal.includes('?') ? `${urlFinalReal}&enablejsapi=1` : `${urlFinalReal}?enablejsapi=1`;
         }
-        // Grava na variável estática. O Angular lê isso uma única vez e nunca mais mexe no iframe!
+
         this.videoUrlBlindada = this.sanitizer.bypassSecurityTrustResourceUrl(urlFinalReal);
       }
     }, 50);
@@ -158,18 +156,12 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     return `${environment.apiUrl}${urlLimpa}`;
   }
 
-  // ==========================================
-  // ENGENHARIA DE TELEMETRIA DA API DO YOUTUBE
-  // ==========================================
-
   private inicializarScriptYouTube(): void {
-    // 🌟 SEGUNDO DISPARO SEGURO: Se a biblioteca já existe, pula a injeção e liga a escuta direto!
     if (typeof YT !== 'undefined' && YT.Player) {
       this.construirInstanciaPlayer();
       return;
     }
 
-    // 🚀 RETIFICADO: Injeta a URL oficial completa da biblioteca JavaScript de controle do Google!
     const tag = document.createElement('script');
     tag.src = 'https://youtube.com';
     const firstScriptTag = document.getElementsByTagName('script');
@@ -181,7 +173,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       this.construirInstanciaPlayer();
     };
 
-    // Vacina de redundância: Garante a tentativa de acoplamento rápido
     setTimeout(() => {
       this.construirInstanciaPlayer();
     }, 500);
@@ -195,13 +186,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         events: {
           'onStateChange': (event: any) => this.gerenciarMudancaStatusPlayer(event),
           'onReady': () => {
-            console.log('📺 API YOUTUBE: Player pronto e sincronizado via Google!');
             this.iniciarMonitoramentoTempo();
           }
         }
       });
-
-      // Gatilho de segurança autônomo caso o evento onReady do Google demore na rede da empresa
       setTimeout(() => {
         if (this.player && typeof this.player.getCurrentTime === 'function') {
           this.iniciarMonitoramentoTempo();
@@ -209,18 +197,16 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1200);
 
     } catch (error) {
-      console.warn('⚠️ Falha ao acoplar API nativa. Ativando monitoria autônoma...');
       this.iniciarMonitoramentoTempo();
     }
   }
 
   private gerenciarMudancaStatusPlayer(event: any): void {
-    if (event.data === 1) { // 1 = PLAYING (Se a API do Google responder)
-      console.log('📺 API YOUTUBE: Vídeo rodando. Ativando cronômetro...');
+    if (event.data === 1) {
+
       this.videoTocandoLocal = true;
       this.iniciarMonitoramentoTempo();
     } else {
-      // Se pausou ou parou, vira a flag e interrompe temporariamente
       this.videoTocandoLocal = false;
       if (this.intervalMonitor) {
         clearInterval(this.intervalMonitor);
@@ -231,11 +217,8 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private iniciarMonitoramentoTempo(): void {
     if (this.intervalMonitor) clearInterval(this.intervalMonitor);
 
-    console.log('🚀 TIMER NEUTRO ATIVADO: Telemetria híbrida aguardando play real do colaborador...');
-
     let progressoSimuladoContingencia = (this.aulaAtiva?.progresso_aulas?.[0]?.percentual || 0);
     
-    // Sincroniza a trava inicial com o que já veio carregado do banco para não re-enviar no boot
     this.ultimoPercentualSalvoNoBanco = progressoSimuladoContingencia;
 
     this.zone.runOutsideAngular(() => {
@@ -244,7 +227,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (!this.videoJaTevePlayReal) return;
 
-        // 🌟 ESTÍMULO MECÂNICO ANTI-ADBLOCK
         try {
           const iframeFisico = document.getElementById('player-video-iframe') as HTMLIFrameElement;
           if (iframeFisico && iframeFisico.contentWindow) {
@@ -253,7 +235,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         } catch (err) {}
 
-        // CENÁRIO A: API DO GOOGLE RESPONDENDO
         if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.getDuration === 'function') {
           try {
             const tempoAtual = this.player.getCurrentTime();
@@ -269,7 +250,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
 
-        // CENÁRIO B: CONTINGÊNCIA ATÔMICA (uBlock ativo)
         if (!this.player || typeof this.player.getCurrentTime !== 'function') {
           try {
             if (progressoSimuladoContingencia < 100) {
@@ -294,7 +274,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         this.aulaAtiva.progresso_aulas[0].percentual = percentualCalculado;
         console.log(`📈 TELEMETRIA LOCAL: Posição do vídeo atualizada para [${percentualCalculado}%]`);
 
-        // 🛡️ VACINA DE DISPARO ÚNICO POR FAIXA: Só envia se for uma nova dezena e não foi enviada ainda!
         if (percentualCalculado % 10 === 0 && percentualCalculado < 100) {
           if (percentualCalculado !== this.ultimoPercentualSalvoNoBanco) {
             this.ultimoPercentualSalvoNoBanco = percentualCalculado; // Trava a porteira imediatamente!
@@ -302,13 +281,12 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
 
-        // Se bater 100% assistido ou arrastado, crava a conclusão definitiva
         if (percentualCalculado >= 100) {
           this.aulaAtiva.progresso_aulas[0].percentual = 100;
           this.aulaAtiva.progresso_aulas[0].concluida = true;
           
           if (this.ultimoPercentualSalvoNoBanco !== 100) {
-            this.ultimoPercentualSalvoNoBanco = 100; // Trava a porteira final
+            this.ultimoPercentualSalvoNoBanco = 100; 
             this.forçarConclusaoProgressoIndividual(100);
           }
           
@@ -323,15 +301,12 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     const idDaAulaAtiva = Number(this.aulaAtiva?.id);
 
     const payloadValido = {
-      tempoAssistido: percentual, // Casado perfeitamente com o body do NestJS
+      tempoAssistido: percentual, 
       concluida: percentual >= 100
     };
 
-    console.log(`📡 COMUNICAÇÃO DE MÍDIAS: Enviando Patch para Aula ID [${idDaAulaAtiva}]:`, payloadValido);
-
     this.treinamentoService.salvarProgressoVideoaula(idDaAulaAtiva, payloadValido).subscribe({
       next: (res) => {
-        console.log(`✔️ BANCO ATUALIZADO: Registro de [${percentual}%] gravado fisicamente!`);
 
         if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
         this.aulaAtiva.progresso_aulas[0].percentual = percentual;
@@ -347,26 +322,22 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public executarPlayCortinaSegura(): void {
-    console.log('🖱️ CORTINA COMPLIANCE: Aluno acionou o player de vídeo! Destravando cronômetro.');
     this.videoJaTevePlayReal = true;
     this.iniciarMonitoramentoTempo();
 
-    // Tenta forçar o play nativo se a biblioteca do Google estiver acessível por baixo da malha
     if (this.player && typeof this.player.playVideo === 'function') {
       try { this.player.playVideo(); } catch (e) { }
     }
   }
 
   public dispararPlayManualNativo(): void {
-    console.log('🖱️ CLIQUE DETECTADO: Aluno ativou a mídia! Ligando cronômetro...');
-    this.videoTocandoLocal = !this.videoTocandoLocal; // Alterna entre Play e Pause
+    this.videoTocandoLocal = !this.videoTocandoLocal; 
     if (this.videoTocandoLocal) {
       this.iniciarMonitoramentoTempo();
     }
   }
 
   public simularConclusaoInstantaneaDEV(): void {
-    console.log('🎮 DEV MODE: Forçando conclusão instantânea da videoaula activa...');
 
     if (!this.aulaAtiva.progresso_aulas) {
       this.aulaAtiva.progresso_aulas = [{}];
@@ -392,12 +363,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       try {
         let dadosDoEvento = event.data;
 
-        // Se a mensagem vier em formato string stringificada, descriptografa para objeto
         if (typeof dadosDoEvento === 'string') {
           dadosDoEvento = JSON.parse(dadosDoEvento);
         }
 
-        // 🌟 CAPTURA MULTI-CAMADA: Tenta ler o estado em todas as variações que o YouTube pode arremessar
         let statusVideo: number | null = null;
 
         if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
@@ -405,14 +374,9 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
           statusVideo = dadosDoEvento.info.playerState;
         } else if (dadosDoEvento?.event === 'onStateChange') {
-          // Captura a assinatura direta de hooks de eventos do Google
           statusVideo = Number(dadosDoEvento.info);
         }
 
-        // 📊 PROCESSAMENTO DO STATUS SEGURO:
-        // 1 = PLAYING (Vídeo rodando de verdade)
-        // 2 = PAUSED (Vídeo pausado)
-        // 0 = ENDED (Vídeo finalizado)
         if (statusVideo !== null) {
           if (statusVideo === 1) {
             console.log('📈 TELEMETRIA ATIVA: Vídeo tocando! Retomando contagem de mídias.');
@@ -422,16 +386,10 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
             this.videoJaTevePlayReal = false;
           }
         }
-      } catch (e) {
-        // Silencia dados de infraestrutura irrelevantes do postMessage
-      }
+      } catch (e) { }
     });
   }
-
-  // ==========================================
-  // LOGÍSTICA DE COMUNICAÇÃO DO CHAT CHANNELS
-  // ==========================================
-
+  
   alternarJanelaChat(): void {
     this.chatAberto = !this.chatAberto;
 

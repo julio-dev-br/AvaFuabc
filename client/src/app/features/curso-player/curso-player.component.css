@@ -15,12 +15,9 @@
   color: #666666;
   font-size: 18px;
 }
-
-/* Divide a tela: 70% para o vídeo, 30% para a lista de módulos */
 .player-grid {
   display: grid;
   grid-template-columns: 7fr 3fr;
-  /* 🌟 CORRIGIDO: Altura calibrada para se encaixar milimetricamente na Master Page */
   height: calc(100vh - 150px);
   overflow: hidden;
 }
@@ -107,7 +104,6 @@
   background-color: #f5f5f5;
 }
 
-/* BARRA LATERAL */
 .sidebar-section {
   border-left: 1px solid #e0e0e0;
   background-color: #ffffff;
@@ -151,7 +147,6 @@
   vertical-align: middle;
 }
 
-/* Destaca a linha da aula que está passando no player */
 .aula-ativa-item {
   background-color: #e6f0fa !important;
 }
@@ -162,13 +157,9 @@
   font-weight: bold;
 }
 
-/* ==========================================================================
-   🎬 GRID ELÁSTICO DO CURSO PLAYER (DESKTOP PADRÃO)
-   ========================================================================== */
 .player-grid-container {
   display: grid;
   grid-template-columns: 1fr 340px;
-  /* Vídeo toma o espaço e menu trava em 340px */
   gap: 24px;
   width: 100%;
   box-sizing: border-box;
@@ -186,7 +177,6 @@
   flex-direction: column;
 }
 
-/* Estilização da aula ativa na lista */
 .aula-ativa-item {
   background-color: rgba(0, 51, 102, 0.06) !important;
 }
@@ -200,12 +190,11 @@
   font-weight: 700 !important;
 }
 
-/* 🌟 CONTAINER FLUTUANTE DA JANELA */
 .aluno-chat-wrapper {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 9999; /* Garante que fique por cima de qualquer player ou painel lateral */
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -221,7 +210,6 @@
   transform: scale(1.05);
 }
 
-/* CAIXA DO CHAT EXPANDIDA */
 .janela-chat-aluno-card {
   width: 330px;
   height: 450px;
@@ -234,9 +222,8 @@
   background: #ffffff;
 }
 
-/* CABEÇALHO SUPORTE */
 .aluno-chat-header {
-  background: #003366; /* Azul Corporativo da Fundação ABC */
+  background: #003366; 
   color: #ffffff;
   padding: 14px 16px;
   display: flex;
@@ -253,11 +240,10 @@
 .header-titulos p {
   margin: 0;
   font-size: 11px;
-  color: #10b981; /* Verde Online */
+  color: #10b981;
   font-weight: 500;
 }
 
-/* CORPO DAS MENSAGENS COM SCROLL */
 .aluno-chat-body-messages {
   flex: 1;
   padding: 16px;
@@ -282,7 +268,6 @@
   line-height: 1.5;
 }
 
-/* ALINHAMENTOS DOS BALÕES (ALUNO X TUTOR) */
 .linha-msg-aluno-box {
   display: flex;
   width: 100%;
@@ -309,7 +294,6 @@
   opacity: 0.6;
 }
 
-/* Aluno fala (Lado Direito - Azul) */
 .linha-msg-aluno-box.lado-direito {
   justify-content: flex-end;
 }
@@ -319,7 +303,6 @@
   border-top-right-radius: 2px;
 }
 
-/* Tutor responde (Lado Esquerdo - Branco) */
 .linha-msg-aluno-box.lado-esquerdo {
   justify-content: flex-start;
 }
@@ -330,7 +313,6 @@
   border: 1px solid #e2e8f0;
 }
 
-/* BARRA DE INPUT INFERIOR */
 .aluno-chat-footer {
   display: flex;
   align-items: center;
@@ -354,7 +336,6 @@
   border-color: #003366;
 }
 
-/* Barra de rolagem fina */
 .aluno-chat-body-messages::-webkit-scrollbar {
   width: 4px;
 }
@@ -363,15 +344,10 @@
   border-radius: 2px;
 }
 
-
-/* ==========================================================================
-   📱 🚀 EQUALIZADOR MOBILE: Desfaz o grid lateral e joga o menu para a base
-   ========================================================================== */
 @media (max-width: 1024px) {
   .player-grid-container {
     display: flex !important;
     flex-direction: column !important;
-    /* Vídeo no topo e menu embaixo */
     gap: 20px !important;
   }
 

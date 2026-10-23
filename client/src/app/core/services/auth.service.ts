@@ -10,9 +10,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-  // Realiza o login e salva o token JWT automaticamente
   signin(credentials: { email: string; password: string }): Observable<{ accessToken: string; role: string }> {
-    // Adicionamos a tipagem da role no retorno do POST
     return this.http.post<{ accessToken: string; role: string }>(`${this.apiUrl}/signin`, credentials).pipe(
       tap((response) => {
         localStorage.setItem('accessToken', response.accessToken);
@@ -25,11 +23,6 @@ export class AuthService {
     return localStorage.getItem('userRole');
   }
 
-  // signup(userData: any): Observable<any> {
-  //   return this.http.post(`${this.apiUrl}/signup`, userData);
-  // }
-
-   // 🚀 NOVO: Método de Auto-Cadastro Público integrado ao Protheus
   signup(payload: { name: string; email: string; cpf: string; password: string }): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/auth/signup`, payload);
   }

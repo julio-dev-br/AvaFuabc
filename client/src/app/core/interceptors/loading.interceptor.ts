@@ -12,9 +12,7 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
             if (requisicoesAtivas > 0) layoutService.showLoader();
         });
     }
-
     requisicoesAtivas++;
-
     return next(req).pipe(
         // delay(1500),
         finalize(() => {

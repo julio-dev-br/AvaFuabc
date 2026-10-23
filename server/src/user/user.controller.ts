@@ -10,7 +10,6 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as bcrypt from 'bcrypt';
 
-// Interface de entrada ajustada para receber o CPF de validação do Protheus
 interface CriarUsuarioInput {
   name: string;
   email: string;
@@ -56,7 +55,6 @@ export class UserController {
       throw new BadRequestException('O CPF do colaborador é obrigatório para validação no Protheus.');
     }
 
-    // 🛡️ TRAVA 1: Verifica se o e-mail já está em uso no portal
     const usuarioExiste = await this.prisma.user.findUnique({
       where: { email: body.email },
     });
@@ -65,7 +63,6 @@ export class UserController {
       throw new BadRequestException('Este e-mail já está cadastrado no sistema.');
     }
 
-    // 🚀 INTEGRAÇÃO PROTHEUS MOCK SÍNCRONA: Varre o array em memória exportado pelo ProtheusMockController
     const cpfLimpo = body.cpf.replace(/\D/g, '');
 
     const { MOCK_FUNCIONARIOS_PROTHEUS } = require('../integracao/protheus/protheus.controller');
@@ -76,13 +73,11 @@ export class UserController {
       throw new BadRequestException('Atenção: CPF não localizado na folha de colaboradores ativos do Protheus da Fundação ABC.');
     }
 
-    // Convertemos os IDs do ERP para BigInt para rodar a checagem cruzada de segurança
     const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
     const unidadeId = funcionarioErp.unidade_id ? BigInt(funcionarioErp.unidade_id) : null;
     const deptoId = funcionarioErp.departamento_id ? BigInt(funcionarioErp.departamento_id) : null;
     const cargoId = funcionarioErp.cargo_id ? BigInt(funcionarioErp.cargo_id) : null;
 
-    // Como o schema do User não guarda a string 'cpf', barramos se o mesmo funcionário do ERP tentar criar outra conta
     if (unidadeId && cargoId) {
       const vinculoExiste = await this.prisma.user.findFirst({
         where: {
@@ -117,7 +112,6 @@ export class UserController {
       select: { id: true, name: true, email: true }
     });
 
-    console.log('✅ VALIDADO NO MOCK PROTHEUS E GRAVADO NO POSTGRESQL COM VALIDAÇÃO DUPLA! ID:', novoUsuario.id);
     return novoUsuario;
   }
 
@@ -150,7 +144,6 @@ export class UserController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        // 🚀 CORRIGIDO: Validação direta por lista de strings (Inviolável e livre de quebras de Regex!)
         const formatosPermitidos = ['image/jpeg', 'image/jpg', 'image/png'];
 
         if (!formatosPermitidos.includes(file.mimetype)) {
@@ -180,7 +173,6 @@ export class UserController {
 
 
   @Get('perfil/me')
-  // 🚀 LIBERADO: Alunos, Líderes e Admins podem puxar seus próprios dados sincronizados do JWT
   @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   async obterPerfilLogado(@CurrentUser() user: any) {
     const usuario = await this.prisma.user.findUnique({
