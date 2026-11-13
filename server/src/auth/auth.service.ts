@@ -1,120 +1,128 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 import { SignInDTO, SignUpDTO } from './dtos/auth';
 import { PrismaService } from '../prisma/prisma.service';
-import { JwtService } from '@nestjs/jwt';
+import { ProtheusService } from '../integracao/protheus/protheus.service';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService,
+    private protheusService: ProtheusService,
+  ) {}
 
-    constructor(
-        private prismaService: PrismaService,
-        private jwtService: JwtService,
-    ) { }
-
-    async signup(data: SignUpDTO) {
-        if (!data.name || data.name.trim() === '') {
-            throw new BadRequestException('O nome do colaborador é obrigatório.');
-        }
-        if (!data.email || !data.email.includes('@')) {
-            throw new BadRequestException('O e-mail informado é inválido.');
-        }
-        if (!data.cpf || data.cpf.trim() === '') {
-            throw new BadRequestException('O CPF é obrigatório para validação no Protheus.');
-        }
-
-        const userAlreadyExists = await this.prismaService.user.findUnique({
-            where: {
-                email: data.email
-            }
-        });
-
-        if (userAlreadyExists) {
-            throw new UnauthorizedException('Este e-mail já está cadastrado no sistema.');
-        }
-
-        const cpfLimpo = data.cpf.replace(/\D/g, '');
-        
-        const { MOCK_FUNCIONARIOS_PROTHEUS } = require('../integracao/protheus/protheus.controller');
-        
-        const funcionarioErp = MOCK_FUNCIONARIOS_PROTHEUS.find((f: any) => f.cpf === cpfLimpo);
-
-        if (!funcionarioErp) {
-            throw new UnauthorizedException('Atenção: CPF não localizado na folha de colaboradores ativos do Protheus da Fundação ABC. Procure o RH institucional.');
-        }
-
-        const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
-        const unidadeId = funcionarioErp.unidade_id ? BigInt(funcionarioErp.unidade_id) : null;
-        const deptoId = funcionarioErp.departamento_id ? BigInt(funcionarioErp.departamento_id) : null;
-        const cargoId = funcionarioErp.cargo_id ? BigInt(funcionarioErp.cargo_id) : null;
-
-        if (unidadeId && cargoId) {
-            const vinculoExiste = await this.prismaService.user.findFirst({
-                where: {
-                    unidade_id: unidadeId,
-                    cargo_id: cargoId,
-                    departamento_id: deptoId,
-                    name: funcionarioErp.name
-                }
-            });
-
-            if (vinculoExiste) {
-                throw new UnauthorizedException(`Atenção: O colaborador ${funcionarioErp.name} já possui uma conta ativa registrada para este CPF.`);
-            }
-        }
-
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-
-        const user = await this.prismaService.user.create({
-            data: {
-                email: data.email,
-                password: hashedPassword,
-                name: data.name || '',
-                role: 'user', 
-                empresa_id: empresaId,
-                unidade_id: unidadeId,
-                departamento_id: deptoId,
-                cargo_id: cargoId,
-                ativo: true
-            }
-        });
-
-        return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
-        };
+  async signup(data: SignUpDTO) {
+    if (!data.name || data.name.trim() === '') {
+      throw new BadRequestException('O nome do colaborador é obrigatório.');
+    }
+    if (!data.cpf || data.cpf.trim() === '') {
+      throw new BadRequestException('O CPF é obrigatório para validação no Protheus.');
     }
 
-    async signin(data: SignInDTO) {
-        const user = await this.prismaService.user.findUnique({
-            where: {
-                email: data.email,
-            },
-        });
+    const cpfLimpo = data.cpf.replace(/\D/g, '');
 
-        if (!user) {
-            throw new UnauthorizedException('Credenciais inválidas');
-        }
+    const funcionarioErp = await this.protheusService.buscarColaboradorPorCpf(cpfLimpo);
 
-        const passwordMatch = await bcrypt.compare(data.password, user.password);
-
-        if (!passwordMatch) {
-            throw new UnauthorizedException('Credenciais inválidas');
-        }
-
-        const token = await this.jwtService.signAsync({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role, 
-        });
-
-        return {
-            accessToken: token,
-            role: user.role
-        };
+    if (!funcionarioErp) {
+      throw new BadRequestException('Não foi possível extrair os dados do colaborador no Protheus.');
     }
+
+    const emailOficial = (funcionarioErp.email || data.email || '').trim().toLowerCase();
+
+    if (!emailOficial || !emailOficial.includes('@')) {
+      throw new BadRequestException('Colaborador sem e-mail válido cadastrado no Protheus. Procure o RH.');
+    }
+
+    const userAlreadyExists = await this.prismaService.user.findFirst({
+      where: {
+        OR: [
+          { cpf: cpfLimpo },
+          { email: emailOficial },
+        ],
+      },
+    });
+
+    if (userAlreadyExists) {
+      if (userAlreadyExists.cpf === cpfLimpo) {
+        throw new UnauthorizedException('Este CPF já possui uma conta ativa cadastrada no portal.');
+      }
+      throw new UnauthorizedException('O e-mail vinculado a este colaborador já está cadastrado no sistema.');
+    }
+
+    const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await this.prismaService.user.create({
+      data: {
+        email: emailOficial,
+        cpf: cpfLimpo,
+        matricula: funcionarioErp.matricula || null,
+        centro_custo: funcionarioErp.departamento_id || null,
+        centro_custo_descricao: funcionarioErp.departamento_nome || null,
+        password: hashedPassword,
+        name: funcionarioErp.nome || data.name.trim(),
+        role: 'user',
+        empresa_id: empresaId,
+        unidade_id: null,
+        departamento_id: null,
+        cargo_id: null,
+        ativo: true,
+      },
+    });
+
+    return {
+      id: user.id.toString(),
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+  }
+
+  async signin(data: SignInDTO) {
+    if (!data.cpf || !data.password) {
+      throw new BadRequestException('Informe o CPF e a senha para acessar o portal.');
+    }
+
+    const cpfLimpo = data.cpf.replace(/\D/g, '');
+
+    if (cpfLimpo.length !== 11) {
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        cpf: cpfLimpo,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('CPF ou senha inválidos.');
+    }
+
+    if (!user.ativo) {
+      throw new UnauthorizedException('Seu acesso encontra-se inativo. Procure o RH.');
+    }
+
+    const passwordMatch = await bcrypt.compare(data.password, user.password);
+
+    if (!passwordMatch) {
+      throw new UnauthorizedException('CPF ou senha inválidos.');
+    }
+
+    const token = await this.jwtService.signAsync({
+      id: Number(user.id),
+      name: user.name,
+      email: user.email,
+      cpf: user.cpf,
+      role: user.role,
+    });
+
+    return {
+      accessToken: token,
+      role: user.role,
+    };
+  }
 }

@@ -6,7 +6,7 @@ import { ProtheusService } from './protheus.service';
 @Module({
   imports: [
     HttpModule.register({
-      timeout: 8000,
+      timeout: 25000,
       maxRedirects: 5,
     }),
   ],
