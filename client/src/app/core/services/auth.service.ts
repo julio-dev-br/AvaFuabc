@@ -10,7 +10,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-  signin(credentials: { email: string; password: string }): Observable<{ accessToken: string; role: string }> {
+  signin(credentials: { cpf: string; password: string }): Observable<{ accessToken: string; role: string }> {
     return this.http.post<{ accessToken: string; role: string }>(`${this.apiUrl}/signin`, credentials).pipe(
       tap((response) => {
         localStorage.setItem('accessToken', response.accessToken);
