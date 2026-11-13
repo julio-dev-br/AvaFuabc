@@ -6,6 +6,6 @@ export interface SignUpDTO {
     cpf: string;
 }
 export interface SignInDTO {
-    email: string;
+    cpf: string;
     password: string;
 }

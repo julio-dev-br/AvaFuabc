@@ -5,9 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProtheusModule } from '../integracao/protheus/protheus.module';
 
 @Module({
   imports: [
+    ProtheusModule, // Libera o ProtheusService para ser injetado no AuthService
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],

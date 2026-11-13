@@ -176,7 +176,9 @@ export class UserController {
   @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   async obterPerfilLogado(@CurrentUser() user: any) {
     const usuario = await this.prisma.user.findUnique({
-      where: { id: user.id }
+      where: { 
+        id: user.id 
+      }
     });
 
     if (!usuario) {

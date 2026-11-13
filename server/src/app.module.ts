@@ -15,6 +15,7 @@ import { MateriaisModule } from './materiais/materiais.module';
 import { GeminiModule } from './gemini/gemini.module'; 
 import { ChatModule } from './chat/chat.module';
 import { ProtheusMockController } from './integracao/protheus/protheus.controller';
+import { ProtheusModule } from './integracao/protheus/protheus.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { ProtheusMockController } from './integracao/protheus/protheus.controlle
     KanbanModule,
     MateriaisModule,
     GeminiModule,
-    ChatModule,   
+    ChatModule,
+    ProtheusModule,   
   ],
   
   controllers: [UserController, NotificacoesController, ProtheusMockController],

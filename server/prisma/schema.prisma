@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id                 Int       @id @default(autoincrement())
-  usuario_externo_id BigInt?
-  empresa_id         BigInt?
-  unidade_id         BigInt?
-  departamento_id    BigInt?
-  cargo_id           BigInt?
-  matricula          String?
-  name               String?
-  email              String    @unique
-  password           String
-  role               String    @default("user")
-  ativo              Boolean   @default(true)
-  avatar_url         String?
-  sincronizado_em    DateTime?
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
+  id                     Int       @id @default(autoincrement())
+  usuario_externo_id     BigInt?
+  empresa_id             BigInt?
+  unidade_id             BigInt?
+  departamento_id        BigInt?
+  cargo_id               BigInt?
+  matricula              String?
+  centro_custo           String?   @db.VarChar(30)
+  centro_custo_descricao String?   @db.VarChar(150)
+  name                   String?
+  email                  String    @unique
+  cpf                    String?   @unique @db.VarChar(11)
+  password               String
+  role                   String    @default("user")
+  ativo                  Boolean   @default(true)
+  avatar_url             String?
+  sincronizado_em        DateTime?
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   // Relacionamentos
   respostas_quiz QuizResponse[]
@@ -156,7 +159,7 @@ model Alternativa {
 
 model QuizResponse {
   id             Int      @id @default(autoincrement())
-  matricula_id   Int      // ➔ Amarra diretamente ao contrato da matrícula do curso
+  matricula_id   Int // ➔ Amarra diretamente ao contrato da matrícula do curso
   usuario_id     Int
   pergunta_id    Int
   alternativa_id Int
@@ -184,14 +187,13 @@ model Matricula {
   treinamento     Treinamento     @relation(fields: [treinamento_id], references: [id], onDelete: Cascade)
   progresso_aulas ProgressoAula[]
   certificados    Certificado[]
-  
+
   // Relações reversas
-  respostas_quiz  QuizResponse[]  // ➔ Permite buscar todas as respostas dadas nesta matrícula
+  respostas_quiz QuizResponse[] // ➔ Permite buscar todas as respostas dadas nesta matrícula
 
   // 🛡️ BLOQUEIO SUPREMO: Impede fisicamente que o mesmo aluno tenha duas matrículas no mesmo curso!
-  @@unique([usuario_id, treinamento_id]) 
+  @@unique([usuario_id, treinamento_id])
 }
-
 
 model ProgressoAula {
   id                  Int       @id @default(autoincrement())
@@ -286,8 +288,8 @@ model KanbanCard {
 // 🌟 NOVO: Controla a sala de bate-papo em tempo real entre o aluno e o suporte/RH
 model SalaChat {
   id         Int      @id @default(autoincrement())
-  usuario_id Int      // O aluno dono do chat
-  titulo     String   // Ex: "Suporte NR-32 - Julio"
+  usuario_id Int // O aluno dono do chat
+  titulo     String // Ex: "Suporte NR-32 - Julio"
   aberto     Boolean  @default(true)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -301,8 +303,8 @@ model SalaChat {
 model MensagemChat {
   id         Int      @id @default(autoincrement())
   sala_id    Int
-  usuario_id Int      // Quem enviou a mensagem (pode ser o aluno ou o tutor do RH)
-  conteudo   String   // O texto digitado
+  usuario_id Int // Quem enviou a mensagem (pode ser o aluno ou o tutor do RH)
+  conteudo   String // O texto digitado
   is_tutor   Boolean  @default(false) // Destaca se a mensagem veio do RH/Suporte
   created_at DateTime @default(now())
 
