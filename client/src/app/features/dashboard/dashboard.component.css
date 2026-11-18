@@ -1,5 +1,5 @@
 .header-toolbar {
-  background-color: #003366 !important; 
+  background-color: var(--text-brand) !important; 
   color: #ffffff;
   padding: 0 24px;
 }
@@ -46,12 +46,12 @@
   margin-right: 16px;
 }
 .course-icon {
-  color: #003366;
+  color: var(--text-brand);
 }
 .course-title {
   font-size: 18px !important;
   font-weight: bold;
-  color: #003366;
+  color: var(--text-brand);
 }
 .course-content {
   padding: 16px;

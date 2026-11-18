@@ -1,5 +1,5 @@
 .admin-toolbar {
-  background-color: #003366 !important;
+  background-color: var(--brand-primary) !important;
   color: #ffffff;
 }
 
@@ -22,14 +22,15 @@ mat-card-actions button {
 }
 
 button[disabled] {
-  background-color: #b3cce6 !important;
-  color: #6688aa !important;
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-color) !important;
   cursor: not-allowed !important;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 ::ng-deep .compact-input .mat-mdc-form-field-subscript-wrapper {
-  display: none !important; /* Remove o espaço fantasma de erro abaixo dos inputs compactos */
+  display: none !important;
 }
 
 .admin-layout-grid {
@@ -65,7 +66,7 @@ button[disabled] {
   font-size: 32px;
   width: 32px;
   height: 32px;
-  color: #ff9800; 
+  color: #ff9800;
 }
 
 .brand-title {
@@ -109,9 +110,8 @@ button[disabled] {
   color: #ffffff !important;
 }
 
-/* Estado Ativo do Menu Lateral */
 .nav-active {
-  background-color: #003366 !important;
+  background-color: var(--brand-primary) !important;
   color: #ffffff !important;
   font-weight: bold !important;
   border-left: 4px solid #ff9800 !important;
@@ -120,23 +120,41 @@ button[disabled] {
 .nav-divider {
   border: 0;
   border-top: 1px solid #002d59;
-  margin: auto 0 12px 0; /* Joga os botões de saída para o rodapé */
+  margin: auto 0 12px 0;
 }
 
-.btn-back-portal { color: #a8ffb2 !important; }
-.btn-logout-admin { color: #fca5a5 !important; }
+.btn-back-portal {
+  color: #a8ffb2 !important;
+}
+
+.btn-logout-admin {
+  color: #fca5a5 !important;
+}
 
 .admin-main-content {
-  background-color: #f8fafc;
+  background-color: var(--bg-page);
   padding: 32px;
-  overflow-y: auto; 
+  overflow-y: auto;
   height: 100vh;
   box-sizing: border-box;
 }
 
-.content-header { margin-bottom: 32px; }
-.page-title { color: #003366; font-size: 26px; font-weight: bold; margin: 0 0 6px 0; }
-.page-subtitle { color: #64748b; font-size: 14px; margin: 0; }
+.content-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  color: var(--text-brand);
+  font-size: 26px;
+  font-weight: bold;
+  margin: 0 0 6px 0;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0;
+}
 
 .metrics-grid {
   display: grid;
@@ -147,9 +165,9 @@ button[disabled] {
 
 .metric-card {
   border-radius: 8px !important;
-  background: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  box-shadow: var(--card-shadow) !important;
+  border: 1px solid var(--border-color);
 }
 
 .metric-card-body {
@@ -161,7 +179,7 @@ button[disabled] {
 
 .metric-label {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 0.5px;
@@ -170,7 +188,7 @@ button[disabled] {
 .metric-value {
   font-size: 34px;
   font-weight: bold;
-  color: #1e293b;
+  color: var(--text-primary);
   margin: 6px 0 0 0;
 }
 
@@ -180,14 +198,29 @@ button[disabled] {
   height: 42px;
 }
 
-/* Bordas coloridas temáticas */
-.border-blue { border-left: 5px solid #003366; }
-.border-orange { border-left: 5px solid #ff9800; }
-.border-green { border-left: 5px solid #2e7d32; }
+.border-blue {
+  border-left: 5px solid var(--text-brand);
+}
 
-.color-blue { color: #003366; }
-.color-orange { color: #ff9800; }
-.color-green { color: #2e7d32; }
+.border-orange {
+  border-left: 5px solid #ff9800;
+}
+
+.border-green {
+  border-left: 5px solid #10b981;
+}
+
+.color-blue {
+  color: var(--text-brand);
+}
+
+.color-orange {
+  color: #ff9800;
+}
+
+.color-green {
+  color: #10b981;
+}
 
 .charts-grid {
   display: grid;
@@ -199,28 +232,24 @@ button[disabled] {
 .chart-card {
   border-radius: 8px !important;
   padding: 24px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow) !important;
 }
 
 .chart-card-title {
   font-size: 14px;
   font-weight: bold;
-  color: #475569;
+  color: var(--text-secondary);
   margin: 0 0 20px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.chart-canvas-wrapper-pie {
-  max-height: 240px;
-  margin: 0 auto;
-  display: block;
-}
-
+.chart-canvas-wrapper-pie,
 .chart-canvas-wrapper-bar {
   max-height: 240px;
+  margin: 0 auto;
   display: block;
 }
 
@@ -230,7 +259,9 @@ button[disabled] {
   align-items: center;
 }
 
-.center-text { text-align: center; }
+.center-text {
+  text-align: center;
+}
 
 .wizard-container {
   width: 100%;
@@ -241,32 +272,33 @@ button[disabled] {
 .steps-indicator {
   display: flex;
   justify-content: space-between;
-  background: #e2e8f0;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   padding: 14px 24px;
   border-radius: 8px;
   margin-bottom: 28px;
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .step-active {
   font-weight: bold;
-  color: #003366;
-  border-bottom: 2px solid #003366;
+  color: var(--text-brand);
+  border-bottom: 2px solid var(--text-brand);
   padding-bottom: 2px;
 }
 
 .form-card {
   border-radius: 8px !important;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   padding: 24px;
-  background: #ffffff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
+  background: var(--bg-card);
+  box-shadow: var(--card-shadow) !important;
 }
 
 .form-card-title {
-  color: #003366;
+  color: var(--text-brand);
   font-weight: bold;
   font-size: 18px !important;
 }
@@ -285,6 +317,9 @@ button[disabled] {
   width: 100%;
 }
 
+/* ==========================================================================
+   CHAT CENTRAL DO RH (LIGHT & DARK MODE)
+   ========================================================================== */
 .chat-grid-wrapper {
   display: grid;
   grid-template-columns: 350px 1fr;
@@ -294,13 +329,15 @@ button[disabled] {
   margin-top: 15px;
 }
 
-.coluna-salas-card {
+.coluna-salas-card,
+.coluna-mensagens-card {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  box-shadow: var(--card-shadow) !important;
 }
 
 .chat-toolbar-header {
@@ -308,6 +345,8 @@ button[disabled] {
   min-height: 56px;
   font-size: 16px;
   font-weight: 600;
+  background-color: #003366 !important;
+  color: #ffffff !important;
 }
 
 .lista-salas-scroll {
@@ -319,18 +358,19 @@ button[disabled] {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .item-sala-aluno:hover {
-  background-color: #f8fafc;
+  background-color: var(--bg-hover);
 }
 
 .item-sala-aluno.sala-ativa {
-  background-color: #f0f4f8;
-  border-left: 4px solid #003366;
+  background-color: var(--bg-active-link);
+  border-left: 4px solid var(--text-brand);
 }
 
 .avatar-wrapper {
@@ -343,7 +383,7 @@ button[disabled] {
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
-  background: #cbd5e1;
+  background: var(--bg-subtle);
 }
 
 .status-indicator.online {
@@ -353,7 +393,7 @@ button[disabled] {
   width: 10px;
   height: 10px;
   background-color: #10b981;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--bg-card);
   border-radius: 50%;
 }
 
@@ -366,7 +406,7 @@ button[disabled] {
   margin: 0 0 2px 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -375,7 +415,7 @@ button[disabled] {
 .email-subtexto {
   margin: 0 0 6px 0;
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -383,29 +423,21 @@ button[disabled] {
 
 .badge-modulo-tag {
   font-size: 10px;
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--bg-subtle);
+  color: var(--text-brand);
+  border: 1px solid var(--border-color);
   padding: 2px 6px;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .contador-mensagens-badge {
-  background-color: #003366;
+  background-color: var(--brand-primary);
   color: #ffffff;
   font-size: 11px;
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 10px;
-}
-
-.coluna-mensagens-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
 }
 
 .janela-chat-bloqueada {
@@ -414,8 +446,8 @@ button[disabled] {
   justify-content: center;
   height: 100%;
   text-align: center;
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
 }
 
 .bloqueio-wrapper {
@@ -426,18 +458,19 @@ button[disabled] {
 .icon-central-suporte {
   transform: scale(2.5);
   margin-bottom: 24px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .bloqueio-wrapper h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
-  color: #334155;
+  color: var(--text-brand);
 }
 
 .bloqueio-wrapper p {
   font-size: 14px;
   line-height: 1.5;
+  color: var(--text-muted);
 }
 
 .janela-chat-ativa-wrapper {
@@ -450,8 +483,8 @@ button[disabled] {
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
 }
 
 .avatar-header-img {
@@ -466,7 +499,7 @@ button[disabled] {
   margin: 0 0 2px 0;
   font-size: 15px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .status-texto-realtime {
@@ -480,7 +513,7 @@ button[disabled] {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background-color: #f1f5f9;
+  background-color: var(--bg-page);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -496,7 +529,7 @@ button[disabled] {
   padding: 10px 14px;
   border-radius: 12px;
   position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .texto-conteudo-chat {
@@ -518,8 +551,9 @@ button[disabled] {
 }
 
 .linha-mensagem-wrapper.alinhado-aluno .balao-mensagem {
-  background-color: #ffffff;
-  color: #1e293b;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-top-left-radius: 2px;
 }
 
@@ -528,7 +562,7 @@ button[disabled] {
 }
 
 .linha-mensagem-wrapper.alinhado-tutor .balao-mensagem {
-  background-color: #003366;
+  background-color: var(--brand-primary);
   color: #ffffff;
   border-top-right-radius: 2px;
 }
@@ -537,15 +571,17 @@ button[disabled] {
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border-top: 1px solid #e2e8f0;
-  background: #ffffff;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-card);
   gap: 12px;
 }
 
 .input-mensagem-texto {
   flex: 1;
   height: 48px;
-  border: 1px solid #cbd5e1;
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 24px;
   padding: 0 20px;
   font-size: 14px;
@@ -553,8 +589,12 @@ button[disabled] {
   transition: border-color 0.2s;
 }
 
+.input-mensagem-texto::placeholder {
+  color: var(--text-muted);
+}
+
 .input-mensagem-texto:focus {
-  border-color: #003366;
+  border-color: var(--text-brand);
 }
 
 .btn-enviar-fab {
@@ -568,16 +608,30 @@ button[disabled] {
 
 .lista-salas-scroll::-webkit-scrollbar-thumb,
 .area-mensagens-scroll::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: var(--border-color);
   border-radius: 3px;
 }
 
-.full-width { width: 100%; }
-.form-actions { justify-content: flex-end; padding-top: 24px; display: flex; }
-.form-actions-split { justify-content: space-between; padding-top: 24px; display: flex; width: 100%; box-sizing: border-box; }
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  justify-content: flex-end;
+  padding-top: 24px;
+  display: flex;
+}
+
+.form-actions-split {
+  justify-content: space-between;
+  padding-top: 24px;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 .btn-action-primary {
-  background-color: #003366 !important;
+  background-color: var(--brand-primary) !important;
   color: #ffffff !important;
   height: 46px;
   padding: 0 32px !important;
@@ -585,27 +639,60 @@ button[disabled] {
   font-size: 15px;
 }
 
-.radio-group-vertical { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
-.radio-row { display: flex; align-items: center; gap: 16px; width: 100%; }
-.form-divider { border: 0; border-top: 1px solid #e2e8f0; margin: 12px 0; }
-::ng-deep .compact-input .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-divider {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  margin: 12px 0;
+}
 
 .draft-box {
   margin-top: 24px;
   padding: 16px;
-  background-color: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
 }
 
-.draft-title { margin: 0 0 12px 0; color: #334155; font-weight: bold; font-size: 14px; }
-.draft-list { margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.6; }
+.draft-title {
+  margin: 0 0 12px 0;
+  color: var(--text-brand);
+  font-weight: bold;
+  font-size: 14px;
+}
 
-button[disabled] {
-  background-color: #b3cce6 !important;
-  color: #6688aa !important;
-  cursor: not-allowed !important;
-  opacity: 0.7;
+.draft-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   LINHAS DIVISÓRIAS (<hr>) SUAVES E NEUTRAS (LIGHT & DARK MODE)
+   ========================================================================== */
+hr {
+  border: 0 !important;
+  height: 1px !important;
+  background-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+body.dark-theme hr {
+  background-color: rgba(148, 163, 184, 0.14) !important;
 }
 
 .fade-in-animation {
@@ -613,7 +700,13 @@ button[disabled] {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

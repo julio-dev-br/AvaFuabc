@@ -2,12 +2,12 @@
 <div class="loading-overlay-container">
   <div class="loading-progress-box">
     <mat-icon
-      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      style="color: var(--text-brand); font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
       cloud_download
     </mat-icon>
     <mat-progress-bar mode="indeterminate"
       style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
-    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+    <h3 style="margin: 0 0 4px 0; color: var(--text-brand); font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
       Sincronizando Ecossistema
     </h3>
     <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
@@ -20,8 +20,8 @@
 @if (!isLoading) {
 <div style="margin-bottom: 20px; padding: 10 4px;">
   <h2
-    style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
-    <mat-icon style="color: #003366; font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
+    style="margin: 0; font-size: 20px; font-weight: 700; color: var(--text-brand); letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px;">
+    <mat-icon style="color: var(--text-brand); font-size: 24px; width: 24px; height: 24px;">assignment</mat-icon>
     Quadro Kanban de Tarefas Pessoais
   </h2>
   <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px; line-height: 1.4;">
@@ -41,7 +41,7 @@
 
         @for (card of coluna.cards; track card.id) {
         <mat-card class="kanban-card" cdkDrag [cdkDragDisabled]="cardIdSendoEditado === card.id"
-          style="position: relative; margin-bottom: 10px; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;">
+          style="position: relative; margin-bottom: 10px; border-radius: 6px; background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;">
           <mat-card-content style="padding: 12px 14px;">
 
             @if (cardIdSendoEditado === card.id) {
@@ -67,7 +67,7 @@
             <div class="card-header-area"
               style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
               <span class="card-title"
-                style="font-size: 14px; font-weight: 600; color: #1e293b; flex: 1; word-break: break-word;">
+                style="font-size: 14px; font-weight: 600; color: var(--text-primary); flex: 1; word-break: break-word;">
                 {{ card.titulo }}
               </span>
               <button mat-icon-button [matMenuTriggerFor]="cardMenu"
@@ -78,7 +78,7 @@
               </button>
               <mat-menu #cardMenu="matMenu" xPosition="before">
                 <button mat-menu-item (click)="ativarEdicaoInline(card)">
-                  <mat-icon style="color: #003366; font-size: 20px;">edit</mat-icon>
+                  <mat-icon style="color: var(--text-brand); font-size: 20px;">edit</mat-icon>
                   <span style="font-size: 13px; font-weight: 500; color: #334155;">Editar Tarefa</span>
                 </button>
 

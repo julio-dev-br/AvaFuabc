@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
+import { ThemeService } from '../../core/services/theme.service'
 
 import { filter } from 'rxjs/operators';
 
@@ -41,6 +42,7 @@ export class LayoutComponent implements OnInit {
   private authService = inject(AuthService);
   public tabService = inject(AdminTabService);
   public layoutService = inject(LayoutService);
+  public themeService = inject(ThemeService);
   private router = inject(Router);
 
   private readonly apiUrl = `${environment.apiUrl}`;

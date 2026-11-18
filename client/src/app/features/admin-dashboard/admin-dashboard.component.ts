@@ -9,6 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AlertsService } from '../../core/services/alerts.service';
 import { ComunicadosComponent } from './components/comunicados/comunicados.component';
 import { ProjetosKanbanComponent } from './components/projetos-kanban/projetos-kanban.component';
+import { ThemeService } from '../../core/services/theme.service';
 
 // Angular Material Modules
 import { MatTableModule } from '@angular/material/table';
@@ -29,7 +30,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // Componentes de Gráficos (Chart.js)
 import { BaseChartDirective } from 'ng2-charts';
-import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { Chart, registerables, ChartConfiguration, ChartData } from 'chart.js';
 import { ControleUsuariosComponent } from '../user/user.component';
 import { ModalMateriaisComponent } from './modal-materiais.component';
 import { NotificationService } from '../../core/services/notification.service';
@@ -88,6 +89,7 @@ export class AdminDashboardComponent implements OnInit {
   public textoBaseIA = '';
   private chatApiService = inject(ChatApiService);
   private router = inject(Router);
+  public themeService = inject(ThemeService);
 
   constructor() {
     effect(() => {
@@ -102,8 +104,13 @@ export class AdminDashboardComponent implements OnInit {
         this.carregarPainelSuporteRH();
       }
     });
-  }
 
+    // Atualiza automaticamente as cores dos 4 gráficos ao alternar entre Sol e Lua
+    effect(() => {
+      const isDark = this.themeService.isDarkMode();
+      this.atualizarCoresGraficos(isDark);
+    });
+  }
   ngOnInit(): void {
     this.route.data.subscribe(data => {
       if (data && data['aba']) {
@@ -145,7 +152,7 @@ export class AdminDashboardComponent implements OnInit {
   };
   isEnviandoComunicado = false;
 
-  passoAtual = 0; 
+  passoAtual = 0;
 
   idCursoCriado: number | null = null;
   idModuloCriado: number | null = null;
@@ -168,71 +175,64 @@ export class AdminDashboardComponent implements OnInit {
 
   filtroTextoAdmin: string = '';
   paginaAtualAdmin: number = 1;
-  itensPorPaginaAdmin: number = 5; 
+  itensPorPaginaAdmin: number = 5;
 
   tipoVinculoSelecionado: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO' = 'EMPRESA';
   idReferenciaSelecionado: number | null = null;
-  listaVinculosAtivos: any[] = []; 
+  listaVinculosAtivos: any[] = [];
 
   listaProjetosAdmin: any[] = [];
   isLoadingProjetos = false;
 
-  public pieChartType: ChartType = 'pie';
-  public pieChartOptions: ChartConfiguration['options'] = {
+  public pieChartType = 'pie' as const;
+  public pieChartOptions: ChartConfiguration<'pie'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'top'
-      }
+      legend: { position: 'top' }
     }
   };
   public pieChartData: ChartData<'pie', number[], string | string[]> = {
     labels: ['Concluídos', 'Em Andamento', 'Reprovados'],
     datasets: [{
       data: [],
-      backgroundColor: [
-        '#10b981',
-        '#f59e0b',
-        '#f50b55'
-      ]
+      backgroundColor: ['#10b981', '#f59e0b', '#f50b55']
     }]
   };
-  public barChartType: ChartType = 'bar';
-  public barChartOptions: ChartConfiguration['options'] = {
-    responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        beginAtZero: true,
-        grid: { color: '#f1f5f9' }
-      },
-      y: {
-        grid: { display: false }
-      }
-    },
 
+  public barChartType = 'bar' as const;
+  public barChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+      y: { grid: { display: false } }
+    },
     datasets: {
-      bar: {
-        maxBarThickness: 24,
-        borderRadius: 4
-      }
+      bar: { maxBarThickness: 24, borderRadius: 4 }
     }
   };
-  public barChartData: ChartData<'bar'> = { labels: [], datasets: [{ data: [], label: 'Matrículas', backgroundColor: '#0284c7' }] };
+  public barChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{ data: [], label: 'Matrículas', backgroundColor: '#0284c7' }]
+  };
 
-  public lineChartType: ChartType = 'line';
-  public lineChartOptions: ChartConfiguration['options'] = {
+  public lineChartType = 'line' as const;
+  public lineChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: true, position: 'top' } },
-    scales: { y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } } }
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Matrículas' } }
+    }
   };
-
   public lineChartData: ChartData<'line'> = {
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
     datasets: [
       {
-        data: Array(12).fill(0), 
+        data: Array(12).fill(0),
         label: 'Novos Alunos Matriculados',
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37, 99, 235, 0.04)',
@@ -242,14 +242,11 @@ export class AdminDashboardComponent implements OnInit {
     ]
   };
 
-
-  public unidadeBarChartType: ChartType = 'bar';
-  public unidadeBarChartOptions: ChartConfiguration['options'] = {
+  public unidadeBarChartType = 'bar' as const;
+  public unidadeBarChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false }
-    },
+    plugins: { legend: { display: false } },
     scales: {
       y: { beginAtZero: true, max: 100, title: { display: true, text: 'Conformidade (%)' } }
     }
@@ -264,6 +261,87 @@ export class AdminDashboardComponent implements OnInit {
       }
     ]
   };
+
+  private atualizarCoresGraficos(isDark: boolean): void {
+    const corTexto = isDark ? '#cbd5e1' : '#475569';
+    const corGrade = isDark ? 'rgba(148, 163, 184, 0.14)' : '#f1f5f9';
+
+    this.pieChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: corTexto, font: { weight: 'bold' } }
+        }
+      }
+    };
+
+    this.barChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: corGrade },
+          ticks: { color: corTexto }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: corTexto }
+        }
+      },
+      datasets: {
+        bar: { maxBarThickness: 24, borderRadius: 4 }
+      }
+    };
+
+    this.lineChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: corTexto }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: corGrade },
+          ticks: { color: corTexto }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: corGrade },
+          ticks: { color: corTexto },
+          title: { display: true, text: 'Matrículas', color: corTexto }
+        }
+      }
+    };
+
+    this.unidadeBarChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: corTexto }
+        },
+        y: {
+          beginAtZero: true,
+          max: 100,
+          grid: { color: corGrade },
+          ticks: { color: corTexto },
+          title: { display: true, text: 'Conformidade (%)', color: corTexto }
+        }
+      }
+    };
+  }
+
 
   get cursosGerenciaisExibidos(): any[] {
     const busca = this.filtroTextoAdmin.toLowerCase().trim();
@@ -292,20 +370,24 @@ export class AdminDashboardComponent implements OnInit {
   get abaAtiva(): string {
     return this.tabService.abaAtiva();
   }
+
   mudarAba(aba: string): void {
     this.tabService.mudarAba(aba);
     this.router.navigate([`/admin/${aba}`]);
   }
+
   proximaPaginaAdmin(): void {
     if (this.paginaAtualAdmin < this.totalPaginasAdmin) {
       this.paginaAtualAdmin++;
     }
   }
+
   paginaAnteriorAdmin(): void {
     if (this.paginaAtualAdmin > 1) {
       this.paginaAtualAdmin--;
     }
   }
+
   carregarCatalogoGerencial(): void {
     this.isLoadingCursos = true;
     this.treinamentoService.obterTreinamentosGerencial().subscribe({
@@ -318,12 +400,14 @@ export class AdminDashboardComponent implements OnInit {
       error: () => this.isLoadingCursos = false
     });
   }
+
   selecionarCursoParaGerenciar(curso: any): void {
     this.cursoSelecionadoParaGerenciar = curso;
     this.idCursoCriado = Number(curso.id);
     this.curso.titulo = curso.titulo;
     this.passoAtual = 2;
   }
+
   carregarDadosBI(): void {
     this.isLoadingMetrics = true;
 
@@ -365,6 +449,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   salvarCursoBase(): void {
     if (!this.curso.titulo.trim()) return;
     const payload = { titulo: this.curso.titulo, descricao: this.curso.descricao, carga_horaria: this.curso.cargaHoraria, obrigatorio: this.curso.obrigatorio };
@@ -377,6 +462,7 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
+
   salvarModulo(): void {
     if (!this.modulo.titulo.trim() || !this.idCursoCriado) return;
 
@@ -395,6 +481,7 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
+
   formatarLinkYouTube(url: string): string {
     if (!url || !url.trim()) return '';
     const urlCrua = url.trim();
@@ -408,6 +495,32 @@ export class AdminDashboardComponent implements OnInit {
     }
     return urlCrua;
   }
+
+  private chatDadosSub: any;
+  private chatMensagemSub: any;
+
+  private obterIdTutorLogado(): number {
+    try {
+      const rawUser = localStorage.getItem('usuario') || localStorage.getItem('user');
+      if (rawUser) {
+        const parsed = JSON.parse(rawUser);
+        const id = Number(parsed.id || parsed.usuario_id || parsed.sub);
+        if (id && !isNaN(id)) return id;
+      }
+
+      const token = localStorage.getItem('accessToken');
+      if (token && token.split('.').length === 3) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const id = Number(payload.sub || payload.id || payload.usuario_id);
+        if (id && !isNaN(id)) return id;
+      }
+    } catch (e) {
+      console.warn('Erro ao ler ID do tutor logado:', e);
+    }
+    return Number(localStorage.getItem('userId') || 0);
+  }
+
+
   salvarAula(): void {
     if (!this.aula.titulo.trim() || !this.aula.videoUrl.trim() || !this.idModuloCriado) return;
     const urlPadronizada = this.formatarLinkYouTube(this.aula.videoUrl);
@@ -433,12 +546,14 @@ export class AdminDashboardComponent implements OnInit {
       error: (err: HttpErrorResponse) => this.tratarErro(err)
     });
   }
+
   adicionarQuestaoMemoria(): void {
     if (!this.novaQuestao.enunciado.trim() || !this.novaQuestao.respostaCorreta) return;
     this.perguntasQuiz.push({ ...this.novaQuestao });
     this.novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
     this.alerts.sucesso('Questão adicionada ao banco temporário!');
   }
+
   salvarQuizCompleto(): void {
     if (!this.idAulaCriada) {
       this.alerts.erro('Erro: Cadastre pelo menos uma videoaula no Passo 3 antes de gerar o Quiz.');
@@ -483,6 +598,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   public obterNomeMock(tipo: 'EMPRESA' | 'UNIDADE' | 'DEPARTAMENTO' | 'CARGO' | 'USUARIO', id: string | number | null): string {
     if (!id) return '';
 
@@ -507,6 +623,7 @@ export class AdminDashboardComponent implements OnInit {
 
     return `${tipo} ID: ${idProcurado}`;
   }
+
   carregarDadosOrigemProtheus(): void {
     this.isLoadingCursos = true;
 
@@ -539,6 +656,7 @@ export class AdminDashboardComponent implements OnInit {
     });
 
   }
+
   salvarVinculoPublico(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum curso base ativo para vincular o público.');
@@ -577,6 +695,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   aoMudarEmpresa(empresaId: string): void {
     this.vinculoRH.empresa_id = empresaId;
     this.vinculoRH.unidade_id = '';
@@ -592,13 +711,14 @@ export class AdminDashboardComponent implements OnInit {
       error: (err) => console.error('Erro ao buscar unidades filtradas:', err)
     });
   }
+
   finalizarEsteiraTreinamento(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum identificador de curso localizado para publicação.');
       return;
     }
 
-    this.isLoadingCursos = true; 
+    this.isLoadingCursos = true;
 
     this.treinamentoService.publicarTreinamentoComKanban(Number(this.idCursoCriado)).subscribe({
       next: (resposta) => {
@@ -618,6 +738,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
     this.dialog.open(ModalMateriaisComponent, {
       width: '500px',
@@ -625,6 +746,7 @@ export class AdminDashboardComponent implements OnInit {
       data: { id: cursoId, titulo: cursoTitulo }
     });
   }
+
   gerarQuizPorInteligenciaArtificial(): void {
     if (!this.textoBaseIA || !this.textoBaseIA.trim()) return;
 
@@ -642,11 +764,13 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   logoutAdmin(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);
   }
-  carregarProjetosKanbanAdmin(): void {   }
+
+  carregarProjetosKanbanAdmin(): void { }
 
   carregarDicionariosRH(): void { }
 
@@ -684,6 +808,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   carregarPainelSuporteRH(): void {
     this.isLoadingChats = true;
     this.chatApiService.listarSalasAtivasDoRH().subscribe({
@@ -697,22 +822,23 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   selecionarSalaSuporte(sala: any): void {
     this.salaChatSelecionada = sala;
     this.historicoMensagensChat = [];
 
-    const tutorId = 1;
+    // Limpa inscrições anteriores para evitar duplicação ao trocar de conversa
+    this.chatDadosSub?.unsubscribe();
+    this.chatMensagemSub?.unsubscribe();
 
-    this.chatApiService.entrarNaSala(sala.usuario_id, sala.user?.name || 'Aluno');
-
-    this.chatApiService.dadosSala.subscribe((dados: any) => {
+    this.chatDadosSub = this.chatApiService.dadosSala.subscribe((dados: any) => {
       if (dados && dados.salaId === sala.id) {
         this.historicoMensagensChat = dados.historico || [];
         this.rolarChatParaOFinal();
       }
     });
 
-    this.chatApiService.novaMensagem.subscribe((mensagem: any) => {
+    this.chatMensagemSub = this.chatApiService.novaMensagem.subscribe((mensagem: any) => {
       if (mensagem && mensagem.sala_id === sala.id) {
         const jaExiste = this.historicoMensagensChat.some(m => m.id === mensagem.id);
         if (!jaExiste) {
@@ -721,22 +847,27 @@ export class AdminDashboardComponent implements OnInit {
         }
       }
     });
+
+    this.chatApiService.entrarNaSala(sala.usuario_id, sala.user?.name || 'Aluno');
   }
+
   enviarMensagemDoTutor(): void {
     if (!this.novaMensagemTutorText.trim() || !this.salaChatSelecionada) return;
 
-    const tutorId = 1; 
+    const tutorId = this.obterIdTutorLogado() || this.salaChatSelecionada.usuario_id;
     const conteudo = this.novaMensagemTutorText.trim();
 
     this.chatApiService.enviarMensagemInstantanea(
       this.salaChatSelecionada.id,
       tutorId,
       conteudo,
-      true 
+      true
     );
 
-    this.novaMensagemTutorText = ''; 
+    this.novaMensagemTutorText = '';
   }
+
+
   private rolarChatParaOFinal(): void {
     setTimeout(() => {
       const container = document.getElementById('chat-messages-container');
@@ -745,6 +876,7 @@ export class AdminDashboardComponent implements OnInit {
       }
     }, 100);
   }
+
   deletarVinculoReal(vinculoId: number): void {
     if (!vinculoId) return;
 
@@ -764,5 +896,6 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
+
   tratarErro(err: HttpErrorResponse): void { console.error(err); }
 }

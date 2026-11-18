@@ -70,10 +70,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private ultimoPercentualSalvoNoBanco = -1;
 
 
-  alunoLogado = {
-    id: Number(localStorage.getItem('userId') || 1),
-    name: localStorage.getItem('userName') || 'Julio Valente (Aluno)'
-  };
+
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -94,6 +91,38 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.intervalMonitor) {
       clearInterval(this.intervalMonitor);
     }
+  }
+
+    alunoLogado = this.obterDadosAlunoLogado();
+
+  private obterDadosAlunoLogado(): { id: number; name: string } {
+    try {
+      // 1. Tenta ler objeto JSON salvo em 'usuario' ou 'user'
+      const rawUser = localStorage.getItem('usuario') || localStorage.getItem('user');
+      if (rawUser) {
+        const parsed = JSON.parse(rawUser);
+        const id = Number(parsed.id || parsed.usuario_id || parsed.sub);
+        const name = parsed.name || parsed.nome || 'Colaborador';
+        if (id && !isNaN(id)) return { id, name };
+      }
+
+      // 2. Tenta extrair direto do token JWT ('accessToken')
+      const token = localStorage.getItem('accessToken');
+      if (token && token.split('.').length === 3) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const id = Number(payload.sub || payload.id || payload.usuario_id);
+        const name = payload.name || payload.nome || payload.email || 'Colaborador';
+        if (id && !isNaN(id)) return { id, name };
+      }
+    } catch (e) {
+      console.warn('Não foi possível decodificar sessão local do aluno:', e);
+    }
+
+    // 3. Fallback legado
+    return {
+      id: Number(localStorage.getItem('userId') || 0),
+      name: localStorage.getItem('userName') || 'Colaborador'
+    };
   }
 
   carregarDadosCurso(id: number): void {

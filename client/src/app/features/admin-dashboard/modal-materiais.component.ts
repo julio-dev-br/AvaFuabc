@@ -18,13 +18,14 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
     MatInputModule, MatButtonModule, MatIconModule, MatRadioModule, MatSelectModule
   ],
   template: `
-    <div style="padding: 20px;">
-      <h2 mat-dialog-title style="color: #003366; font-weight: bold; margin: 0 0 4px 0; font-size: 18px;">
+    <div style="padding: 20px; background-color: var(--bg-card); color: var(--text-primary);">
+      <h2 mat-dialog-title style="color: var(--text-brand); font-weight: bold; margin: 0 0 4px 0; font-size: 18px; padding: 0;">
         📂 Materiais de Apoio
       </h2>
-      <p style="color: #64748b; font-size: 13px; margin: 0 0 16px 0;">
-        Gerencie os arquivos complementares para: <strong>{{ data.titulo }}</strong>
+      <p style="color: var(--text-muted); font-size: 13px; margin: 0 0 16px 0;">
+        Gerencie os arquivos complementares para: <strong style="color: var(--text-primary);">{{ data.titulo }}</strong>
       </p>
+
       <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 16px;">
         <mat-label>Selecione a Aula Destino</mat-label>
         <mat-select [(ngModel)]="aulaIdSelecionada" (selectionChange)="carregarMateriaisDoAula()">
@@ -35,27 +36,28 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
           </mat-optgroup>
         </mat-select>
       </mat-form-field>
+
       <div *ngIf="aulaIdSelecionada" style="max-height: 140px; overflow-y: auto; margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
         <div *ngFor="let mat of listaMateriais" 
-             style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; font-weight: 500;">
-            <mat-icon style="color: #003366;">description</mat-icon>
+             style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); font-weight: 500;">
+            <mat-icon style="color: var(--text-brand);">description</mat-icon>
             <span style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ mat.nome }}</span>
           </div>
           <button mat-icon-button color="warn" (click)="excluirMaterial(mat.id)" style="width: 32px; height: 32px;">
             <mat-icon style="font-size: 18px;">delete</mat-icon>
           </button>
         </div>
-        <p *ngIf="listaMateriais.length === 0" style="color: #94a3b8; font-size: 13px; text-align: center; margin: 16px 0;">
+        <p *ngIf="listaMateriais.length === 0" style="color: var(--text-muted); font-size: 13px; text-align: center; margin: 16px 0;">
           Nenhum material anexado a esta aula específica.
         </p>
       </div>
 
-      <div *ngIf="!aulaIdSelecionada" style="padding: 24px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 6px; border: 1px dashed #cbd5e1; margin-bottom: 24px; font-size: 13px; font-weight: 500;">
+      <div *ngIf="!aulaIdSelecionada" style="padding: 24px; text-align: center; color: var(--text-muted); background: var(--bg-subtle); border-radius: 6px; border: 1px dashed var(--border-color); margin-bottom: 24px; font-size: 13px; font-weight: 500;">
         ⚠️ Selecione uma aula acima para visualizar e gerenciar os documentos.
       </div>
 
-      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin-bottom: 20px;">
+      <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 20px;">
 
       <!-- FORMULÁRIO DE INCLUSÃO (SÓ LIBERA SE HOUVER AULA SELECIONADA) -->
       <fieldset [disabled]="!aulaIdSelecionada" style="border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
@@ -74,22 +76,24 @@ import { TreinamentoService } from '../../core/services/treinamento.service';
         <mat-form-field *ngIf="tipoEnvio === 'link'" appearance="outline" style="width: 100%;">
           <mat-label>URL do Documento</mat-label>
           <input matInput [(ngModel)]="novoMaterial.url" placeholder="Ex: https://sharepoint.com...">
-          <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">link</mat-icon>
+          <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">link</mat-icon>
         </mat-form-field>
 
-        <div *ngIf="tipoEnvio === 'arquivo'" style="padding: 12px; border: 1px dashed #cbd5e1; border-radius: 6px; text-align: center; background: #fafafa;">
+        <div *ngIf="tipoEnvio === 'arquivo'" style="padding: 16px; border: 1px dashed var(--border-color); border-radius: 8px; text-align: center; background: var(--bg-subtle);">
           <input type="file" id="fileUpload" (change)="selecionarArquivoDoPC($event)" style="display: none;" accept=".pdf,.ppt,.pptx,.docx,.xlsx">
-          <label for="fileUpload" mat-stroked-button style="cursor: pointer; border-color: #003366; color: #003366;">
+          <label for="fileUpload" mat-stroked-button style="cursor: pointer; border-color: var(--text-brand); color: var(--text-brand); background-color: var(--bg-card);">
             <mat-icon style="vertical-align: middle; margin-right: 4px;">upload_file</mat-icon> Escolher Arquivo do PC
           </label>
-          <p *ngIf="arquivoSelecionado" style="margin: 8px 0 0 0; font-size: 12px; color: #2e7d32; font-weight: bold;">
+          <p *ngIf="arquivoSelecionado" style="margin: 10px 0 0 0; font-size: 12px; color: #10b981; font-weight: bold;">
             ✔️ {{ arquivoSelecionado.name }}
           </p>
         </div>
 
         <div mat-dialog-actions style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px;">
-          <button mat-button (click)="fecharModal()" style="color: #64748b;">Cancelar</button>
-          <button mat-raised-button style="background-color: #003366; color: #ffffff;" 
+          <button mat-button (click)="fecharModal()" style="color: var(--text-muted);">Cancelar</button>
+          <button mat-raised-button
+                  [style.background-color]="!novoMaterial.nome.trim() || (tipoEnvio === 'link' && !novoMaterial.url.trim()) || (tipoEnvio === 'arquivo' && !arquivoSelecionado) ? 'var(--bg-subtle)' : 'var(--brand-primary)'"
+                  [style.color]="!novoMaterial.nome.trim() || (tipoEnvio === 'link' && !novoMaterial.url.trim()) || (tipoEnvio === 'arquivo' && !arquivoSelecionado) ? 'var(--text-muted)' : '#ffffff'"
                   [disabled]="!novoMaterial.nome.trim() || (tipoEnvio === 'link' && !novoMaterial.url.trim()) || (tipoEnvio === 'arquivo' && !arquivoSelecionado)" 
                   (click)="salvarMaterial()">
             <mat-icon>add</mat-icon> Anexar Material

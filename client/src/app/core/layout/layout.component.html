@@ -1,35 +1,35 @@
-
 @if (layoutService.isLoadingGlobal()) {
 <div class="loading-overlay-container"
-    style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(4px) !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 99999 !important; pointer-events: all !important;">
+    style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: var(--bg-overlay) !important; backdrop-filter: blur(4px) !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 99999 !important; pointer-events: all !important;">
     <div class="loading-progress-box"
-        style="background: #ffffff !important; padding: 36px 32px !important; border-radius: 16px !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08) !important; text-align: center !important; width: 280px !important; z-index: 100000 !important; box-sizing: border-box;">
+        style="background: var(--bg-card) !important; padding: 36px 32px !important; border-radius: 16px !important; border: 1px solid var(--border-color) !important; box-shadow: var(--card-shadow) !important; text-align: center !important; width: 280px !important; z-index: 100000 !important; box-sizing: border-box;">
         <mat-icon
-            style="color: #003366 !important; font-size: 32px !important; width: 32px !important; height: 32px !important; margin-bottom: 16px !important; animation: pulse 2s infinite; display: inline-flex !important; align-items: center !important; justify-content: center !important;">
+            style="color: var(--text-brand) !important; font-size: 32px !important; width: 32px !important; height: 32px !important; margin-bottom: 16px !important; animation: pulse 2s infinite; display: inline-flex !important; align-items: center !important; justify-content: center !important;">
             cloud_download
         </mat-icon>
         <mat-progress-bar mode="indeterminate"
             style="border-radius: 4px !important; height: 6px !important; margin-bottom: 16px !important; width: 100% !important; display: block !important;"></mat-progress-bar>
         <h3
-            style="margin: 0 0 6px 0 !important; color: #003366 !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: -0.3px !important; font-family: sans-serif !important;">
+            style="margin: 0 0 6px 0 !important; color: var(--text-brand) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: -0.3px !important; font-family: sans-serif !important;">
             Sincronizando Ecossistema
         </h3>
         <p
-            style="color: #64748b !important; font-size: 12px !important; font-weight: 500 !important; margin: 0 !important; font-family: sans-serif !important;">
+            style="color: var(--text-muted) !important; font-size: 12px !important; font-weight: 500 !important; margin: 0 !important; font-family: sans-serif !important;">
             Processando dados corporativos...
         </p>
     </div>
 </div>
 }
 <div
-    style="display: flex; min-height: 100vh; background-color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden;">
+    style="display: flex; min-height: 100vh; background-color: var(--bg-page); font-family: 'Inter', sans-serif; overflow-x: hidden; transition: background-color 0.25s ease;">
     <aside class="sidebar-container" [class.colapsada]="sidebarColapsada" [class.aberta-mobile]="menuMobileAberto"
-        style="background-color: #ffffff; 
-         border-right: 1px solid #e2e8f0;
+        style="background-color: var(--bg-card); 
+         border-right: 1px solid var(--border-color);
          display: flex; 
          flex-direction: column; 
          padding: 24px 12px; 
-         z-index: 150;">
+         z-index: 150;
+         transition: background-color 0.25s ease, border-color 0.25s ease;">
         <div
             style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px; min-height: 40px; overflow: hidden;">
             <div
@@ -40,11 +40,13 @@
             @if (!sidebarColapsada) {
             <div style="animation: fadeIn 0.2s ease-out;">
                 <h2
-                    style="margin: 0; font-size: 20px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px; line-height: 1.2;">
+                    style="margin: 0; font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; line-height: 1.2;">
                     @if (estaNoPainelAdmin()) { Painel de Gestão }
                     @if (!estaNoPainelAdmin()) { Portal do Aluno }
                 </h2>
-                <span style="font-size: 11px; color: #003366; font-weight: 700; letter-spacing: 0.2px;">Fundação do
+                <span
+                    style="font-size: 11px; color: var(--text-brand); font-weight: 700; letter-spacing: 0.2px;">Fundação
+                    do
                     ABC</span>
             </div>
             }
@@ -54,21 +56,21 @@
             @if (!estaNoPainelAdmin()) {
             <a mat-button routerLink="/dashboard/cursos" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Meus Cursos' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden;">
                 <mat-icon style="flex-shrink: 0;">school</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Meus Cursos</span> }
             </a>
             <a mat-button routerLink="/dashboard/progresso" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Meu Progresso' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden;">
                 <mat-icon style="flex-shrink: 0;">emoji_events</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Meu Progresso</span> }
             </a>
             <a mat-button routerLink="/dashboard/kanban" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Quadro de Estudos' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden;">
                 <mat-icon style="flex-shrink: 0;">dashboard</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Quadro de Estudos</span>
@@ -88,43 +90,44 @@
             @if (estaNoPainelAdmin()) {
             <a mat-button routerLink="/admin/dashboard" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Dashboard' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">insights</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Dashboard</span> }
             </a>
             <a mat-button routerLink="/admin/cadastro" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Gerenciar Cursos' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">add_to_photos</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Treinamentos</span> }
             </a>
             <a mat-button routerLink="/admin/usuarios" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Usuários' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">group</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Usuários</span> }
             </a>
             <a mat-button routerLink="/admin/comunicados" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Comunicados' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">campaign</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Comunicados</span> }
             </a>
             <a mat-button routerLink="/admin/chat" routerLinkActive="active-saas-link"
-                [matTooltip]="sidebarColapsada ? 'Comunicados' : ''" matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                [matTooltip]="sidebarColapsada ? 'Chat Central' : ''" matTooltipPosition="right"
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">headset_mic</mat-icon>
                 @if (!sidebarColapsada) { <span
-                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Chat Central (RH)</span> }
+                    style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Chat Central (RH)</span>
+                }
             </a>
             <a mat-button routerLink="/admin/projetos" routerLinkActive="active-saas-link"
                 (click)="tabService.mudarAba('projetos')" [matTooltip]="sidebarColapsada ? 'Projetos' : ''"
                 matTooltipPosition="right"
-                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: #64748b; background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
+                style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
                 <mat-icon style="flex-shrink: 0;">dashboard</mat-icon>
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Projetos</span> }
@@ -140,37 +143,37 @@
             }
         </nav>
         <div
-            style="border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden;">
+            style="border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; overflow: hidden;">
             <div [matMenuTriggerFor]="userMenu"
                 style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.2s; min-height: 52px;"
-                onmouseover="this.style.backgroundColor='#f8fafc'"
+                onmouseover="this.style.backgroundColor='var(--bg-hover)'"
                 onmouseout="this.style.backgroundColor='transparent'">
                 <img [src]="usuario.avatarUrl || 'assets/default-avatar.jpg'" alt="Avatar"
-                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #003366; flex-shrink: 0;">
+                    style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--brand-primary); flex-shrink: 0;">
                 @if (!sidebarColapsada) {
                 <div
                     style="flex: 1; min-width: 0; display: flex; flex-direction: column; animation: fadeIn 0.2s ease-out;">
                     <p
-                        style="margin: 0; font-size: 13px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        style="margin: 0; font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         {{ usuario.nome }}</p>
-                    <span style="font-size: 11px; color: #94a3b8; font-weight: 500;">Matrícula Ativa</span>
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Matrícula Ativa</span>
                 </div>
-                <mat-icon style="font-size: 18px; color: #64748b; flex-shrink: 0;">expand_less</mat-icon>
+                <mat-icon style="font-size: 18px; color: var(--text-muted); flex-shrink: 0;">expand_less</mat-icon>
                 }
             </div>
             <mat-menu #userMenu="matMenu" yPosition="above" xPosition="after">
-                <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; min-width: 200px;">
-                    <p style="margin: 0; font-size: 12px; font-weight: 500; color: #94a3b8;">Logado como</p>
+                <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); min-width: 200px;">
+                    <p style="margin: 0; font-size: 12px; font-weight: 500; color: var(--text-muted);">Logado como</p>
                     <p
-                        style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         {{ usuario.email }}</p>
                 </div>
                 <button mat-menu-item routerLink="/dashboard/perfil" (click)="menuMobileAberto = false">
-                    <mat-icon style="color: #003366;">account_circle</mat-icon><span>Meu Perfil</span>
+                    <mat-icon style="color: var(--text-brand);">account_circle</mat-icon><span>Meu Perfil</span>
                 </button>
-                <div style="height: 1px; background-color: #f1f5f9; margin: 4px 0;"></div>
-                <button mat-menu-item (click)="logout()" style="color: #dc2626;">
-                    <mat-icon style="color: #dc2626;">logout</mat-icon><span>Sair</span>
+                <div style="height: 1px; background-color: var(--border-color); margin: 4px 0;"></div>
+                <button mat-menu-item (click)="logout()" style="color: #ef4444;">
+                    <mat-icon style="color: #ef4444;">logout</mat-icon><span>Sair</span>
                 </button>
             </mat-menu>
         </div>
@@ -181,12 +184,10 @@
           height: 100vh; 
           transition: padding-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);">
         <header
-            style="height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 40; flex-shrink: 0; gap: 16px;">
+            style="height: 70px; background-color: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 40; flex-shrink: 0; gap: 16px; transition: background-color 0.25s ease, border-color 0.25s ease;">
             <div style="display: flex; align-items: center; gap: 16px; min-width: 0; flex: 1;">
                 <button mat-icon-button (click)="alternarSidebar()" title="Alternar Menu Lateral"
-                    style="color: #003366; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border: none; cursor: pointer; border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0; transition: all 0.2s;"
-                    onmouseover="this.style.backgroundColor='#003366'; this.style.color='#ffffff'"
-                    onmouseout="this.style.backgroundColor='#f1f5f9'; this.style.color='#003366'">
+                    style="color: var(--text-brand); display: flex; align-items: center; justify-content: center; background: var(--bg-subtle); border: 1px solid var(--border-color); cursor: pointer; border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0; transition: all 0.2s;">
                     <mat-icon
                         style="font-size: 20px; width: 20px; height: 20px; margin: 0; display: flex; align-items: center; justify-content: center;">
                         {{ (window.innerWidth <= 1024) ? 'menu' : (sidebarColapsada ? 'chevron_right' : 'chevron_left' )
@@ -194,45 +195,64 @@
                 </button>
                 <div class="esconder-no-mobile" style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
                     <div
-                        style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500; white-space: nowrap;">
+                        style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); font-weight: 500; white-space: nowrap;">
                         @for (bc of breadcrumbs; track bc.url; let last = $last) {
                         @if (!last) {
-                        <a [routerLink]="bc.url" style="color: #64748b; text-decoration: none;">{{ bc.texto }}</a>
+                        <a [routerLink]="bc.url" style="color: var(--text-muted); text-decoration: none;">{{ bc.texto
+                            }}</a>
                         <mat-icon
-                            style="font-size: 14px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; color: #cbd5e1;">chevron_right</mat-icon>
+                            style="font-size: 14px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; color: var(--border-color);">chevron_right</mat-icon>
                         } @else {
-                        <span style="color: #003366; font-weight: 700; overflow: hidden; text-overflow: ellipsis;">{{
+                        <span
+                            style="color: var(--text-brand); font-weight: 700; overflow: hidden; text-overflow: ellipsis;">{{
                             bc.texto }}</span>
                         }
                         }
                     </div>
                 </div>
             </div>
+            <!-- Ações do Topo Direito: Toggle Dark Mode + Notificações -->
             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+
+                <!-- Botão de Alternância de Tema -->
+                <button mat-icon-button (click)="themeService.alternarTema()"
+                    [matTooltip]="themeService.isDarkMode() ? 'Mudar para Tema Claro' : 'Mudar para Modo Escuro'"
+                    style="display: inline-flex; align-items: center; justify-content: center; padding: 0; background: var(--bg-subtle); border: 1px solid var(--border-color); cursor: pointer; border-radius: 50%; width: 38px; height: 38px; transition: all 0.2s;">
+                    <mat-icon [style.color]="themeService.isDarkMode() ? '#fbbf24' : '#475569'"
+                        style="font-size: 20px; width: 24px; height: 24px; line-height: 24px; margin: 0; display: inline-flex; align-items: center; justify-content: center;">
+                        {{ themeService.isDarkMode() ? 'light_mode' : 'brightness_2' }}
+                    </mat-icon>
+                </button>
+
+
+                <!-- Sininho de Notificações -->
                 <button mat-icon-button [matMenuTriggerFor]="menuNoti"
-                    style="color: #64748b; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; width: 36px; height: 36px;">
+                    style="color: var(--text-muted); display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; width: 36px; height: 36px;">
                     <mat-icon [matBadge]="notificacoes.length" matBadgeColor="warn"
                         [matBadgeHidden]="notificacoes.length === 0">notifications</mat-icon>
                 </button>
                 <mat-menu #menuNoti="matMenu">
                     <div
-                        style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #003366;">
+                        style="padding: 12px 16px; font-weight: bold; border-bottom: 1px solid var(--border-color); font-size: 14px; color: var(--text-brand);">
                         Notificações Recentes</div>
                     @if (notificacoes.length === 0) {
-                    <div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 13px; font-weight: 500;">
+                    <div
+                        style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; font-weight: 500;">
                         Nenhuma notificação pendente.</div>
                     }
                     @for (n of notificacoes; track n.id) {
                     <div
-                        style="padding: 14px 16px; border-bottom: 1px solid #f1f5f9; width: 290px; max-width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
+                        style="padding: 14px 16px; border-bottom: 1px solid var(--border-color); width: 290px; max-width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
                         <div style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
-                            <span style="font-weight: 600; color: #1e293b; font-size: 13px;">{{ n.titulo }}</span>
-                            <span style="color: #64748b; font-size: 12px; line-height: 1.4; word-break: break-word;">{{
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 13px;">{{ n.titulo
+                                }}</span>
+                            <span
+                                style="color: var(--text-secondary); font-size: 12px; line-height: 1.4; word-break: break-word;">{{
                                 n.mensagem }}</span>
                         </div>
                         <div style="text-align: left; padding-left: 2px;">
                             <button mat-button
-                                style="font-size: 11px; font-weight: 700; color: #003366; padding: 0; min-width: auto; height: auto;"
+                                style="font-size: 11px; font-weight: 700; color: var(--text-brand); padding: 0; min-width: auto; height: auto;"
                                 (click)="marcarLida(n.id); $event.stopPropagation();">
                                 <mat-icon
                                     style="font-size: 14px; width: 14px; height: 14px; margin: 0; color: inherit;">done</mat-icon>Marcar
@@ -244,7 +264,8 @@
                 </mat-menu>
             </div>
         </header>
-        <main style="padding: 24px 16px; overflow-y: auto; flex: 1; box-sizing: border-box; background-color: #f8fafc;">
+        <main
+            style="padding: 24px 16px; overflow-y: auto; flex: 1; box-sizing: border-box; background-color: var(--bg-page); transition: background-color 0.25s ease;">
             <router-outlet></router-outlet>
         </main>
     </div>

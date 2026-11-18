@@ -2,15 +2,15 @@
 <div class="loading-overlay-container">
   <div class="loading-progress-box">
     <mat-icon
-      style="color: #003366; font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
+      style="color: var(--text-brand); font-size: 32px; width: 32px; height: 32px; margin-bottom: 16px; animation: pulse 2s infinite;">
       cloud_download
     </mat-icon>
     <mat-progress-bar mode="indeterminate"
       style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
-    <h3 style="margin: 0 0 4px 0; color: #003366; font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
+    <h3 style="margin: 0 0 4px 0; color: var(--text-brand); font-size: 15px; font-weight: 700; letter-spacing: -0.3px;">
       Sincronizando Ecossistema
     </h3>
-    <p style="color: #64748b; font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
+    <p style="color: var(--text-muted); font-size: 13px; font-weight: 500; margin: 0; letter-spacing: -0.1px;">
       Carregando estrutura do curso...
     </p>
   </div>
@@ -22,7 +22,7 @@
   <div class="video-section-wrapper">
     @if (aulaAtiva) {
     <div class="video-wrapper"
-      style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      style="position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; box-shadow: var(--card-shadow);">
       <div *ngIf="!videoJaTevePlayReal" (click)="executarPlayCortinaSegura()"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: rgba(0,0,0,0.05); cursor: pointer; display: flex; justify-content: center; align-items: center;">
         <div
@@ -41,11 +41,11 @@
     </div>
 
     <div class="card-progresso-premium"
-      style="margin: 20px 0; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+      style="margin: 20px 0; padding: 20px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: var(--card-shadow);">
       <div
-        style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+        style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span
-          style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">🛠️
+          style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">🛠️
           Painel do Desenvolvedor</span>
         <button type="button" (click)="simularConclusaoInstantaneaDEV()"
           style="padding: 6px 12px; background-color: #3b82f6; color: white; font-size: 11px; font-weight: 700; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2); transition: all 0.2s;"
@@ -54,7 +54,8 @@
         </button>
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 14px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+        <span
+          style="font-size: 14px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
           <span *ngIf="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100">📺 Assistindo videoaula
             regulamentar</span>
           <span *ngIf="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) >= 100">✅ Conteúdo totalmente
@@ -65,7 +66,7 @@
         </span>
       </div>
       <div
-        style="width: 100%; height: 12px; background-color: #cbd5e1; border-radius: 9999px; overflow: hidden; margin-bottom: 20px;">
+        style="width: 100%; height: 10px; background-color: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 9999px; overflow: hidden; margin-bottom: 20px;">
         <div [style.width.%]="aulaAtiva?.progresso_aulas?.[0]?.percentual || 0"
           style="height: 100%; background-color: #10b981; border-radius: 9999px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
         </div>
@@ -74,22 +75,24 @@
 
         <!-- CENÁRIO A: AVALIAÇÃO BLOQUEADA -->
         <div *ngIf="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100"
-          style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; color: #991b1b;">
+          style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background-color: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; color: var(--text-secondary);">
           <span style="font-size: 20px;">🔒</span>
-          <div style="font-size: 13px; font-weight: 500;">
-            <strong style="display: block; font-size: 14px; margin-bottom: 2px;">Avaliação Bloqueada</strong>
-            Assista a <span style="font-weight: 700; color: #dc2626;">100% desta videoaula</span> para liberar o
+          <div style="font-size: 13px; font-weight: 500; line-height: 1.4;">
+            <strong style="display: block; font-size: 14px; margin-bottom: 2px; color: #f87171;">Avaliação
+              Bloqueada</strong>
+            Assista a <span style="font-weight: 700; color: #f87171;">100% desta videoaula</span> para liberar o
             questionário de certificação da Fundação ABC.
           </div>
         </div>
 
         <!-- CENÁRIO B: PROVA LIBERADA -->
         <div *ngIf="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) >= 100"
-          style="display: flex; flex-direction: column; gap: 12px; padding: 16px; background-color: #f0fdf4; border: 1px solid #dcfce7; border-radius: 8px; animation: pulse 2s infinite;">
-          <div style="display: flex; align-items: center; gap: 12px; color: #166534;">
+          style="display: flex; flex-direction: column; gap: 12px; padding: 16px; background-color: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
             <span style="font-size: 20px;">🎉</span>
-            <div style="font-size: 13px; font-weight: 500;">
-              <strong style="display: block; font-size: 14px; margin-bottom: 2px;">Parabéns! Prova Liberada</strong>
+            <div style="font-size: 13px; font-weight: 500; line-height: 1.4;">
+              <strong style="display: block; font-size: 14px; margin-bottom: 2px; color: #10b981;">Parabéns! Prova
+                Liberada</strong>
               Você concluiu a carga horária obrigatória desta aula. Clique abaixo para iniciar o seu Quiz.
             </div>
           </div>
@@ -104,27 +107,28 @@
 
     <div class="aula-detalhes" style="margin-top: 24px; padding: 0 4px;">
       <h2 class="aula-titulo"
-        style="color: #003366; font-size: 22px; font-weight: bold; margin-bottom: 8px; word-break: break-word; line-height: 1.3;">
+        style="color: var(--text-brand); font-size: 22px; font-weight: bold; margin-bottom: 8px; word-break: break-word; line-height: 1.3;">
         {{ aulaAtiva.titulo }}
       </h2>
       <p class="aula-descricao"
-        style="color: #555555; font-size: 15px; line-height: 1.6; margin-bottom: 24px; word-break: break-word;">
+        style="color: var(--text-secondary); font-size: 15px; line-height: 1.6; margin-bottom: 24px; word-break: break-word;">
         {{ aulaAtiva.descricao || 'Sem descrição para esta aula.' }}
       </p>
 
       <div
-        style="margin-bottom: 32px; border-top: 1px solid #e2e8f0; padding-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
-       
+        style="margin-bottom: 32px; border-top: 1px solid var(--border-color); padding-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+
         <button mat-raised-button [routerLink]="['/dashboard/quiz/aula', aulaAtiva?.id]"
           [disabled]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100"
-          [style.backgroundColor]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? '#cbd5e1' : '#ff9800'"
-          [style.color]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? '#64748b' : '#ffffff'"
-          style="padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px; transition: all 0.3s;">
+          [style.backgroundColor]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? 'var(--bg-subtle)' : '#ff9800'"
+          [style.color]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? 'var(--text-muted)' : '#ffffff'"
+          [style.border]="(aulaAtiva?.progresso_aulas?.[0]?.percentual || 0) < 100 ? '1px solid var(--border-color)' : 'none'"
+          style="padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px; transition: all 0.3s;">
           <mat-icon style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px;">assignment</mat-icon>
           Fazer Avaliação
         </button>
         <button mat-raised-button [routerLink]="['/dashboard/forum/aula', aulaAtiva?.id]"
-          style="background-color: #003366; color: #ffffff; padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px;">
+          style="background-color: var(--brand-primary); color: #ffffff; padding: 0 20px; font-size: 14px; font-weight: 600; height: 40px; border: none; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; min-width: 160px; flex: 1; max-width: 240px;">
           <mat-icon style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px;">chat</mat-icon>
           Fórum de Dúvidas
         </button>
@@ -132,15 +136,15 @@
 
       @if (aulaAtiva?.materiais && aulaAtiva?.materiais.length > 0) {
       <div
-        style="margin-top: 24px; padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box;">
+        style="margin-top: 24px; padding: 20px; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box;">
         <h3
-          style="margin: 0 0 12px 0; color: #003366; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-          <mat-icon style="color: #003366;">library_books</mat-icon> Materiais de Apoio Disponíveis
+          style="margin: 0 0 12px 0; color: var(--text-brand); font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+          <mat-icon style="color: var(--text-brand);">library_books</mat-icon> Materiais de Apoio Disponíveis
         </h3>
         <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%;">
           @for (material of aulaAtiva.materiais; track material.id) {
           <a mat-stroked-button [href]="configurarUrlMaterial(material.url)" target="_blank"
-            style="border-color: #003366; color: #003366; font-weight: 500; height: 40px; line-height: 38px; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            style="border-color: var(--text-brand); color: var(--text-brand); font-weight: 500; height: 40px; line-height: 38px; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             <mat-icon style="margin-right: 4px; vertical-align: middle;">
               {{ material.tipo === 'LINK' ? 'link' : 'file_download' }}
             </mat-icon>
@@ -153,25 +157,25 @@
     </div>
     } @else {
     <div class="no-lesson"
-      style="text-align: center; padding: 64px 16px; color: #888888; font-size: 16px; box-sizing: border-box;">
+      style="text-align: center; padding: 64px 16px; color: var(--text-muted); font-size: 16px; box-sizing: border-box;">
       <mat-icon
-        style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; color: #b0bec5; margin: 0 auto 12px auto;">ondemand_video</mat-icon>
+        style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; color: var(--text-muted); margin: 0 auto 12px auto;">ondemand_video</mat-icon>
       <p>Selecione uma aula na barra lateral para iniciar o treinamento.</p>
     </div>
     }
   </div>
   <div class="sidebar-section">
     <h3 class="sidebar-title"
-      style="color: #003366; font-weight: 700; font-size: 15px; margin: 0 0 16px 0; padding-left: 4px;">
+      style="color: var(--text-brand); font-weight: 700; font-size: 15px; margin: 0 0 16px 0; padding-left: 4px;">
       Conteúdo Programático
     </h3>
     <mat-accordion multi="true">
       @for (modulo of curso.modulos; track modulo.id; let first = $first) {
       <mat-expansion-panel [expanded]="first" class="modulo-panel"
-        style="margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 8px !important; box-shadow: none !important; background: #ffffff;">
+        style="margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: 8px !important; box-shadow: none !important; background: var(--bg-card);">
         <mat-expansion-panel-header style="height: 48px;">
           <mat-panel-title class="modulo-titulo"
-            style="color: #003366; font-weight: 600; font-size: 14px; word-break: break-word;">
+            style="color: var(--text-brand); font-weight: 600; font-size: 14px; word-break: break-word;">
             {{ modulo.titulo }}
           </mat-panel-title>
         </mat-expansion-panel-header>
@@ -182,15 +186,14 @@
             class="aula-list-button"
             style="border-radius: 6px; margin: 4px 0; transition: all 0.2s; border: none; cursor: pointer; text-align: left; width: 100%; box-sizing: border-box; display: flex; align-items: center;">
 
-           
             <mat-icon matListItemIcon class="aula-status-icon"
-              [style.color]="aula?.progresso_aulas?.[0]?.concluida ? '#10b981' : '#64748b'"
+              [style.color]="aula?.progresso_aulas?.[0]?.concluida ? '#10b981' : 'var(--text-muted)'"
               style="margin-right: 8px; font-size: 20px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex-shrink: 0;">
               {{ aula?.progresso_aulas?.[0]?.concluida ? 'check_circle' : 'play_circle_outline' }}
             </mat-icon>
 
             <span class="aula-item-titulo"
-              [style.color]="aulaAtiva?.id === aula.id ? '#003366' : (aula?.progresso_aulas?.[0]?.concluida ? '#10b981' : '#1e293b')"
+              [style.color]="aulaAtiva?.id === aula.id ? 'var(--text-brand)' : (aula?.progresso_aulas?.[0]?.concluida ? '#10b981' : 'var(--text-primary)')"
               style="font-size: 13px; font-weight: 500; vertical-align: middle; white-space: normal; line-height: 1.3; word-break: break-word; display: inline-block;">
               {{ aula?.titulo }}
             </span>
@@ -213,7 +216,6 @@
   @if (chatAberto) {
   <mat-card class="janela-chat-aluno-card animate__animated animate__slideInUp">
 
-    <!-- Cabeçalho do Suporte -->
     <div class="aluno-chat-header">
       <mat-icon>headset_mic</mat-icon>
       <div class="header-titulos">

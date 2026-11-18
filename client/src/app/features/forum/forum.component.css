@@ -6,7 +6,7 @@
 }
 
 .topics-sidebar {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-right: 1px solid #e2e8f0;
   padding: 20px;
   overflow-y: auto;
@@ -18,7 +18,7 @@
 }
 
 .submit-reply-btn:not([disabled]) {
-  background-color: #003366 !important;
+  background-color: var(--text-brand) !important;
   /* Azul escuro corporativo */
   color: #ffffff !important;
   cursor: pointer;
@@ -52,7 +52,7 @@
 
 .topico-ativo-item {
   background-color: rgba(0, 51, 102, 0.05) !important;
-  border-color: #003366 !important;
+  border-color: var(--text-brand) !important;
 }
 
 .tutor-reply-card {

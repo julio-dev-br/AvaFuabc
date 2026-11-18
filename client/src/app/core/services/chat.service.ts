@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 
@@ -15,7 +15,7 @@ export class ChatApiService {
   private novaMensagemSubject = new Subject<any>();
   public novaMensagem = this.novaMensagemSubject.asObservable();
 
-  private dadosSalaSubject = new Subject<any>();
+  private dadosSalaSubject = new BehaviorSubject<any>(null);
   public dadosSala = this.dadosSalaSubject.asObservable();
 
   private getHeaders(): HttpHeaders {
@@ -31,10 +31,22 @@ export class ChatApiService {
   conectarAoSocket(): void {
     if (this.socket?.connected) return;
 
-    this.socket = io(environment.apiUrl, {
+    // Garante conexão na raiz do servidor (remove '/api' caso exista no environment.apiUrl)
+    const socketUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+
+    this.socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000
+    });
+
+    this.socket.on('connect', () => {
+      console.log('🟢 WebSocket conectado com sucesso! ID:', this.socket.id);
+    });
+
+    this.socket.on('connect_error', (err) => {
+      console.error('🔴 Erro ao conectar WebSocket:', err.message);
     });
 
     this.socket.on('roomData', (dados: any) => {
@@ -45,7 +57,6 @@ export class ChatApiService {
       this.novaMensagemSubject.next(mensagem);
     });
   }
-
 
   entrarNaSala(usuarioId: number, nomeUsuario: string): void {
     this.conectarAoSocket();
@@ -67,4 +78,5 @@ export class ChatApiService {
       console.log('❌ Conexão do Chat Central encerrada com segurança.');
     }
   }
+  
 }

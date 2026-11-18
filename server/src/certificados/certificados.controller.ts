@@ -50,7 +50,7 @@ export class CertificadosController {
             .card {
               max-width: 440px;
               width: 100%;
-              background-color: #ffffff;
+              background-color: var(--bg-card);
               border-radius: 16px;
               border: 1px solid #10b981;
               border-top: 8px solid #047857;
@@ -83,7 +83,7 @@ export class CertificadosController {
             h2 {
               font-size: 22px;
               font-weight: 800;
-              color: #1e293b;
+              color: var(--text-primary);
               margin: 0 0 4px 0;
               letter-spacing: -0.5px;
             }
@@ -133,7 +133,7 @@ export class CertificadosController {
             .value-highlight {
               font-size: 14px;
               font-weight: 800;
-              color: #003366;
+              color: var(--text-brand);
             }
             .value-mono {
               font-size: 13px;
@@ -236,11 +236,11 @@ export class CertificadosController {
           <title>Aviso de Segurança - FUABC</title>
           <style>
             body { background-color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 16px; box-sizing: border-box; }
-            .card { max-width: 440px; width: 100%; background-color: #ffffff; border-radius: 16px; border: 1px solid #e11d48; border-top: 8px solid #b91c1c; box-shadow: 0 10px 25px rgba(225,29,72,0.1); overflow: hidden; }
+            .card { max-width: 440px; width: 100%; background-color: var(--bg-card); border-radius: 16px; border: 1px solid #e11d48; border-top: 8px solid #b91c1c; box-shadow: 0 10px 25px rgba(225,29,72,0.1); overflow: hidden; }
             .card-content { padding: 32px; display: flex; flex-direction: column; align-items: center; text-align: center; }
             .icon-container { width: 64px; height: 64px; background-color: #fff1f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
             .icon-svg { width: 40px; height: 40px; fill: #e11d48; }
-            h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 8px 0; }
+            h2 { font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 0 0 8px 0; }
             p { color: #e11d48; font-size: 14px; font-weight: 600; line-height: 1.5; margin: 0 0 24px 0; }
             .footer-title { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 2px 0; }
           </style>

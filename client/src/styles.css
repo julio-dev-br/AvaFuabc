@@ -1,3 +1,59 @@
+/* ==========================================================================
+   TOKENS DE CORES SEMÂNTICAS (LIGHT & DARK MODE CORPORATIVO FUABC)
+   ========================================================================== */
+:root {
+  --bg-page: #f4f6f8;
+  --bg-card: #ffffff;
+  --bg-subtle: #f8fafc;
+  --bg-hover: rgba(0, 51, 102, 0.06);
+  --bg-active-link: rgba(0, 51, 102, 0.08);
+  --bg-overlay: rgba(248, 250, 252, 0.65);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-brand: #003366;
+
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
+
+  --brand-primary: #003366;
+  --brand-accent: #0284c7;
+
+  --shimmer-base: #f0f2f5;
+  --shimmer-highlight: #e6e8eb;
+
+  --card-shadow: 0 4px 12px rgba(0, 51, 102, 0.05);
+}
+
+body.dark-theme {
+  --bg-page: #0f172a;           /* Slate 900 - Fundo principal confortável */
+  --bg-card: #1e293b;           /* Slate 800 - Cards, Sidenav e Modais */
+  --bg-subtle: #162032;         /* Superfícies internas e cabeçalhos */
+  --bg-hover: rgba(56, 189, 248, 0.08);
+  --bg-active-link: rgba(56, 189, 248, 0.14);
+  --bg-overlay: rgba(15, 23, 42, 0.78);
+
+  --text-primary: #f1f5f9;      /* Slate 100 - Leitura nítida sem ofuscar */
+  --text-secondary: #cbd5e1;    /* Slate 300 - Subtítulos e descrições */
+  --text-muted: #94a3b8;        /* Slate 400 - Hints e metadados */
+  --text-brand: #38bdf8;        /* Sky 400 - Destaque institucional legível */
+
+  --border-color: #334155;      /* Slate 700 - Divisores discretos */
+  --border-subtle: #1e293b;
+
+  --brand-primary: #0284c7;
+  --brand-accent: #38bdf8;
+
+  --shimmer-base: #1e293b;
+  --shimmer-highlight: #334155;
+
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+}
+
+/* ==========================================================================
+   BASE GLOBAL E TRANSIÇÕES SUAVES
+   ========================================================================== */
 html {
   margin: 0;
   padding: 0;
@@ -13,9 +69,11 @@ body {
   height: 100%;
   width: 100%;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #f4f6f8;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   overflow-y: auto !important;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 *,
@@ -24,6 +82,75 @@ body {
   box-sizing: inherit;
 }
 
+/* ==========================================================================
+   ADAPTAÇÕES ELEGANTES PARA ANGULAR MATERIAL NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+body.dark-theme .mat-drawer,
+body.dark-theme .mat-sidenav {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-right-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-drawer-container,
+body.dark-theme .mat-sidenav-container,
+body.dark-theme .mat-sidenav-content {
+  background-color: var(--bg-page) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-list-item .mdc-list-item__primary-text {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__leading,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__notch,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-form-field input.mat-mdc-input-element,
+body.dark-theme .mat-mdc-form-field textarea.mat-mdc-input-element,
+body.dark-theme .mat-mdc-select-value-text {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-form-field .mdc-floating-label {
+  color: var(--text-muted) !important;
+}
+
+body.dark-theme .mat-mdc-table {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-header-cell {
+  color: var(--text-secondary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-cell {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-menu-panel,
+body.dark-theme .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   SNACKBARS, LINKS ATIVOS, OVERLAY E SHIMMER
+   ========================================================================== */
 body .snackbar-container-limpo .mat-mdc-snack-bar-container .mdc-snackbar__surface {
   background-color: #2e7d32 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
@@ -50,8 +177,8 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
 }
 
 .active-saas-link {
-  background-color: rgba(0, 51, 102, 0.08) !important;
-  color: #003366 !important;
+  background-color: var(--bg-active-link) !important;
+  color: var(--text-brand) !important;
 }
 
 .loading-overlay-container {
@@ -60,28 +187,29 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(248, 250, 252, 0.65);
+  background-color: var(--bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
 }
 
 .loading-progress-box {
   width: 90%;
   max-width: 450px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   padding: 32px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 51, 102, 0.1), 0 8px 10px -6px rgba(0, 51, 102, 0.05);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
   text-align: center;
 }
 
 .shimmer-placeholder {
-  background: linear-gradient(90deg, #f0f2f5 25%, #e6e8eb 50%, #f0f2f5 75%);
+  background: linear-gradient(90deg, var(--shimmer-base) 25%, var(--shimmer-highlight) 50%, var(--shimmer-base) 75%);
   background-size: 200% 100%;
   animation: loadingShimmer 1.5s infinite linear;
   border-radius: 8px;
@@ -92,7 +220,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
     opacity: 0;
     transform: translateY(-20px) scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -103,7 +230,6 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   from {
     width: 100%;
   }
-
   to {
     width: 0%;
   }
@@ -111,10 +237,11 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
 
 .toastr-card-custom {
   position: relative;
-  background: #ffffff !important;
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
   border-radius: 8px !important;
   padding: 16px 20px !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: var(--card-shadow) !important;
   animation: toastrFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   overflow: hidden !important;
 }
@@ -141,8 +268,356 @@ body .snackbar-erro-MDC .mat-mdc-snack-bar-action button {
   0% {
     background-position: 200% 0;
   }
-
   100% {
     background-position: -200% 0;
   }
 }
+
+/* Botões desabilitados elegantes no Dark Mode */
+body.dark-theme .mat-mdc-outlined-button[disabled],
+body.dark-theme .mat-mdc-unelevated-button[disabled],
+body.dark-theme .mat-mdc-raised-button[disabled] {
+  background-color: rgba(148, 163, 184, 0.08) !important;
+  color: #64748b !important;
+  border-color: #334155 !important;
+}
+
+/* ==========================================================================
+   MAT-SELECT OVERLAY E PAGINATOR NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-select-panel {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+body.dark-theme .mat-mdc-option {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+body.dark-theme .mat-mdc-option.mat-mdc-option-active {
+  background-color: var(--bg-hover) !important;
+}
+
+body.dark-theme .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: var(--bg-active-link) !important;
+  color: var(--text-brand) !important;
+}
+
+body.dark-theme .mat-mdc-select-arrow svg,
+body.dark-theme .mat-mdc-paginator-icon {
+  fill: var(--text-secondary) !important;
+}
+
+body.dark-theme .mat-mdc-paginator-navigation-first[disabled] .mat-mdc-paginator-icon,
+body.dark-theme .mat-mdc-paginator-navigation-previous[disabled] .mat-mdc-paginator-icon,
+body.dark-theme .mat-mdc-paginator-navigation-next[disabled] .mat-mdc-paginator-icon,
+body.dark-theme .mat-mdc-paginator-navigation-last[disabled] .mat-mdc-paginator-icon {
+  fill: var(--text-muted) !important;
+  opacity: 0.4;
+}
+
+/* ==========================================================================
+   MAT-TAB-GROUP (ABAS) NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-tab .mdc-tab__text-label {
+  color: var(--text-muted) !important;
+}
+
+body.dark-theme .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--text-brand) !important;
+  font-weight: 700 !important;
+}
+
+body.dark-theme .mat-mdc-tab .mdc-tab-indicator__content--underline {
+  border-color: var(--text-brand) !important;
+}
+
+body.dark-theme .mat-mdc-tab-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* ==========================================================================
+   CABEÇALHO DE TABELAS (MAT-TABLE) NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-header-row {
+  background-color: var(--bg-subtle) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-header-cell {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-brand) !important;
+  font-weight: 700 !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-row:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* ==========================================================================
+   MAT-EXPANSION-PANEL (ACORDEÃO DE MÓDULOS) NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-expansion-panel {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .mat-expansion-panel-header-title,
+body.dark-theme .mat-expansion-panel-header-description {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-expansion-indicator::after {
+  color: var(--text-secondary) !important;
+}
+
+/* ==========================================================================
+   MAT-RADIO-BUTTON NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-radio-button .mdc-label {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-radio-button .mdc-radio__outer-circle {
+  border-color: var(--text-muted) !important;
+}
+
+body.dark-theme .mat-mdc-radio-button.mat-mdc-radio-checked .mdc-radio__outer-circle,
+body.dark-theme .mat-mdc-radio-button.mat-mdc-radio-checked .mdc-radio__inner-circle {
+  border-color: var(--text-brand) !important;
+}
+
+/* ==========================================================================
+   CARTÕES DE ALTERNATIVAS DO QUIZ (LIGHT & DARK MODE)
+   ========================================================================== */
+.quiz-option-card {
+  display: block;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+}
+
+.quiz-option-card:hover {
+  border-color: var(--text-brand);
+  background-color: var(--bg-hover);
+}
+
+.quiz-option-card .mat-mdc-radio-button {
+  width: 100%;
+}
+
+.quiz-option-card .mdc-label {
+  color: var(--text-primary) !important;
+  width: 100%;
+}
+
+body.dark-theme .quiz-option-card .mdc-radio__outer-circle {
+  border-color: var(--text-muted) !important;
+}
+
+body.dark-theme .quiz-option-card .mat-mdc-radio-checked .mdc-radio__outer-circle,
+body.dark-theme .quiz-option-card .mat-mdc-radio-checked .mdc-radio__inner-circle {
+  border-color: var(--text-brand) !important;
+}
+
+/* ==========================================================================
+   HOVER E SELEÇÃO ELEGANTE NAS ALTERNATIVAS DO QUIZ
+   ========================================================================== */
+.quiz-option-card {
+  cursor: pointer;
+}
+
+/* Remove o círculo branco padrão do Angular Material MDC no hover do radio */
+.quiz-option-card .mat-mdc-radio-button .mdc-radio__background::before,
+.quiz-option-card .mat-mdc-radio-button .mat-mdc-radio-touch-target,
+.quiz-option-card .mat-mdc-radio-button .mat-mdc-focus-indicator {
+  display: none !important;
+}
+
+/* Destaca o cartão inteiro quando a alternativa está marcada */
+.quiz-option-card:has(.mat-mdc-radio-checked) {
+  border-color: var(--text-brand) !important;
+  background-color: var(--bg-active-link) !important;
+}
+
+/* ==========================================================================
+   MAT-CHECKBOX NO DARK MODE
+   ========================================================================== */
+body.dark-theme .mat-mdc-checkbox .mdc-label {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-checkbox .mdc-checkbox__background {
+  border-color: var(--text-muted) !important;
+}
+
+/* ==========================================================================
+   BOTÃO DE ALTERNÂNCIA ENTRE PAINÉIS NA SIDEBAR (LIGHT & DARK MODE)
+   ========================================================================== */
+.admin-sidebar-btn-premium {
+  background-color: var(--bg-active-link) !important;
+  color: var(--text-brand) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.admin-sidebar-btn-premium mat-icon,
+.admin-sidebar-btn-premium span,
+.admin-sidebar-btn-premium .mdc-button__label {
+  color: var(--text-brand) !important;
+}
+
+.admin-sidebar-btn-premium:hover {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+}
+
+.admin-sidebar-btn-premium:hover mat-icon,
+.admin-sidebar-btn-premium:hover span,
+.admin-sidebar-btn-premium:hover .mdc-button__label {
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   CHAT CENTRAL DO RH (LIGHT & DARK MODE)
+   ========================================================================== */
+.coluna-salas-card,
+.coluna-mensagens-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  overflow: hidden;
+}
+
+.chat-toolbar-header {
+  background-color: #003366 !important;
+  color: #ffffff !important;
+}
+
+/* Lista de Salas na Barra Lateral */
+.item-sala-aluno {
+  background-color: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.item-sala-aluno:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.item-sala-aluno.sala-ativa {
+  background-color: var(--bg-active-link) !important;
+  border-left: 4px solid var(--text-brand) !important;
+}
+
+.nome-aluno-titulo {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+}
+
+.email-subtexto {
+  color: var(--text-muted) !important;
+}
+
+.badge-modulo-tag {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-brand) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.contador-mensagens-badge {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+/* Tela Vazia (Nenhuma sala selecionada) */
+.janela-chat-bloqueada {
+  background-color: var(--bg-subtle) !important;
+}
+
+.bloqueio-wrapper h3 {
+  color: var(--text-brand) !important;
+}
+
+.bloqueio-wrapper p {
+  color: var(--text-muted) !important;
+}
+
+/* Cabeçalho da Conversa Ativa */
+.header-conversa-ativa {
+  background-color: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.header-info-box h3 {
+  color: var(--text-primary) !important;
+}
+
+/* Área de Mensagens e Balões */
+.area-mensagens-scroll {
+  background-color: var(--bg-page) !important;
+}
+
+.linha-mensagem-wrapper.alinhado-aluno .balao-mensagem {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.linha-mensagem-wrapper.alinhado-tutor .balao-mensagem {
+  background-color: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+/* Rodapé e Input de Envio */
+.barra-input-envio-footer {
+  background-color: var(--bg-card) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.input-mensagem-texto {
+  background-color: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  outline: none !important;
+}
+
+.input-mensagem-texto::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.input-mensagem-texto:focus {
+  border-color: var(--text-brand) !important;
+}
+
+/* ==========================================================================
+   LIMPEZA DE HOVER EM RADIO BUTTONS DENTRO DE MODAIS
+   ========================================================================== */
+.mat-mdc-dialog-container .mat-mdc-radio-button .mdc-radio__background::before,
+.mat-mdc-dialog-container .mat-mdc-radio-button .mat-mdc-radio-touch-target,
+.mat-mdc-dialog-container .mat-mdc-radio-button .mat-mdc-focus-indicator {
+  display: none !important;
+}
+
+body.dark-theme .mat-mdc-dialog-container .mat-mdc-radio-button .mdc-label {
+  color: var(--text-primary) !important;
+}
+
+
+
+
+
+
+
+
+
+
+

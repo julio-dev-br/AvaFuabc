@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post, Patch, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, Post, Patch, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProtheusService } from '../integracao/protheus/protheus.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -13,7 +14,7 @@ import * as bcrypt from 'bcrypt';
 interface CriarUsuarioInput {
   name: string;
   email: string;
-  cpf: string; 
+  cpf: string;
   role: Role;
   password?: string;
 }
@@ -22,7 +23,10 @@ interface CriarUsuarioInput {
 @UseGuards(AuthGuard, RolesGuard)
 export class UserController {
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly protheusService: ProtheusService,
+  ) { }
 
   @Get()
   @Roles(Role.ADMIN, Role.MANAGER)
@@ -34,6 +38,7 @@ export class UserController {
       id: u.id,
       name: u.name || 'Usuário Sem Nome',
       email: u.email,
+      cpf: u.cpf,
       role: u.role,
       ativo: u.ativo,
       unidade: { nome: u.unidade_id ? `Unidade ${u.unidade_id.toString()}` : 'Aguardando Integração ERP' },
@@ -55,65 +60,63 @@ export class UserController {
       throw new BadRequestException('O CPF do colaborador é obrigatório para validação no Protheus.');
     }
 
-    const usuarioExiste = await this.prisma.user.findUnique({
-      where: { email: body.email },
+    const cpfLimpo = body.cpf.replace(/\D/g, '');
+    if (cpfLimpo.length !== 11) {
+      throw new BadRequestException('O CPF informado deve conter 11 dígitos.');
+    }
+
+    const emailExiste = await this.prisma.user.findUnique({
+      where: { email: body.email.trim() },
     });
 
-    if (usuarioExiste) {
+    if (emailExiste) {
       throw new BadRequestException('Este e-mail já está cadastrado no sistema.');
     }
 
-    const cpfLimpo = body.cpf.replace(/\D/g, '');
+    const cpfExiste = await this.prisma.user.findUnique({
+      where: { cpf: cpfLimpo },
+    });
 
-    const { MOCK_FUNCIONARIOS_PROTHEUS } = require('../integracao/protheus/protheus.controller');
-
-    const funcionarioErp = MOCK_FUNCIONARIOS_PROTHEUS.find(f => f.cpf === cpfLimpo);
-
-    if (!funcionarioErp) {
-      throw new BadRequestException('Atenção: CPF não localizado na folha de colaboradores ativos do Protheus da Fundação ABC.');
+    if (cpfExiste) {
+      throw new BadRequestException('Este CPF já possui uma conta cadastrada no sistema.');
     }
 
-    const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
-    const unidadeId = funcionarioErp.unidade_id ? BigInt(funcionarioErp.unidade_id) : null;
-    const deptoId = funcionarioErp.departamento_id ? BigInt(funcionarioErp.departamento_id) : null;
-    const cargoId = funcionarioErp.cargo_id ? BigInt(funcionarioErp.cargo_id) : null;
+    // Consulta oficial no TOTVS Protheus via ProtheusService
+    const funcionarioErp = await this.protheusService.buscarColaboradorPorCpf(cpfLimpo);
 
-    if (unidadeId && cargoId) {
-      const vinculoExiste = await this.prisma.user.findFirst({
-        where: {
-          unidade_id: unidadeId,
-          cargo_id: cargoId,
-          departamento_id: deptoId,
-          name: funcionarioErp.nome
-        }
-      });
+    const toBigIntSafe = (valor?: string | null): bigint | null => {
+      if (!valor) return null;
+      const apenasNumeros = String(valor).replace(/\D/g, '');
+      return apenasNumeros ? BigInt(apenasNumeros) : null;
+    };
 
-      if (vinculoExiste) {
-        throw new BadRequestException(`Atenção: O colaborador ${funcionarioErp.nome} já possui uma conta ativa registrada para este CPF/Lotação.`);
-      }
-    }
+    const empresaId = toBigIntSafe(funcionarioErp.empresa_id);
+    const deptoId = toBigIntSafe(funcionarioErp.departamento_id);
+    const cargoId = toBigIntSafe(funcionarioErp.cargo_id);
 
-    const senhaPadrao = body.password || 'Fuabc@2026';
+    const senhaPadrao = body.password?.trim() || 'Fuabc@2026';
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(senhaPadrao, salt);
 
     const novoUsuario = await this.prisma.user.create({
       data: {
-        email: body.email,
-        name: body.name,
+        email: body.email.trim(),
+        name: body.name.trim() || funcionarioErp.nome,
+        cpf: cpfLimpo,
         password: passwordHash,
-        role: body.role,
+        role: body.role || Role.USER,
         ativo: true,
         empresa_id: empresaId,
-        unidade_id: unidadeId,
+        unidade_id: empresaId,
         departamento_id: deptoId,
         cargo_id: cargoId,
       },
-      select: { id: true, name: true, email: true }
+      select: { id: true, name: true, email: true, cpf: true }
     });
 
     return novoUsuario;
   }
+
 
   @Patch(':id/status')
   @Roles(Role.ADMIN)
@@ -154,7 +157,6 @@ export class UserController {
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
-
   async uploadAvatar(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Arquivo não enviado.');
     const linkPublico = `http://localhost:3000/uploads/avatars/${file.filename}`;
@@ -165,19 +167,18 @@ export class UserController {
       select: { id: true, name: true, email: true, avatar_url: true }
     });
 
-    return { 
+    return {
       message: 'Foto de perfil atualizada com sucesso no ecossistema!',
-      avatar_url: usuarioAtualizado.avatar_url 
+      avatar_url: usuarioAtualizado.avatar_url
     };
   }
-
 
   @Get('perfil/me')
   @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
   async obterPerfilLogado(@CurrentUser() user: any) {
     const usuario = await this.prisma.user.findUnique({
-      where: { 
-        id: user.id 
+      where: {
+        id: user.id
       }
     });
 

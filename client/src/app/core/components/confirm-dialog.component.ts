@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
         <mat-icon style="color: #dc2626; font-size: 28px; width: 28px; height: 28px;">warning_outline</mat-icon>
       </div>
 
-      <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #1e293b; letter-spacing: -0.5px;">{{ data.titulo }}</h2>
+      <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px;">{{ data.titulo }}</h2>
       <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b; line-height: 1.5;">{{ data.mensagem }}</p>
 
       <div style="display: flex; gap: 12px; justify-content: center;">

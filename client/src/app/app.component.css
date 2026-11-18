@@ -5,7 +5,7 @@
 
 .sidenav {
   width: 260px;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@
   margin: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .profile-role {
@@ -43,7 +43,7 @@
 
 /* Estilo da Barra Superior */
 .main-toolbar {
-  background-color: #003366 !important; /* Azul FUABC */
+  background-color: var(--text-brand) !important; /* Azul FUABC */
   color: #ffffff;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
@@ -63,12 +63,12 @@ mat-nav-list a {
 /* Destaca o link da tela em que o usuário está navegando no momento */
 .active-link {
   background-color: #e6f0fa !important;
-  color: #003366 !important;
+  color: var(--text-brand) !important;
   font-weight: 600;
 }
 
 .active-link mat-icon {
-  color: #003366 !important;
+  color: var(--text-brand) !important;
 }
 
 .logout-item {

@@ -1,21 +1,21 @@
 <div
-    style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 24px; box-sizing: border-box; font-family: sans-serif;">
+    style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--bg-page); padding: 24px; box-sizing: border-box; font-family: sans-serif; transition: background-color 0.25s ease;">
     <div style="max-width: 460px; width: 100%; box-sizing: border-box; animation: fadeIn 0.4s ease;">
 
         <div style="text-align: center; margin-bottom: 24px;">
             <div
-                style="background-color: #003366; color: #ffffff; width: 54px; height: 54px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.2);">
+                style="background: linear-gradient(135deg, #003366 0%, #0284c7 100%); color: #ffffff; width: 54px; height: 54px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--card-shadow);">
                 <mat-icon
                     style="font-size: 28px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;">school</mat-icon>
             </div>
-            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #003366; letter-spacing: -0.5px;">Portal de
+            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--text-brand); letter-spacing: -0.5px;">Portal de
                 Treinamentos FUABC</h2>
-            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px; font-weight: 500;">Auto-admissão digital
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 13px; font-weight: 500;">Auto-admissão digital
                 integrada ao Protheus ERP</p>
         </div>
 
         <mat-card
-            style="border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.01) !important; border: 1px solid #e2e8f0; overflow: hidden; background: #ffffff;">
+            style="border-radius: 16px; box-shadow: var(--card-shadow) !important; border: 1px solid var(--border-color); overflow: hidden; background: var(--bg-card);">
 
             <mat-progress-bar *ngIf="isProcessando || isBuscandoCpf" mode="indeterminate"
                 style="height: 4px; margin-bottom: -4px; position: relative; z-index: 10;"></mat-progress-bar>
@@ -36,7 +36,7 @@
                             placeholder="000.000.000-00" 
                             maxlength="14" 
                             required>
-                        <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">badge</mat-icon>
+                        <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">badge</mat-icon>
                         
                         <button mat-icon-button matSuffix type="button" 
                             *ngIf="!colaboradorValidado" 
@@ -44,7 +44,7 @@
                             (click)="consultarCpfProtheus()"
                             [disabled]="isBuscandoCpf || !formularioCadastro.cpf"
                             title="Consultar CPF no RH">
-                            <mat-icon style="color: #003366;">search</mat-icon>
+                            <mat-icon style="color: var(--text-brand);">search</mat-icon>
                         </button>
 
                         <button mat-icon-button matSuffix type="button" 
@@ -52,31 +52,32 @@
                             (click)="limparValidacaoCpf()"
                             [disabled]="isProcessando"
                             title="Alterar CPF">
-                            <mat-icon style="color: #64748b;">edit</mat-icon>
+                            <mat-icon style="color: var(--text-muted);">edit</mat-icon>
                         </button>
 
-                        <mat-hint *ngIf="!colaboradorValidado" style="color: #64748b; font-size: 11px;">
+                        <mat-hint *ngIf="!colaboradorValidado" style="color: var(--text-muted); font-size: 11px;">
                             Digite seu CPF e clique fora do campo para localizar seu cadastro no RH.
                         </mat-hint>
                     </mat-form-field>
 
                     <ng-container *ngIf="colaboradorValidado">
                         
-                        <div style="background: #f0f7ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; animation: fadeIn 0.3s ease;">
+                        <!-- Card de Retorno do Protheus ERP Harmonizado -->
+                        <div style="background: var(--bg-active-link); border: 1px solid var(--border-color); border-left: 4px solid var(--text-brand); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; animation: fadeIn 0.3s ease;">
                             <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <span style="font-size: 11px; font-weight: 700; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span style="font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; letter-spacing: 0.5px;">
                                     Vínculo Localizado • Matrícula {{ dadosProtheus?.matricula }}
                                 </span>
-                                <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #16a34a;">verified</mat-icon>
+                                <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #10b981;">verified</mat-icon>
                             </div>
                             
-                            <div style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px;">
+                            <div style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
                                 {{ formularioCadastro.name }}
                             </div>
                             
-                            <div style="font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 2px; margin-top: 2px;">
-                                <span><strong>Unidade:</strong> {{ dadosProtheus?.empresa_nome }}</span>
-                                <span><strong>Cargo:</strong> {{ dadosProtheus?.cargo_nome }} ({{ dadosProtheus?.departamento_nome }})</span>
+                            <div style="font-size: 12px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px; margin-top: 2px;">
+                                <span><strong style="color: var(--text-primary);">Unidade:</strong> {{ dadosProtheus?.empresa_nome }}</span>
+                                <span><strong style="color: var(--text-primary);">Cargo:</strong> {{ dadosProtheus?.cargo_nome }} ({{ dadosProtheus?.departamento_nome }})</span>
                             </div>
                         </div>
 
@@ -85,8 +86,8 @@
                             <input matInput type="email" [(ngModel)]="formularioCadastro.email" name="email"
                                 [readonly]="!!dadosProtheus?.email"
                                 [disabled]="isProcessando" placeholder="exemplo@fuabc.org.br" required>
-                            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">mail</mat-icon>
-                            <mat-hint style="color: #64748b; font-size: 11px;">
+                            <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">mail</mat-icon>
+                            <mat-hint style="color: var(--text-muted); font-size: 11px;">
                                 {{ dadosProtheus?.email ? 'E-mail oficial recuperado do Protheus (somente leitura).' : 'Informe um e-mail válido para receber notificações.' }}
                             </mat-hint>
                         </mat-form-field>
@@ -95,7 +96,7 @@
                             <mat-label>Criar Senha de Acesso</mat-label>
                             <input matInput type="password" [(ngModel)]="formularioCadastro.password" name="password"
                                 [disabled]="isProcessando" placeholder="Mínimo 6 caracteres" required>
-                            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">lock</mat-icon>
+                            <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">lock</mat-icon>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
@@ -103,13 +104,14 @@
                             <input matInput type="password" [(ngModel)]="formularioCadastro.confirmarPassword"
                                 name="confirmarPassword" [disabled]="isProcessando" placeholder="Digite a senha novamente"
                                 required>
-                            <mat-icon matPrefix style="color: #64748b; margin-right: 8px;">lock_reset</mat-icon>
+                            <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">lock_reset</mat-icon>
                         </mat-form-field>
 
                         <button mat-raised-button type="submit"
-                            [style.background]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword ? 'rgba(0, 51, 102, 0.35)' : 'linear-gradient(135deg, #003366 0%, #0a2540 100%)'"
-                            [style.color]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword ? 'rgba(255, 255, 255, 0.6)' : '#ffffff'"
-                            style="width: 100%; height: 44px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.1); transition: all 0.3s ease; margin-top: 6px;"
+                            [style.background]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword ? 'var(--bg-subtle)' : 'linear-gradient(135deg, #003366 0%, #0284c7 100%)'"
+                            [style.color]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword ? 'var(--text-muted)' : '#ffffff'"
+                            [style.border]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword ? '1px solid var(--border-color)' : 'none'"
+                            style="width: 100%; height: 44px; font-weight: 700; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--card-shadow); transition: all 0.3s ease; margin-top: 6px;"
                             [disabled]="isProcessando || !formularioCadastro.email || !formularioCadastro.password || !formularioCadastro.confirmarPassword">
                             <mat-icon style="font-size: 18px; width: 18px; height: 18px;">how_to_reg</mat-icon>
                             {{ isProcessando ? 'Gerando Acesso...' : 'Confirmar e Criar Minha Conta' }}
@@ -117,11 +119,10 @@
                     </ng-container>
 
                     <div
-                        style="text-align: center; margin-top: 10px; font-size: 13px; color: #64748b; font-weight: 500;">
+                        style="text-align: center; margin-top: 10px; font-size: 13px; color: var(--text-muted); font-weight: 500;">
                         Já possui uma conta ativa?
                         <a routerLink="/login"
-                            style="color: #003366; font-weight: 700; text-decoration: none; transition: color 0.2s;"
-                            onmouseover="this.style.color='#0a2540'" onmouseout="this.style.color='#003366'">Faça login
+                            style="color: var(--text-brand); font-weight: 700; text-decoration: none;">Faça login
                             aqui</a>
                     </div>
 
