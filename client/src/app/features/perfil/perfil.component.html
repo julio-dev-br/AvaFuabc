@@ -74,6 +74,9 @@
     </mat-card-content>
   </mat-card>
 
+
+
+
   <mat-card
     style="border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--card-shadow) !important; padding: 24px;">
     <h3
@@ -82,32 +85,41 @@
     </h3>
 
     <div style="display: flex; flex-direction: column; gap: 16px;">
-      <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
         <mat-label>Senha Atual</mat-label>
         <input matInput type="password" [(ngModel)]="senhaAtual" placeholder="Digite sua senha atual">
+        <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">lock_open</mat-icon>
       </mat-form-field>
 
       <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-        <mat-form-field appearance="outline" style="flex: 1; min-width: 250px;">
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 250px;" class="compact-form">
           <mat-label>Nova Senha</mat-label>
           <input matInput type="password" [(ngModel)]="novaSenha" placeholder="Mínimo 6 caracteres">
+          <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">lock</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" style="flex: 1; min-width: 250px;">
+        <mat-form-field appearance="outline" style="flex: 1; min-width: 250px;" class="compact-form">
           <mat-label>Confirmar Nova Senha</mat-label>
           <input matInput type="password" [(ngModel)]="confirmarSenha" placeholder="Repita a nova senha">
+          <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">lock_reset</mat-icon>
         </mat-form-field>
       </div>
 
       <div style="text-align: right; margin-top: 8px;">
         <button mat-flat-button
-          style="background-color: var(--brand-primary); color: white; font-weight: 600; border-radius: 6px; padding: 0 24px; height: 44px; border: none; cursor: pointer;"
+          [style.background-color]="!senhaAtual.trim() || !novaSenha.trim() || !confirmarSenha.trim() ? 'var(--bg-subtle)' : 'var(--brand-primary)'"
+          [style.color]="!senhaAtual.trim() || !novaSenha.trim() || !confirmarSenha.trim() ? 'var(--text-muted)' : '#ffffff'"
+          [style.border]="!senhaAtual.trim() || !novaSenha.trim() || !confirmarSenha.trim() ? '1px solid var(--border-color)' : 'none'"
+          style="font-weight: 600; border-radius: 8px; padding: 0 24px; height: 44px; cursor: pointer; transition: all 0.2s ease;"
           [disabled]="!senhaAtual.trim() || !novaSenha.trim() || !confirmarSenha.trim()" (click)="salvarNovaSenha()">
           Atualizar Senha
         </button>
       </div>
     </div>
   </mat-card>
+
+
+
 
 </div>
 

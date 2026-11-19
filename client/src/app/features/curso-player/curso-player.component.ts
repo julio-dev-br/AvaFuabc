@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, AfterViewInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { TreinamentoService } from '../../core/services/treinamento.service';
 import { environment } from '../../../environments/environment';
 
@@ -53,6 +54,9 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public player: any;
   private intervalMonitor: any;
+  private chatDadosSub?: Subscription;
+  private chatMensagemSub?: Subscription;
+  private youtubeMessageHandler = (event: MessageEvent) => this.processarMensagemYouTube(event);
 
   videoUrlBlindada!: SafeResourceUrl;
 
@@ -69,8 +73,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   public videoJaTevePlayReal = false;
   private ultimoPercentualSalvoNoBanco = -1;
 
-
-
+  alunoLogado = this.obterDadosAlunoLogado();
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -81,23 +84,25 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.inicializarScriptYouTube();
-    this.escutarEventosGlobaisDoIframeDoYouTube();
+    window.addEventListener('message', this.youtubeMessageHandler);
   }
 
   ngOnDestroy(): void {
     this.aulaAtiva = null;
     this.curso = null;
+    this.chatDadosSub?.unsubscribe();
+    this.chatMensagemSub?.unsubscribe();
     this.chatApiService.desconectarDoSocket();
+    window.removeEventListener('message', this.youtubeMessageHandler);
+
     if (this.intervalMonitor) {
       clearInterval(this.intervalMonitor);
+      this.intervalMonitor = null;
     }
   }
 
-    alunoLogado = this.obterDadosAlunoLogado();
-
   private obterDadosAlunoLogado(): { id: number; name: string } {
     try {
-      // 1. Tenta ler objeto JSON salvo em 'usuario' ou 'user'
       const rawUser = localStorage.getItem('usuario') || localStorage.getItem('user');
       if (rawUser) {
         const parsed = JSON.parse(rawUser);
@@ -106,7 +111,6 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         if (id && !isNaN(id)) return { id, name };
       }
 
-      // 2. Tenta extrair direto do token JWT ('accessToken')
       const token = localStorage.getItem('accessToken');
       if (token && token.split('.').length === 3) {
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -118,13 +122,11 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('Não foi possível decodificar sessão local do aluno:', e);
     }
 
-    // 3. Fallback legado
     return {
       id: Number(localStorage.getItem('userId') || 0),
       name: localStorage.getItem('userName') || 'Colaborador'
     };
   }
-
   carregarDadosCurso(id: number): void {
     this.treinamentoService.obterConteudoCurso(id).subscribe({
       next: (dados) => {
@@ -150,6 +152,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.intervalMonitor) {
       clearInterval(this.intervalMonitor);
+      this.intervalMonitor = null;
     }
     this.player = null;
     this.aulaAtiva = null;
@@ -161,14 +164,15 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       if (aula.video_url) {
         let urlFinalReal = String(aula.video_url).trim();
         if (!urlFinalReal.includes('enablejsapi=1')) {
-          urlFinalReal = urlFinalReal.includes('?') ? `${urlFinalReal}&enablejsapi=1` : `${urlFinalReal}?enablejsapi=1`;
+          urlFinalReal = urlFinalReal.includes('?')
+            ? `${urlFinalReal}&enablejsapi=1`
+            : `${urlFinalReal}?enablejsapi=1`;
         }
 
         this.videoUrlBlindada = this.sanitizer.bypassSecurityTrustResourceUrl(urlFinalReal);
       }
     }, 50);
   }
-
 
   obterVideoUrlSegura(url: string): SafeResourceUrl {
     if (!url) return '';
@@ -191,11 +195,13 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const tag = document.createElement('script');
-    tag.src = 'https://youtube.com';
-    const firstScriptTag = document.getElementsByTagName('script');
-    if (firstScriptTag && firstScriptTag.length > 0 && firstScriptTag[0].parentNode) {
-      firstScriptTag[0].parentNode.insertBefore(tag, firstScriptTag[0]);
+    if (!document.querySelector('script[src*="://youtube.com"]')) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.://youtube.com';
+      const firstScriptTag = document.getElementsByTagName('script');
+      if (firstScriptTag && firstScriptTag.length > 0 && firstScriptTag[0].parentNode) {
+        firstScriptTag[0].parentNode.insertBefore(tag, firstScriptTag[0]);
+      }
     }
 
     window.onYouTubeIframeAPIReady = () => {
@@ -209,22 +215,20 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private construirInstanciaPlayer(): void {
     try {
-      console.log('📡 SENSOR DE MÍDIAS: Acoplando capturadores do YouTube no iframe...');
-
       this.player = new YT.Player('player-video-iframe', {
         events: {
-          'onStateChange': (event: any) => this.gerenciarMudancaStatusPlayer(event),
-          'onReady': () => {
+          onStateChange: (event: any) => this.gerenciarMudancaStatusPlayer(event),
+          onReady: () => {
             this.iniciarMonitoramentoTempo();
           }
         }
       });
+
       setTimeout(() => {
         if (this.player && typeof this.player.getCurrentTime === 'function') {
           this.iniciarMonitoramentoTempo();
         }
       }, 1200);
-
     } catch (error) {
       this.iniciarMonitoramentoTempo();
     }
@@ -232,13 +236,13 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private gerenciarMudancaStatusPlayer(event: any): void {
     if (event.data === 1) {
-
       this.videoTocandoLocal = true;
       this.iniciarMonitoramentoTempo();
     } else {
       this.videoTocandoLocal = false;
       if (this.intervalMonitor) {
         clearInterval(this.intervalMonitor);
+        this.intervalMonitor = null;
       }
     }
   }
@@ -246,15 +250,12 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private iniciarMonitoramentoTempo(): void {
     if (this.intervalMonitor) clearInterval(this.intervalMonitor);
 
-    let progressoSimuladoContingencia = (this.aulaAtiva?.progresso_aulas?.[0]?.percentual || 0);
-    
+    let progressoSimuladoContingencia = this.aulaAtiva?.progresso_aulas?.[0]?.percentual || 0;
     this.ultimoPercentualSalvoNoBanco = progressoSimuladoContingencia;
 
     this.zone.runOutsideAngular(() => {
       this.intervalMonitor = setInterval(() => {
-        if (!this.aulaAtiva) return;
-
-        if (!this.videoJaTevePlayReal) return;
+        if (!this.aulaAtiva || !this.videoJaTevePlayReal) return;
 
         try {
           const iframeFisico = document.getElementById('player-video-iframe') as HTMLIFrameElement;
@@ -264,7 +265,11 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         } catch (err) {}
 
-        if (this.player && typeof this.player.getCurrentTime === 'function' && typeof this.player.getDuration === 'function') {
+        if (
+          this.player &&
+          typeof this.player.getCurrentTime === 'function' &&
+          typeof this.player.getDuration === 'function'
+        ) {
           try {
             const tempoAtual = this.player.getCurrentTime();
             const duracaoTotal = this.player.getDuration();
@@ -282,71 +287,73 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         if (!this.player || typeof this.player.getCurrentTime !== 'function') {
           try {
             if (progressoSimuladoContingencia < 100) {
-              progressoSimuladoContingencia += 0.5; // Incremento controlado
+              progressoSimuladoContingencia += 0.5;
               this.atualizarProgressoEInterfaceIndividual(Math.round(progressoSimuladoContingencia));
             }
           } catch (error) {
             console.error('❌ Erro no fallback de mídias:', error);
           }
         }
-
       }, 1000);
     });
   }
-
   private atualizarProgressoEInterfaceIndividual(percentualCalculado: number): void {
+    if (!this.aulaAtiva) return;
     if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
-    if (this.aulaAtiva.progresso_aulas.length === 0) this.aulaAtiva.progresso_aulas.push({ percentual: 0, concluida: false });
+    if (this.aulaAtiva.progresso_aulas.length === 0) {
+      this.aulaAtiva.progresso_aulas.push({ percentual: 0, concluida: false });
+    }
 
     if (percentualCalculado > (this.aulaAtiva.progresso_aulas[0].percentual || 0)) {
       this.zone.run(() => {
         this.aulaAtiva.progresso_aulas[0].percentual = percentualCalculado;
-        console.log(`📈 TELEMETRIA LOCAL: Posição do vídeo atualizada para [${percentualCalculado}%]`);
 
         if (percentualCalculado % 10 === 0 && percentualCalculado < 100) {
           if (percentualCalculado !== this.ultimoPercentualSalvoNoBanco) {
-            this.ultimoPercentualSalvoNoBanco = percentualCalculado; // Trava a porteira imediatamente!
-            this.forçarConclusaoProgressoIndividual(percentualCalculado);
+            this.ultimoPercentualSalvoNoBanco = percentualCalculado;
+            this.forcarConclusaoProgressoIndividual(percentualCalculado);
           }
         }
 
         if (percentualCalculado >= 100) {
           this.aulaAtiva.progresso_aulas[0].percentual = 100;
           this.aulaAtiva.progresso_aulas[0].concluida = true;
-          
+
           if (this.ultimoPercentualSalvoNoBanco !== 100) {
-            this.ultimoPercentualSalvoNoBanco = 100; 
-            this.forçarConclusaoProgressoIndividual(100);
+            this.ultimoPercentualSalvoNoBanco = 100;
+            this.forcarConclusaoProgressoIndividual(100);
           }
-          
-          if (this.intervalMonitor) clearInterval(this.intervalMonitor);
+
+          if (this.intervalMonitor) {
+            clearInterval(this.intervalMonitor);
+            this.intervalMonitor = null;
+          }
         }
       });
     }
   }
 
-
-  private forçarConclusaoProgressoIndividual(percentual: number): void {
+  private forcarConclusaoProgressoIndividual(percentual: number): void {
     const idDaAulaAtiva = Number(this.aulaAtiva?.id);
+    if (!idDaAulaAtiva) return;
 
     const payloadValido = {
-      tempoAssistido: percentual, 
+      tempoAssistido: percentual,
       concluida: percentual >= 100
     };
 
     this.treinamentoService.salvarProgressoVideoaula(idDaAulaAtiva, payloadValido).subscribe({
-      next: (res) => {
-
+      next: () => {
+        if (!this.aulaAtiva) return;
         if (!this.aulaAtiva.progresso_aulas) this.aulaAtiva.progresso_aulas = [{}];
         this.aulaAtiva.progresso_aulas[0].percentual = percentual;
 
         if (percentual >= 100) {
           this.aulaAtiva.progresso_aulas[0].percentual = 100;
           this.aulaAtiva.progresso_aulas[0].concluida = true;
-          console.log('🎉 PORTÃO DE SEGURANÇA DESTRANCADO: Avaliação liberada!');
         }
       },
-      error: (err) => console.error('❌ Falha ao sincronizar métricas de progresso via API Patch:', err)
+      error: (err) => console.error('❌ Falha ao sincronizar métricas de progresso:', err)
     });
   }
 
@@ -355,19 +362,21 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     this.iniciarMonitoramentoTempo();
 
     if (this.player && typeof this.player.playVideo === 'function') {
-      try { this.player.playVideo(); } catch (e) { }
+      try {
+        this.player.playVideo();
+      } catch (e) {}
     }
   }
 
   public dispararPlayManualNativo(): void {
-    this.videoTocandoLocal = !this.videoTocandoLocal; 
+    this.videoTocandoLocal = !this.videoTocandoLocal;
     if (this.videoTocandoLocal) {
       this.iniciarMonitoramentoTempo();
     }
   }
 
   public simularConclusaoInstantaneaDEV(): void {
-
+    if (!this.aulaAtiva) return;
     if (!this.aulaAtiva.progresso_aulas) {
       this.aulaAtiva.progresso_aulas = [{}];
     }
@@ -380,52 +389,50 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.intervalMonitor) {
       clearInterval(this.intervalMonitor);
+      this.intervalMonitor = null;
     }
 
-    this.forçarConclusaoProgressoIndividual(100);
+    this.forcarConclusaoProgressoIndividual(100);
   }
 
-  private escutarEventosGlobaisDoIframeDoYouTube(): void {
-    window.addEventListener('message', (event) => {
-      if (!event.origin.includes('youtube.com')) return;
+  private processarMensagemYouTube(event: MessageEvent): void {
+    if (!event.origin.includes('youtube.com')) return;
 
-      try {
-        let dadosDoEvento = event.data;
+    try {
+      let dadosDoEvento = event.data;
 
-        if (typeof dadosDoEvento === 'string') {
-          dadosDoEvento = JSON.parse(dadosDoEvento);
+      if (typeof dadosDoEvento === 'string') {
+        dadosDoEvento = JSON.parse(dadosDoEvento);
+      }
+
+      let statusVideo: number | null = null;
+
+      if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+        statusVideo = dadosDoEvento.info.playerState;
+      } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
+        statusVideo = dadosDoEvento.info.playerState;
+      } else if (dadosDoEvento?.event === 'onStateChange') {
+        statusVideo = Number(dadosDoEvento.info);
+      }
+
+      if (statusVideo !== null) {
+        if (statusVideo === 1) {
+          this.videoJaTevePlayReal = true;
+        } else if (statusVideo === 2 || statusVideo === 0 || statusVideo === -1) {
+          this.videoJaTevePlayReal = false;
         }
-
-        let statusVideo: number | null = null;
-
-        if (dadosDoEvento?.event === 'infoDelivery' && typeof dadosDoEvento?.info?.playerState !== 'undefined') {
-          statusVideo = dadosDoEvento.info.playerState;
-        } else if (typeof dadosDoEvento?.info?.playerState !== 'undefined') {
-          statusVideo = dadosDoEvento.info.playerState;
-        } else if (dadosDoEvento?.event === 'onStateChange') {
-          statusVideo = Number(dadosDoEvento.info);
-        }
-
-        if (statusVideo !== null) {
-          if (statusVideo === 1) {
-            console.log('📈 TELEMETRIA ATIVA: Vídeo tocando! Retomando contagem de mídias.');
-            this.videoJaTevePlayReal = true;
-          } else if (statusVideo === 2 || statusVideo === 0 || statusVideo === -1) {
-            console.log('📉 TELEMETRIA ATIVA: Vídeo pausado ou parado! Congelando barra.');
-            this.videoJaTevePlayReal = false;
-          }
-        }
-      } catch (e) { }
-    });
+      }
+    } catch (e) {}
   }
-  
+
   alternarJanelaChat(): void {
     this.chatAberto = !this.chatAberto;
 
     if (this.chatAberto) {
-      this.chatApiService.entrarNaSala(this.alunoLogado.id, this.alunoLogado.name);
+      this.chatDadosSub?.unsubscribe();
+      this.chatMensagemSub?.unsubscribe();
 
-      this.chatApiService.dadosSala.subscribe((dados: any) => {
+      this.chatDadosSub = this.chatApiService.dadosSala.subscribe((dados: any) => {
         if (dados) {
           this.salaId = dados.salaId;
           this.historicoMensagens = dados.historico || [];
@@ -433,15 +440,17 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
 
-      this.chatApiService.novaMensagem.subscribe((msgRecebida: any) => {
+      this.chatMensagemSub = this.chatApiService.novaMensagem.subscribe((msgRecebida: any) => {
         if (msgRecebida && msgRecebida.sala_id === this.salaId) {
-          const jaExiste = this.historicoMensagens.some(m => m.id === msgRecebida.id);
+          const jaExiste = this.historicoMensagens.some((m) => m.id === msgRecebida.id);
           if (!jaExiste) {
             this.historicoMensagens.push(msgRecebida);
             this.rolarChatAlunoParaOFinal();
           }
         }
       });
+
+      this.chatApiService.entrarNaSala(this.alunoLogado.id, this.alunoLogado.name);
     }
   }
 

@@ -1,21 +1,22 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
-import { ThemeService } from '../../core/services/theme.service'
-
-import { filter } from 'rxjs/operators';
+import { ThemeService } from '../../core/services/theme.service';
+import { AdminTabService } from '../services/admin-tab.service';
+import { LayoutService } from '../services/layout.service';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AdminTabService } from '../services/admin-tab.service';
-import { LayoutService } from '../services/layout.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
@@ -35,8 +36,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
   ],
   templateUrl: './layout.component.html'
 })
-
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
@@ -46,10 +46,12 @@ export class LayoutComponent implements OnInit {
   private router = inject(Router);
 
   private readonly apiUrl = `${environment.apiUrl}`;
-
   protected readonly window = window;
 
-  breadcrumbs: Array<{ texto: string, url: string }> = [];
+  private intervalNotificacoes: any;
+  private routerSub?: Subscription;
+
+  breadcrumbs: Array<{ texto: string; url: string }> = [];
   notificacoes: any[] = [];
 
   usuario: any = {
@@ -64,21 +66,30 @@ export class LayoutComponent implements OnInit {
   ngOnInit(): void {
     this.carregarDadosPerfilReal();
     this.carregarNotificacoes();
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.gerarBreadcrumbs();
-    });
+
+    this.routerSub = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.gerarBreadcrumbs();
+      });
 
     this.gerarBreadcrumbs();
   }
-  private gerarBreadcrumbs(): void {
-    const urlAtual = this.router.url; 
 
+  ngOnDestroy(): void {
+    if (this.intervalNotificacoes) {
+      clearInterval(this.intervalNotificacoes);
+      this.intervalNotificacoes = null;
+    }
+    this.routerSub?.unsubscribe();
+  }
+
+  private gerarBreadcrumbs(): void {
+    const urlAtual = this.router.url;
     const ehAdmin = urlAtual.includes('/admin');
 
     if (ehAdmin) {
-      const partes = urlAtual.split('/').filter(p => p && p !== 'dashboard' && p !== 'admin');
+      const partes = urlAtual.split('/').filter((p) => p && p !== 'dashboard' && p !== 'admin');
       this.breadcrumbs = [{ texto: 'Painel Admin', url: '/admin/dashboard' }];
       let urlAcumulada = '/admin';
 
@@ -99,8 +110,8 @@ export class LayoutComponent implements OnInit {
     } else {
       this.breadcrumbs = [{ texto: 'Portal do Aluno', url: '/dashboard' }];
 
-      const segmentos = urlAtual.split('/').filter(p => p);
-      const idString = segmentos.find(s => !isNaN(Number(s)));
+      const segmentos = urlAtual.split('/').filter((p) => p);
+      const idString = segmentos.find((s) => !isNaN(Number(s)));
       const idNum = idString ? Number(idString) : null;
 
       if (idNum && (urlAtual.includes('/forum/aula') || urlAtual.includes('/quiz/aula'))) {
@@ -112,11 +123,10 @@ export class LayoutComponent implements OnInit {
         const termoFinal = urlAtual.includes('/forum/aula') ? 'Fórum de Dúvidas' : 'Avaliação Regulamentar';
         this.breadcrumbs.push({
           texto: termoFinal,
-          url: urlAtual 
+          url: urlAtual
         });
-
       } else {
-        const partes = urlAtual.split('/').filter(p => p && p !== 'dashboard');
+        const partes = urlAtual.split('/').filter((p) => p && p !== 'dashboard');
         let urlAcumulada = '/dashboard';
 
         partes.forEach((parte) => {
@@ -139,7 +149,7 @@ export class LayoutComponent implements OnInit {
   marcarLida(id: number): void {
     this.notificationService.marcarComoLida(id).subscribe({
       next: () => {
-        this.notificacoes = this.notificacoes.filter(n => n.id !== id);
+        this.notificacoes = this.notificacoes.filter((n) => n.id !== id);
       },
       error: (err: any) => {
         console.error('Erro ao marcar notificação como lida no layout master:', err);
@@ -149,7 +159,7 @@ export class LayoutComponent implements OnInit {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
-    return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
   carregarDadosPerfilReal(): void {
@@ -167,19 +177,26 @@ export class LayoutComponent implements OnInit {
 
   carregarNotificacoes(): void {
     this.notificationService.buscarNaoLidas().subscribe({
-      next: (dados: any[]) => this.notificacoes = dados,
+      next: (dados: any[]) => {
+        this.notificacoes = dados || [];
+      },
       error: (err) => console.error('Erro ao carregar notificações no layout:', err)
     });
-    setInterval(() => {
+
+    if (this.intervalNotificacoes) {
+      clearInterval(this.intervalNotificacoes);
+    }
+
+    this.intervalNotificacoes = setInterval(() => {
       this.notificationService.buscarNaoLidas().subscribe({
         next: (dados: any[]) => {
-          if (dados) {
+          if (dados && JSON.stringify(dados) !== JSON.stringify(this.notificacoes)) {
             this.notificacoes = dados;
           }
         },
-        error: (err) => console.error('Erro no pooling silencioso de notificações:', err)
+        error: (err) => console.error('Erro no polling silencioso de notificações:', err)
       });
-    }, 30000); 
+    }, 30000);
   }
 
   estaNoPainelAdmin(): boolean {
@@ -198,7 +215,7 @@ export class LayoutComponent implements OnInit {
     const role = this.authService.getUserRole();
     return role === 'admin' || role === 'manager';
   }
-  
+
   logout(): void {
     localStorage.removeItem('accessToken');
     this.router.navigate(['/login']);

@@ -168,14 +168,18 @@
                         style="margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         {{ usuario.email }}</p>
                 </div>
-                <button mat-menu-item routerLink="/dashboard/perfil" (click)="menuMobileAberto = false">
-                    <mat-icon style="color: var(--text-brand);">account_circle</mat-icon><span>Meu Perfil</span>
+                <button mat-menu-item routerLink="/dashboard/perfil" (click)="menuMobileAberto = false"
+                    style="color: var(--text-primary);">
+                    <mat-icon style="color: var(--text-brand);">account_circle</mat-icon>
+                    <span style="color: var(--text-primary); font-weight: 500;">Meu Perfil</span>
                 </button>
                 <div style="height: 1px; background-color: var(--border-color); margin: 4px 0;"></div>
                 <button mat-menu-item (click)="logout()" style="color: #ef4444;">
-                    <mat-icon style="color: #ef4444;">logout</mat-icon><span>Sair</span>
+                    <mat-icon style="color: #ef4444;">logout</mat-icon>
+                    <span style="color: #ef4444; font-weight: 500;">Sair</span>
                 </button>
             </mat-menu>
+
         </div>
     </aside>
     <div class="main-layout-wrapper" [class.colapsada]="sidebarColapsada" style="flex: 1; 
