@@ -29,7 +29,6 @@ export class ProtheusService {
     }
 
     try {
-      // ✅ CORRIGIDO: Removido o "https://" duplicado da URL oficial TOTVS
       const baseUrl =
         process.env.PROTHEUS_API_URL ||
         'https://fundacaodo170819.protheus.cloudtotvs.com.br:4050/app/poadmin/api/v1';
@@ -64,6 +63,7 @@ export class ProtheusService {
         departamento_id: colaborador.costCenter,
         departamento_nome: colaborador.costCenterDescription,
       };
+      
     } catch (error: any) {
       if (error instanceof BadRequestException) {
         throw error;

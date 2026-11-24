@@ -32,33 +32,52 @@
 @if (exibirFormularioCadastro) {
 <mat-card
   style="margin-bottom: 32px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow) !important; overflow: hidden; background: var(--bg-card); animation: fadeIn 0.3s ease;">
-  <div style="background-color: var(--bg-subtle); padding: 20px 24px; border-bottom: 1px solid var(--border-color);">
+  <div style="background-color: var(--bg-subtle); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
     <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-brand);">Matricular e Registrar Novo
-      Funcionário
+      Funcionário (Integração TOTVS Protheus)
     </h3>
   </div>
+
+  <mat-progress-bar *ngIf="isBuscandoCpf" mode="indeterminate" style="height: 3px;"></mat-progress-bar>
+
   <mat-card-content style="padding: 24px !important; box-sizing: border-box;">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; width: 100%;">
 
       <mat-form-field appearance="outline" class="compact-form">
+        <mat-label>CPF do Colaborador</mat-label>
+        <input matInput
+          [(ngModel)]="novoUsuario.cpf"
+          (input)="aplicarMascaraCpf($event)"
+          (blur)="consultarCpfProtheus()"
+          (keyup.enter)="consultarCpfProtheus()"
+          [disabled]="isBuscandoCpf || isSalvando"
+          placeholder="000.000.000-00"
+          maxlength="14">
+        <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">badge</mat-icon>
+        <button mat-icon-button matSuffix type="button"
+          (mousedown)="$event.preventDefault()"
+          (click)="consultarCpfProtheus()"
+          [disabled]="isBuscandoCpf || !novoUsuario.cpf"
+          title="Consultar CPF no Protheus">
+          <mat-icon style="color: var(--text-brand);">search</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="compact-form">
         <mat-label>Nome Completo</mat-label>
-        <input matInput [(ngModel)]="novoUsuario.name" placeholder="Ex: Julio Valente">
+        <input matInput [(ngModel)]="novoUsuario.name" [disabled]="isSalvando" placeholder="Preenchido pelo Protheus ou manual">
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">person</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>E-mail Corporativo</mat-label>
-        <input matInput type="email" [(ngModel)]="novoUsuario.email" placeholder="Ex: julio@fuabc.org">
+        <input matInput type="email" [(ngModel)]="novoUsuario.email" [disabled]="isSalvando" placeholder="Ex: colaborador@fuabc.org.br">
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">mail</mat-icon>
       </mat-form-field>
-      <mat-form-field appearance="outline" class="compact-form">
-        <mat-label>CPF do Colaborador</mat-label>
-        <input matInput [(ngModel)]="novoUsuario.cpf" placeholder="000.000.000-00" maxlength="14">
-        <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">badge</mat-icon>
-      </mat-form-field>
+
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>Nível de Perfil de Acesso</mat-label>
-        <mat-select [(ngModel)]="novoUsuario.role">
+        <mat-select [(ngModel)]="novoUsuario.role" [disabled]="isSalvando">
           <mat-option value="user">👤 Colaborador (Aluno)</mat-option>
           <mat-option value="manager">📋 Liderança (Gestor)</mat-option>
           <mat-option value="admin">🛡️ Administrador Central</mat-option>
@@ -66,6 +85,24 @@
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">admin_panel_settings</mat-icon>
       </mat-form-field>
     </div>
+
+    <!-- Card de Retorno do TOTVS Protheus -->
+    @if (dadosProtheus) {
+    <div style="margin-top: 16px; background: var(--bg-active-link); border: 1px solid var(--border-color); border-left: 4px solid var(--text-brand); border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; animation: fadeIn 0.3s ease;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; letter-spacing: 0.4px;">
+          Vínculo Localizado no Protheus • Matrícula {{ dadosProtheus.matricula }}
+        </span>
+        <span style="font-size: 13px; color: var(--text-primary); font-weight: 600;">
+          {{ dadosProtheus.empresa_nome }} — {{ dadosProtheus.cargo_nome }} ({{ dadosProtheus.departamento_nome }})
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; color: #10b981; font-size: 12px; font-weight: 700;">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">verified</mat-icon>
+        Dados Pronto para Gravação
+      </div>
+    </div>
+    }
 
     <div
       style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px;">
@@ -87,6 +124,7 @@
   </mat-card-content>
 </mat-card>
 }
+
 <mat-card
   style="border-radius: 16px; box-shadow: var(--card-shadow) !important; border: 1px solid var(--border-color); overflow: hidden; background: var(--bg-card);">
 

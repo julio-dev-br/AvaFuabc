@@ -34,16 +34,24 @@ export class UserController {
     const usuarios = await this.prisma.user.findMany({
       orderBy: { name: 'asc' },
     });
+
     return usuarios.map(u => ({
       id: u.id,
       name: u.name || 'Usuário Sem Nome',
       email: u.email,
       cpf: u.cpf,
+      matricula: u.matricula,
       role: u.role,
       ativo: u.ativo,
-      unidade: { nome: u.unidade_id ? `Unidade ${u.unidade_id.toString()}` : 'Aguardando Integração ERP' },
-      departamento: { nome: u.departamento_id ? `Depto ${u.departamento_id.toString()}` : 'Geral / RH' },
-      cargo: { nome: u.cargo_id ? `Cargo ${u.cargo_id.toString()}` : 'Colaborador' }
+      unidade: {
+        nome: u.empresa_nome || (u.unidade_id ? `Unidade ${u.unidade_id.toString()}` : 'Fundação ABC')
+      },
+      departamento: {
+        nome: u.centro_custo_descricao || (u.departamento_id ? `Depto ${u.departamento_id.toString()}` : 'Geral / RH')
+      },
+      cargo: {
+        nome: u.cargo_nome || (u.cargo_id ? `Cargo ${u.cargo_id.toString()}` : 'Colaborador')
+      }
     }));
   }
 
@@ -100,23 +108,37 @@ export class UserController {
 
     const novoUsuario = await this.prisma.user.create({
       data: {
-        email: body.email.trim(),
+        email: body.email.trim().toLowerCase(),
         name: body.name.trim() || funcionarioErp.nome,
         cpf: cpfLimpo,
+        matricula: funcionarioErp.matricula || null,
         password: passwordHash,
         role: body.role || Role.USER,
         ativo: true,
         empresa_id: empresaId,
         unidade_id: empresaId,
+        empresa_nome: funcionarioErp.empresa_nome || null,
         departamento_id: deptoId,
+        centro_custo: funcionarioErp.departamento_id || null,
+        centro_custo_descricao: funcionarioErp.departamento_nome || null,
         cargo_id: cargoId,
+        cargo_nome: funcionarioErp.cargo_nome || null,
+        sincronizado_em: new Date(),
       },
-      select: { id: true, name: true, email: true, cpf: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        cpf: true,
+        matricula: true,
+        empresa_nome: true,
+        cargo_nome: true,
+        centro_custo_descricao: true,
+      }
     });
 
     return novoUsuario;
   }
-
 
   @Patch(':id/status')
   @Roles(Role.ADMIN)
@@ -190,10 +212,12 @@ export class UserController {
       id: usuario.id,
       nome: usuario.name || 'Colaborador',
       email: usuario.email,
+      cpf: usuario.cpf,
+      matricula: usuario.matricula,
       avatarUrl: usuario.avatar_url || 'assets/default-avatar.jpg',
-      empresa: usuario.empresa_id ? `Empresa ${usuario.empresa_id.toString()}` : 'Fundação ABC',
-      unidade: usuario.unidade_id ? `Unidade ${usuario.unidade_id.toString()}` : 'Hospital Mário Covas',
-      cargo: usuario.cargo_id ? `Cargo ${usuario.cargo_id.toString()}` : 'Colaborador'
+      empresa: usuario.empresa_nome || (usuario.empresa_id ? `Empresa ${usuario.empresa_id.toString()}` : 'Fundação ABC'),
+      unidade: usuario.centro_custo_descricao || (usuario.unidade_id ? `Unidade ${usuario.unidade_id.toString()}` : 'Hospital Mário Covas'),
+      cargo: usuario.cargo_nome || (usuario.cargo_id ? `Cargo ${usuario.cargo_id.toString()}` : 'Colaborador')
     };
   }
 

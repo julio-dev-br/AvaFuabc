@@ -15,6 +15,8 @@ model User {
   departamento_id        BigInt?
   cargo_id               BigInt?
   matricula              String?
+  empresa_nome           String?   @db.VarChar(150) 
+  cargo_nome             String?   @db.VarChar(150) 
   centro_custo           String?   @db.VarChar(30)
   centro_custo_descricao String?   @db.VarChar(150)
   name                   String?

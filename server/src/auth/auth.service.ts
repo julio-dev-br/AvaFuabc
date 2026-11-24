@@ -23,6 +23,9 @@ export class AuthService {
     }
 
     const cpfLimpo = data.cpf.replace(/\D/g, '');
+    if (cpfLimpo.length !== 11) {
+      throw new BadRequestException('O CPF informado deve conter 11 dígitos.');
+    }
 
     const funcionarioErp = await this.protheusService.buscarColaboradorPorCpf(cpfLimpo);
 
@@ -52,7 +55,16 @@ export class AuthService {
       throw new UnauthorizedException('O e-mail vinculado a este colaborador já está cadastrado no sistema.');
     }
 
-    const empresaId = funcionarioErp.empresa_id ? BigInt(funcionarioErp.empresa_id) : null;
+    const toBigIntSafe = (valor?: string | null): bigint | null => {
+      if (!valor) return null;
+      const apenasNumeros = String(valor).replace(/\D/g, '');
+      return apenasNumeros ? BigInt(apenasNumeros) : null;
+    };
+
+    const empresaId = toBigIntSafe(funcionarioErp.empresa_id);
+    const deptoId = toBigIntSafe(funcionarioErp.departamento_id);
+    const cargoId = toBigIntSafe(funcionarioErp.cargo_id);
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const user = await this.prismaService.user.create({
@@ -60,16 +72,19 @@ export class AuthService {
         email: emailOficial,
         cpf: cpfLimpo,
         matricula: funcionarioErp.matricula || null,
-        centro_custo: funcionarioErp.departamento_id || null,
-        centro_custo_descricao: funcionarioErp.departamento_nome || null,
         password: hashedPassword,
         name: funcionarioErp.nome || data.name.trim(),
         role: 'user',
-        empresa_id: empresaId,
-        unidade_id: null,
-        departamento_id: null,
-        cargo_id: null,
         ativo: true,
+        empresa_id: empresaId,
+        unidade_id: empresaId,
+        empresa_nome: funcionarioErp.empresa_nome || null,
+        departamento_id: deptoId,
+        centro_custo: funcionarioErp.departamento_id || null,
+        centro_custo_descricao: funcionarioErp.departamento_nome || null,
+        cargo_id: cargoId,
+        cargo_nome: funcionarioErp.cargo_nome || null,
+        sincronizado_em: new Date(),
       },
     });
 
