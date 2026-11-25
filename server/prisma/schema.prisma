@@ -41,6 +41,7 @@ model User {
 
   salas_chat     SalaChat[]
   mensagens_chat MensagemChat[]
+  leituras_materiais LeituraMaterial[]
 }
 
 model Treinamento {
@@ -124,8 +125,22 @@ model Material {
   url     String?
   tipo    String?
 
-  aula Aula? @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+  aula     Aula?             @relation(fields: [aula_id], references: [id], onDelete: Cascade)
+  leituras LeituraMaterial[]
 }
+
+model LeituraMaterial {
+  id          Int      @id @default(autoincrement())
+  usuario_id  Int
+  material_id Int
+  lido_em     DateTime @default(now())
+
+  user     User     @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@unique([usuario_id, material_id])
+}
+
 
 model Quiz {
   id          Int     @id @default(autoincrement())

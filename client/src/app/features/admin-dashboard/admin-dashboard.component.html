@@ -151,14 +151,40 @@
       Processando catálogo operacional de cursos...
     </div>
     }
+
     @if (!isLoadingCursos && !cursoSelecionadoParaGerenciar && listaCursosGerencial && listaCursosGerencial.length > 0)
     {
     <div style="width: 100%;">
+      <!-- Barra de Controle Cards / Lista -->
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">
+          Exibindo <strong style="color: var(--text-brand);">{{ cursosGerenciaisExibidos.length }}</strong> de
+          <strong style="color: var(--text-primary);">{{ listaCursosGerencial.length }}</strong> treinamento(s)
+        </span>
+        <div
+          style="display: inline-flex; align-items: center; background: var(--bg-subtle); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); gap: 4px;">
+          <button type="button" (click)="alterarModoVisualizacaoCatalogo('cards')"
+            [style.background-color]="modoVisualizacaoCatalogo === 'cards' ? 'var(--brand-primary)' : 'transparent'"
+            [style.color]="modoVisualizacaoCatalogo === 'cards' ? '#ffffff' : 'var(--text-muted)'"
+            style="border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">grid_view</mat-icon> Cards
+          </button>
+          <button type="button" (click)="alterarModoVisualizacaoCatalogo('lista')"
+            [style.background-color]="modoVisualizacaoCatalogo === 'lista' ? 'var(--brand-primary)' : 'transparent'"
+            [style.color]="modoVisualizacaoCatalogo === 'lista' ? '#ffffff' : 'var(--text-muted)'"
+            style="border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">view_list</mat-icon> Lista
+          </button>
+        </div>
+      </div>
+
+      @if (modoVisualizacaoCatalogo === 'cards') {
       <div
         style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; width: 100%; padding: 4px; box-sizing: border-box;">
         @for (curso of cursosGerenciaisExibidos; track curso.id || $index) {
         <mat-card
-          style="border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.01) !important; display: flex; flex-direction: column; justify-content: space-between; background: var(--bg-card); min-height: 220px; box-sizing: border-box;">
+          style="border-radius: 8px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow) !important; display: flex; flex-direction: column; justify-content: space-between; background: var(--bg-card); min-height: 220px; box-sizing: border-box;">
           <mat-card-header style="padding: 16px 16px 0 16px;">
             <div
               style="display: flex; justify-content: space-between; width: 100%; align-items: flex-start; gap: 12px;">
@@ -176,7 +202,8 @@
           </mat-card-header>
           <mat-card-content
             style="padding: 12px 16px !important; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-            <p style="color: #64748b; font-size: 13px; line-height: 1.4; margin: 0 0 16px 0; word-break: break-word;">
+            <p
+              style="color: var(--text-muted); font-size: 13px; line-height: 1.4; margin: 0 0 16px 0; word-break: break-word;">
               {{ curso?.descricao || 'Nenhuma descrição detalhada inserida para este treinamento corporativo.' }}
             </p>
             <div
@@ -188,7 +215,7 @@
             </div>
           </mat-card-content>
           <mat-card-actions
-            style="padding: 12px 16px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
+            style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; box-sizing: border-box;">
             <button mat-stroked-button
               style="color: var(--text-brand); border-color: var(--text-brand); font-size: 12px; height: 34px; padding: 0 10px;"
               (click)="abrirModalMateriais(curso.id, curso.titulo)">
@@ -197,7 +224,7 @@
               Materiais
             </button>
             <button mat-flat-button
-              style="background-color: var(--text-brand) !important; color: #ffffff; font-size: 12px; height: 34px; padding: 0 12px; border-radius: 4px; font-weight: 600;"
+              style="background-color: var(--brand-primary) !important; color: #ffffff; font-size: 12px; height: 34px; padding: 0 12px; border-radius: 4px; font-weight: 600;"
               (click)="selecionarCursoParaGerenciar(curso)">
               <mat-icon
                 style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">settings</mat-icon>
@@ -207,9 +234,82 @@
         </mat-card>
         }
       </div>
+      }
+
+      @if (modoVisualizacaoCatalogo === 'lista') {
+      <div
+        style="width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: var(--card-shadow);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-color);">
+              <th
+                style="padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase;">
+                Treinamento</th>
+              <th
+                style="padding: 14px 12px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase;">
+                Tipo</th>
+              <th
+                style="padding: 14px 12px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; text-align: center;">
+                Módulos</th>
+              <th
+                style="padding: 14px 12px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; text-align: center;">
+                CH</th>
+              <th
+                style="padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; text-align: right;">
+                Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (curso of cursosGerenciaisExibidos; track curso.id || $index) {
+            <tr style="border-bottom: 1px solid var(--border-color);">
+              <td style="padding: 14px 16px; max-width: 380px;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">{{
+                  curso?.titulo || 'Curso Sem Título' }}</div>
+                <div
+                  style="font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  {{ curso?.descricao || 'Sem descrição detalhada.' }}</div>
+              </td>
+              <td style="padding: 14px 12px; white-space: nowrap;">
+                <span [style.background-color]="curso?.obrigatorio ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-subtle)'"
+                  [style.color]="curso?.obrigatorio ? '#f87171' : 'var(--text-secondary)'"
+                  [style.border]="curso?.obrigatorio ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid var(--border-color)'"
+                  style="padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                  {{ curso?.obrigatorio ? 'Obrigatório' : 'Eletivo' }}
+                </span>
+              </td>
+              <td
+                style="padding: 14px 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-primary);">
+                {{ curso?.totalModulos || 0 }}</td>
+              <td
+                style="padding: 14px 12px; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-primary);">
+                {{ curso?.carga_horaria || curso?.cargaHoraria || 0 }}h</td>
+              <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                  <button mat-stroked-button
+                    style="color: var(--text-brand); border-color: var(--text-brand); font-size: 12px; height: 32px; padding: 0 10px;"
+                    (click)="abrirModalMateriais(curso.id, curso.titulo)">
+                    <mat-icon
+                      style="margin-right: 4px; font-size: 16px; width: 16px; height: 16px;">attach_file</mat-icon>
+                    Materiais
+                  </button>
+                  <button mat-flat-button
+                    style="background-color: var(--brand-primary) !important; color: #ffffff; font-size: 12px; height: 32px; padding: 0 12px; border-radius: 4px; font-weight: 600;"
+                    (click)="selecionarCursoParaGerenciar(curso)">
+                    <mat-icon style="margin-right: 4px; font-size: 16px; width: 16px; height: 16px;">settings</mat-icon>
+                    Gerenciar
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+
       @if (totalPaginasAdmin > 1) {
       <div
-        style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 16px 4px 0 4px; border-top: 1px solid #f1f5f9; margin-top: 32px; margin-bottom: 24px; flex-wrap: wrap;">
+        style="display: flex; justify-content: center; align-items: center; gap: 12px; padding: 16px 4px 0 4px; border-top: 1px solid var(--border-color); margin-top: 32px; margin-bottom: 24px; flex-wrap: wrap;">
         <button mat-stroked-button [disabled]="paginaAtualAdmin === 1" (click)="paginaAnteriorAdmin()"
           style="border-color: var(--text-brand); color: var(--text-brand); height: 34px; padding: 0 10px; min-width: auto;">
           <mat-icon style="vertical-align: middle; margin: 0;">chevron_left</mat-icon><span
@@ -218,7 +318,6 @@
         <span
           style="font-size: 13px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; padding: 0 6px;">Página
           <strong style="color: var(--text-brand);">{{ paginaAtualAdmin }}</strong> de {{ totalPaginasAdmin }}</span>
-
         <button mat-stroked-button [disabled]="paginaAtualAdmin === totalPaginasAdmin" (click)="proximaPaginaAdmin()"
           style="border-color: var(--text-brand); color: var(--text-brand); height: 34px; padding: 0 10px; min-width: auto;">
           <span style="margin-right: 4px; font-size: 12px; font-weight: 600;">Próxima</span><mat-icon
@@ -229,6 +328,7 @@
     </div>
     }
     }
+
     @if (passoAtual > 0) {
     <mat-card
       style="border-radius: 16px; border: 1px solid var(--border-color); padding: 28px; background: var(--bg-card); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02) !important; box-sizing: border-box; width: 100%; transition: all 0.3s ease;">
@@ -366,50 +466,72 @@
       <div style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease;">
         <div>
           <h3 style="color: var(--text-brand); font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Injeção de Aulas &
-            Conteúdo
-            Digital</h3>
-          <p style="margin: 0; color: #64748b; font-size: 13px;">Anexe os vídeos e as diretrizes técnicas das aulas que
+            Conteúdo Digital</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Anexe os vídeos e as diretrizes técnicas das
+            aulas que
             compõem este módulo.</p>
         </div>
+
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
           <mat-label>Título da Aula</mat-label>
           <input matInput [(ngModel)]="aula.titulo" placeholder="Ex: Aula 1.1 - Protocolos de Desinfecção e EPIs">
         </mat-form-field>
+
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
           <mat-label>URL do Vídeo (YouTube, Vimeo ou MP4)</mat-label>
           <input matInput [(ngModel)]="aula.videoUrl" placeholder="https://youtube.com... ou link direto">
-          <mat-icon matSuffix style="color: #64748b; margin-right: 4px;">video_library</mat-icon>
+          <mat-icon matSuffix style="color: var(--text-muted); margin-right: 4px;">video_library</mat-icon>
         </mat-form-field>
+
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
-          <mat-label>Diretrizes ou Notas de Estudo (Opcional)</mat-label>
+          <mat-label>Diretrizes ou Notas de Estudo</mat-label>
           <textarea matInput rows="3" [(ngModel)]="aula.descricao"
             placeholder="Escreva observações ou orientações importantes para os colaboradores sobre esta aula..."></textarea>
         </mat-form-field>
+
         <div
-          style="display: flex; align-items: center; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
-          <mat-icon
-            style="color: var(--text-brand); font-size: 20px; width: 20px; height: 20px;">format_list_numbered</mat-icon>
-          <span style="font-size: 13px; color: #475569; font-weight: 500;">Esta videoaula será registrada
-            automaticamente na posição de ordem número <strong style="color: var(--text-brand);">{{ aula.ordem
-              }}</strong>.</span>
+          style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: var(--bg-subtle); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <mat-icon
+              style="color: var(--text-brand); font-size: 20px; width: 20px; height: 20px;">format_list_numbered</mat-icon>
+            <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">
+              Esta videoaula será registrada na posição de ordem número <strong style="color: var(--text-brand);">{{
+                aula.ordem }}</strong>.
+            </span>
+          </div>
+
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;"
+            [style.background-color]="aula.ordem > 1 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'"
+            [style.color]="aula.ordem > 1 ? '#10b981' : '#f59e0b'">
+            {{ aula.ordem > 1 ? (aula.ordem - 1) + ' aula(s) gravada(s)' : 'Nenhuma aula gravada ainda' }}
+          </span>
         </div>
+
         <div
-          style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px; flex-wrap: wrap;">
-          <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
+          style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px; flex-wrap: wrap;">
+          <button mat-button style="color: var(--text-muted); font-weight: 600; height: 40px;"
             (click)="passoAtual = 2">Voltar</button>
+
           <button mat-stroked-button
-            style="color: var(--text-brand); border-color: var(--text-brand); height: 40px; font-weight: 600; padding: 0 16px; border-radius: 6px;"
-            [disabled]="!aula.titulo.trim() || !aula.videoUrl.trim()" (click)="salvarAula()">
+            [style.color]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim() ? 'var(--text-muted)' : 'var(--text-brand)'"
+            [style.border-color]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim() ? 'var(--border-color)' : 'var(--text-brand)'"
+            style="height: 40px; font-weight: 600; padding: 0 16px; border-radius: 6px;"
+            [disabled]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim()" (click)="salvarAula()">
             + Gravar e Add Outra Aula
           </button>
+
           <button mat-flat-button
-            style="background-color: var(--text-brand) !important; color: white; height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;"
+            [style.background-color]="aula.ordem <= 1 ? 'var(--bg-subtle)' : 'var(--brand-primary)'"
+            [style.color]="aula.ordem <= 1 ? 'var(--text-muted)' : '#ffffff'"
+            [style.border]="aula.ordem <= 1 ? '1px solid var(--border-color)' : 'none'"
+            style="height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;" [disabled]="aula.ordem <= 1"
             (click)="passoAtual = 4">
             Avançar para Avaliação
           </button>
         </div>
       </div>
       }
+
       @if (passoAtual === 4) {
       <div
         style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; width: 100%; box-sizing: border-box;">
@@ -652,6 +774,7 @@
     }
   </div>
   }
+  
   @if (abaAtiva === 'comunicados') {
   <div style="width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
     <app-comunicados></app-comunicados>

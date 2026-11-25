@@ -96,6 +96,16 @@ export class TreinamentoService {
     return this.http.delete<any>(`${environment.apiUrl}/materiais/${materialId}`, { headers: this.obterHeaders() });
   }
 
+  registrarLeituraMaterial(materialId: number): Observable<any> {
+    const headers = this.obterHeaders().set('X-Skip-Loader', 'true');
+    return this.http.post<any>(
+      `${environment.apiUrl}/materiais/${materialId}/ler`,
+      {},
+      { headers }
+    );
+  }
+
+
   obterProjetosAdmin(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/projetos`, { headers: this.obterHeaders() });
   }

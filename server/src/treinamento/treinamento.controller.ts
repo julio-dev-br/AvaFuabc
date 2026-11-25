@@ -69,9 +69,10 @@ export class TreinamentoController {
   }
 
   @Get(':id')
-  async obterConteudoCurso(@Param('id') id: string) {
-    return this.treinamentosService.obterConteudoCurso(Number(id));
+  async obterConteudoCurso(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.treinamentosService.obterConteudoCurso(Number(id), Number(user?.id));
   }
+
 
   @Get('admin/projetos')
   async obterProjetosAdmin() {

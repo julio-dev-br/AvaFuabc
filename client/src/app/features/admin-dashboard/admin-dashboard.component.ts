@@ -367,6 +367,17 @@ export class AdminDashboardComponent implements OnInit {
     );
     return Math.ceil(filtrados.length / this.itensPorPaginaAdmin) || 1;
   }
+
+  modoVisualizacaoCatalogo: 'cards' | 'lista' =
+    (localStorage.getItem('ava_catalogo_admin_view') as 'cards' | 'lista') || 'cards';
+
+  alterarModoVisualizacaoCatalogo(modo: 'cards' | 'lista'): void {
+    this.modoVisualizacaoCatalogo = modo;
+    localStorage.setItem('ava_catalogo_admin_view', modo);
+  }
+
+
+
   get abaAtiva(): string {
     return this.tabService.abaAtiva();
   }

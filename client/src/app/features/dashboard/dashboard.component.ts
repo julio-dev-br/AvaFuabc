@@ -79,7 +79,7 @@ export class DashboardComponent implements OnInit {
   };
 
   // Escuta nativamente o redimensionamento do navegador para adequar a tela para Mobile!
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.verificarTamanhoTela();
   }
@@ -223,6 +223,27 @@ export class DashboardComponent implements OnInit {
       this.paginaAtual--;
     }
   }
+
+    modoVisualizacaoAluno: 'cards' | 'lista' =
+    (localStorage.getItem('ava_catalogo_aluno_view') as 'cards' | 'lista') || 'cards';
+
+  alterarModoVisualizacaoAluno(modo: 'cards' | 'lista'): void {
+    this.modoVisualizacaoAluno = modo;
+    localStorage.setItem('ava_catalogo_aluno_view', modo);
+  }
+
+  obterProgressoCurso(curso: any): number {
+    const progresso = curso?.matriculas?.[0]?.progresso ?? 0;
+    return Math.min(100, Math.max(0, Math.round(Number(progresso) || 0)));
+  }
+
+  obterStatusCurso(curso: any): string {
+    const pct = this.obterProgressoCurso(curso);
+    if (pct >= 100 || curso?.matriculas?.[0]?.status === 'CONCLUIDO') return 'Concluído';
+    if (pct > 0 || (curso?.matriculas && curso.matriculas.length > 0)) return 'Em andamento';
+    return 'Não iniciado';
+  }
+
 
   isAdmin(): boolean {
     const role = this.authService.getUserRole();

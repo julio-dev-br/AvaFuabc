@@ -136,19 +136,40 @@
 
       @if (aulaAtiva?.materiais && aulaAtiva?.materiais.length > 0) {
       <div
-        style="margin-top: 24px; padding: 20px; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box;">
-        <h3
-          style="margin: 0 0 12px 0; color: var(--text-brand); font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-          <mat-icon style="color: var(--text-brand);">library_books</mat-icon> Materiais de Apoio Disponíveis
-        </h3>
+        style="margin-top: 24px; padding: 20px; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+          <h3
+            style="margin: 0; color: var(--text-brand); font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            <mat-icon style="color: var(--text-brand);">library_books</mat-icon> Materiais de Apoio Disponíveis
+          </h3>
+
+          <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;"
+            [style.background-color]="contarMateriaisLidos(aulaAtiva.materiais) === aulaAtiva.materiais.length ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-card)'"
+            [style.color]="contarMateriaisLidos(aulaAtiva.materiais) === aulaAtiva.materiais.length ? '#10b981' : 'var(--text-muted)'"
+            [style.border]="contarMateriaisLidos(aulaAtiva.materiais) === aulaAtiva.materiais.length ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid var(--border-color)'">
+            {{ contarMateriaisLidos(aulaAtiva.materiais) }}/{{ aulaAtiva.materiais.length }} lido(s)
+          </span>
+        </div>
+
         <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%;">
           @for (material of aulaAtiva.materiais; track material.id) {
-          <a mat-stroked-button [href]="configurarUrlMaterial(material.url)" target="_blank"
-            style="border-color: var(--text-brand); color: var(--text-brand); font-weight: 500; height: 40px; line-height: 38px; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-            <mat-icon style="margin-right: 4px; vertical-align: middle;">
-              {{ material.tipo === 'LINK' ? 'link' : 'file_download' }}
+          <a mat-stroked-button
+            [href]="configurarUrlMaterial(material.url)"
+            target="_blank"
+            (click)="marcarMaterialComoLido(material)"
+            [style.border-color]="material.lido ? '#10b981' : 'var(--text-brand)'"
+            [style.color]="material.lido ? '#10b981' : 'var(--text-brand)'"
+            [style.background-color]="material.lido ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-card)'"
+            style="font-weight: 600; height: 42px; line-height: 40px; text-decoration: none; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 8px; transition: all 0.2s;">
+            <mat-icon style="margin-right: 6px; vertical-align: middle;">
+              {{ material.lido ? 'check_circle' : (material.tipo === 'LINK' ? 'link' : 'file_download') }}
             </mat-icon>
             {{ material.nome }}
+            @if (material.lido) {
+            <span style="margin-left: 8px; font-size: 11px; font-weight: 700; background: rgba(16, 185, 129, 0.18); color: #10b981; padding: 2px 8px; border-radius: 999px;">
+              Lido
+            </span>
+            }
           </a>
           }
         </div>

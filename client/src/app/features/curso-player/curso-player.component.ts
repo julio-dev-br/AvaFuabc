@@ -189,6 +189,24 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     return `${environment.apiUrl}${urlLimpa}`;
   }
 
+  marcarMaterialComoLido(material: any): void {
+    if (!material?.id) return;
+
+    this.treinamentoService.registrarLeituraMaterial(material.id).subscribe({
+      next: (res) => {
+        material.lido = true;
+        material.lido_em = res?.lido_em || new Date().toISOString();
+      },
+      error: (err) => console.error('Erro ao registrar leitura do material:', err),
+    });
+  }
+
+  contarMateriaisLidos(materiais: any[]): number {
+    if (!materiais || materiais.length === 0) return 0;
+    return materiais.filter((m) => m.lido).length;
+  }
+
+
   private inicializarScriptYouTube(): void {
     if (typeof YT !== 'undefined' && YT.Player) {
       this.construirInstanciaPlayer();
@@ -263,7 +281,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
             iframeFisico.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*');
             iframeFisico.contentWindow.postMessage(JSON.stringify({ command: 'getPlayerState', id: 1 }), '*');
           }
-        } catch (err) {}
+        } catch (err) { }
 
         if (
           this.player &&
@@ -364,7 +382,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.player && typeof this.player.playVideo === 'function') {
       try {
         this.player.playVideo();
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 
@@ -422,7 +440,7 @@ export class CursoPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
           this.videoJaTevePlayReal = false;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   alternarJanelaChat(): void {

@@ -4,15 +4,27 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { MateriaisService } from './materiais.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('materiais')
-@UseGuards(AuthGuard) 
+@UseGuards(AuthGuard)
 export class MateriaisController {
   constructor(private readonly materiaisService: MateriaisService) {}
 
   @Get('aula/:id')
-  async obterMateriaisPorAula(@Param('id', ParseIntPipe) aulaId: number) {
-    return this.materiaisService.obterPorAula(aulaId);
+  async obterMateriaisPorAula(
+    @Param('id', ParseIntPipe) aulaId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.materiaisService.obterPorAula(aulaId, Number(user?.id));
+  }
+
+  @Post(':id/ler')
+  async registrarLeituraMaterial(
+    @Param('id', ParseIntPipe) materialId: number,
+    @CurrentUser() user: any,
+  ) {
+    return this.materiaisService.registrarLeitura(materialId, Number(user.id));
   }
 
   @Post()
@@ -26,20 +38,21 @@ export class MateriaisController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads/materiais', 
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
-        callback(null, `doc-${uniqueSuffix}${ext}`);
-      },
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/materiais',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `doc-${uniqueSuffix}${ext}`);
+        },
+      }),
     }),
-  }))
-
+  )
   async uploadArquivo(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { aulaId: string; nome: string }
+    @Body() body: { aulaId: string; nome: string },
   ) {
     const urlLocal = `/uploads/materiais/${file.filename}`;
     return this.materiaisService.adicionar({

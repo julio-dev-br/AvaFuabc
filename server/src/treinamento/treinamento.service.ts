@@ -333,22 +333,55 @@ export class TreinamentoService {
     return treinamentos.map(t => ({ ...t, totalModulos: t.modulos.length }));
   }
 
-  async obterConteudoCurso(id: number) {
-    return this.prisma.treinamento.findUnique({
-      where: { id: id },
-      include: {
-        modulos: {
-          orderBy: { ordem: 'asc' },
-          include: {
-            aulas: {
-              orderBy: { ordem: 'asc' },
-              include: { materiais: true }
-            }
-          }
-        }
-      }
-    });
-  }
+async obterConteudoCurso(id: number, usuarioId?: number) {
+  const curso = await this.prisma.treinamento.findUnique({
+    where: { id: id },
+    include: {
+      modulos: {
+        orderBy: { ordem: 'asc' },
+        include: {
+          aulas: {
+            orderBy: { ordem: 'asc' },
+            include: {
+              materiais: {
+                include: usuarioId
+                  ? {
+                      leituras: {
+                        where: { usuario_id: usuarioId },
+                        select: { id: true, lido_em: true },
+                      },
+                    }
+                  : undefined,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!curso) return null;
+
+  return {
+    ...curso,
+    modulos: curso.modulos.map((mod: any) => ({
+      ...mod,
+      aulas: mod.aulas.map((aula: any) => ({
+        ...aula,
+        materiais: (aula.materiais || []).map((mat: any) => {
+          const leitura = mat.leituras?.[0] || null;
+          const { leituras, ...dadosMat } = mat;
+          return {
+            ...dadosMat,
+            lido: !!leitura,
+            lido_em: leitura?.lido_em || null,
+          };
+        }),
+      })),
+    })),
+  };
+}
+
 
   async listarProjetosAdmin() {
     const projetos = await this.prisma.treinamento.findMany({

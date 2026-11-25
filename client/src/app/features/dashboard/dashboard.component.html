@@ -35,7 +35,33 @@
     </mat-form-field>
   </div>
   }
+
   @if (!isLoading && treinamentos.length > 0) {
+  <!-- Barra de Controle Cards / Lista do Aluno -->
+  <div
+    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px;">
+    <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">
+      Meus Treinamentos (<strong style="color: var(--text-brand);">{{ treinamentos.length }}</strong>)
+    </span>
+    <div
+      style="display: inline-flex; align-items: center; background: var(--bg-subtle); padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); gap: 4px;">
+      <button type="button" (click)="alterarModoVisualizacaoAluno('cards')"
+        [style.background-color]="modoVisualizacaoAluno === 'cards' ? 'var(--brand-primary)' : 'transparent'"
+        [style.color]="modoVisualizacaoAluno === 'cards' ? '#ffffff' : 'var(--text-muted)'"
+        style="border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">grid_view</mat-icon> Cards
+      </button>
+      <button type="button" (click)="alterarModoVisualizacaoAluno('lista')"
+        [style.background-color]="modoVisualizacaoAluno === 'lista' ? 'var(--brand-primary)' : 'transparent'"
+        [style.color]="modoVisualizacaoAluno === 'lista' ? '#ffffff' : 'var(--text-muted)'"
+        style="border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">view_list</mat-icon> Lista
+      </button>
+    </div>
+  </div>
+
+  <!-- MODO 1: GRADE DE CARDS -->
+  @if (modoVisualizacaoAluno === 'cards') {
   <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; padding: 4px;">
     @for (curso of treinamentosExibidos; track curso.id) {
     <mat-card
@@ -51,17 +77,38 @@
             style="color: var(--text-brand); font-size: 15px !important; font-weight: 700; line-height: 1.3; margin: 0; word-break: break-word;">
             {{ curso.titulo }}
           </mat-card-title>
-          <mat-card-subtitle style="font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block;">Carga
-            Horária: {{
-            curso.carga_horaria }}h</mat-card-subtitle>
+          <mat-card-subtitle style="font-size: 12px; color: var(--text-muted); margin-top: 4px; display: block;">
+            Carga Horária: {{ curso.carga_horaria }}h
+          </mat-card-subtitle>
         </div>
       </mat-card-header>
 
       <mat-card-content
-        style="padding: 16px !important; color: var(--text-secondary); font-size: 13px; flex: 1; line-height: 1.5; margin-top: 8px;">
-        <p style="margin: 0; word-break: break-word;">{{ curso.descricao || 'Treinamento de qualificação institucional.'
-          }}</p>
+        style="padding: 16px !important; color: var(--text-secondary); font-size: 13px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; line-height: 1.5; margin-top: 8px;">
+        <p style="margin: 0 0 16px 0; word-break: break-word;">{{ curso.descricao || 'Treinamento de qualificação
+          institucional.' }}</p>
+
+        <!-- Barrinha de Percentual de Progresso -->
+        <div
+          style="background: var(--bg-subtle); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; font-weight: 600;">
+            <span style="color: var(--text-muted);">Progresso</span>
+            <span
+              [style.color]="obterProgressoCurso(curso) === 100 ? '#10b981' : (obterProgressoCurso(curso) > 0 ? 'var(--text-brand)' : 'var(--text-muted)')">
+              {{ obterProgressoCurso(curso) }}% concluído
+            </span>
+          </div>
+          <div
+            style="width: 100%; height: 7px; background: var(--bg-card); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color);">
+            <div [style.width.%]="obterProgressoCurso(curso)"
+              [style.background]="obterProgressoCurso(curso) === 100 ? '#10b981' : 'linear-gradient(90deg, #003366 0%, #0284c7 100%)'"
+              style="height: 100%; border-radius: 999px; transition: width 0.4s ease;">
+            </div>
+          </div>
+        </div>
       </mat-card-content>
+
       <mat-card-actions class="course-actions"
         style="padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
         @if (curso.obrigatorio) {
@@ -71,25 +118,96 @@
         <div></div>
         }
         <button mat-flat-button color="primary"
-          style="background-color: var(--brand-primary) !important; color: #ffffff !important; font-weight: 600; font-size: 13px; border-radius: 6px; height: 36px; padding: 0 16px;"
+          [style.background-color]="obterProgressoCurso(curso) === 100 ? '#10b981' : 'var(--brand-primary)'"
+          style="color: #ffffff !important; font-weight: 600; font-size: 13px; border-radius: 6px; height: 36px; padding: 0 16px;"
           (click)="acessarCurso(curso.id)">
-          Acessar Curso
+          {{ obterProgressoCurso(curso) === 100 ? 'Revisar Curso' : (obterProgressoCurso(curso) > 0 ? 'Continuar Estudo'
+          : 'Acessar Curso') }}
         </button>
       </mat-card-actions>
     </mat-card>
     }
   </div>
+  }
+  <!-- MODO 2: LISTA COMPACTA -->
+  @if (modoVisualizacaoAluno === 'lista') {
+  <div
+    style="width: 100%; overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; box-shadow: var(--card-shadow);">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-color);">
+          <th
+            style="padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase;">
+            Treinamento</th>
+          <th
+            style="padding: 14px 12px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase;">
+            Tipo</th>
+          <th
+            style="padding: 14px 12px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; min-width: 170px;">
+            Progresso</th>
+          <th
+            style="padding: 14px 16px; font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; text-align: right;">
+            Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (curso of treinamentosExibidos; track curso.id) {
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 14px 16px; max-width: 360px;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">{{
+              curso.titulo }}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">{{ curso.carga_horaria }}h • {{ curso.descricao ||
+              'Qualificação institucional' }}</div>
+          </td>
+          <td style="padding: 14px 12px; white-space: nowrap;">
+            @if (curso.obrigatorio) {
+            <span
+              style="background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">Obrigatório</span>
+            } @else {
+            <span
+              style="background-color: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;">Eletivo</span>
+            }
+          </td>
+          <td style="padding: 14px 12px;">
+            <div
+              style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px;">
+              <span [style.color]="obterProgressoCurso(curso) === 100 ? '#10b981' : 'var(--text-secondary)'">{{
+                obterProgressoCurso(curso) }}% concluído</span>
+            </div>
+            <div
+              style="width: 100%; height: 6px; background: var(--bg-subtle); border-radius: 999px; overflow: hidden;">
+              <div [style.width.%]="obterProgressoCurso(curso)"
+                [style.background]="obterProgressoCurso(curso) === 100 ? '#10b981' : 'linear-gradient(90deg, #003366 0%, #0284c7 100%)'"
+                style="height: 100%; border-radius: 999px;">
+              </div>
+            </div>
+          </td>
+          <td style="padding: 14px 16px; text-align: right; white-space: nowrap;">
+            <button mat-flat-button
+              [style.background-color]="obterProgressoCurso(curso) === 100 ? '#10b981' : 'var(--brand-primary)'"
+              style="color: #ffffff !important; font-weight: 600; font-size: 12px; border-radius: 6px; height: 34px; padding: 0 14px;"
+              (click)="acessarCurso(curso.id)">
+              {{ obterProgressoCurso(curso) === 100 ? 'Revisar' : (obterProgressoCurso(curso) > 0 ? 'Continuar' :
+              'Acessar') }}
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
 
   @if (totalPaginas > 1) {
   <div
-    style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px; padding: 16px 4px 0 4px; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
+    style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px; padding: 16px 4px 0 4px; border-top: 1px solid var(--border-color); flex-wrap: wrap;">
     <button mat-stroked-button [disabled]="paginaAtual === 1" (click)="paginaAnterior()"
       style="border-color: var(--text-brand); color: var(--text-brand); min-width: auto; padding: 0 12px; height: 36px;">
       <mat-icon style="vertical-align: middle; margin: 0;">chevron_left</mat-icon>
       <span style="margin-left: 4px; font-size: 13px; font-weight: 600;">Anterior</span>
     </button>
     <span
-      style="font-size: 13px; color: #475569; font-weight: 500; text-align: center; white-space: nowrap; padding: 0 8px;">
+      style="font-size: 13px; color: var(--text-secondary); font-weight: 500; text-align: center; white-space: nowrap; padding: 0 8px;">
       Página <strong style="color: var(--text-brand);">{{ paginaAtual }}</strong> de {{ totalPaginas }}
     </span>
     <button mat-stroked-button [disabled]="paginaAtual === totalPaginas" (click)="proximaPagina()"
@@ -100,6 +218,7 @@
   </div>
   }
   }
+
 
   @if (!isLoading && treinamentos.length === 0) {
   <div class="empty-state"
