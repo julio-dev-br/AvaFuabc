@@ -138,6 +138,10 @@ export class TreinamentoService {
     return this.http.patch(`${environment.apiUrl}/aulas/${aulaId}/progresso`, payload, { headers: this.obterHeaders() });
   }
 
+  enviarTreinamentoParaRevisao(treinamentoId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/admin/enviar-revisao/${treinamentoId}`, {}, { headers: this.obterHeaders() });
+  }
+  
   publicarTreinamentoComKanban(treinamentoId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admin/publicar/${treinamentoId}`, {}, { headers: this.obterHeaders() });
   }

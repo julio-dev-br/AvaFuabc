@@ -32,7 +32,8 @@
 @if (exibirFormularioCadastro) {
 <mat-card
   style="margin-bottom: 32px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow) !important; overflow: hidden; background: var(--bg-card); animation: fadeIn 0.3s ease;">
-  <div style="background-color: var(--bg-subtle); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+  <div
+    style="background-color: var(--bg-subtle); padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
     <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-brand);">Matricular e Registrar Novo
       Funcionário (Integração TOTVS Protheus)
     </h3>
@@ -45,19 +46,12 @@
 
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>CPF do Colaborador</mat-label>
-        <input matInput
-          [(ngModel)]="novoUsuario.cpf"
-          (input)="aplicarMascaraCpf($event)"
-          (blur)="consultarCpfProtheus()"
-          (keyup.enter)="consultarCpfProtheus()"
-          [disabled]="isBuscandoCpf || isSalvando"
-          placeholder="000.000.000-00"
-          maxlength="14">
+        <input matInput [(ngModel)]="novoUsuario.cpf" (input)="aplicarMascaraCpf($event)"
+          (blur)="consultarCpfProtheus()" (keyup.enter)="consultarCpfProtheus()"
+          [disabled]="isBuscandoCpf || isSalvando" placeholder="000.000.000-00" maxlength="14">
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">badge</mat-icon>
-        <button mat-icon-button matSuffix type="button"
-          (mousedown)="$event.preventDefault()"
-          (click)="consultarCpfProtheus()"
-          [disabled]="isBuscandoCpf || !novoUsuario.cpf"
+        <button mat-icon-button matSuffix type="button" (mousedown)="$event.preventDefault()"
+          (click)="consultarCpfProtheus()" [disabled]="isBuscandoCpf || !novoUsuario.cpf"
           title="Consultar CPF no Protheus">
           <mat-icon style="color: var(--text-brand);">search</mat-icon>
         </button>
@@ -65,13 +59,15 @@
 
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>Nome Completo</mat-label>
-        <input matInput [(ngModel)]="novoUsuario.name" [disabled]="isSalvando" placeholder="Preenchido pelo Protheus ou manual">
+        <input matInput [(ngModel)]="novoUsuario.name" [disabled]="isSalvando"
+          placeholder="Preenchido pelo Protheus ou manual">
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">person</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="compact-form">
         <mat-label>E-mail Corporativo</mat-label>
-        <input matInput type="email" [(ngModel)]="novoUsuario.email" [disabled]="isSalvando" placeholder="Ex: colaborador@fuabc.org.br">
+        <input matInput type="email" [(ngModel)]="novoUsuario.email" [disabled]="isSalvando"
+          placeholder="Ex: colaborador@fuabc.org.br">
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">mail</mat-icon>
       </mat-form-field>
 
@@ -80,17 +76,25 @@
         <mat-select [(ngModel)]="novoUsuario.role" [disabled]="isSalvando">
           <mat-option value="user">👤 Colaborador (Aluno)</mat-option>
           <mat-option value="manager">📋 Liderança (Gestor)</mat-option>
+          <mat-option value="conteudista">✍️ Conteudista (Fábrica)</mat-option>
+          <mat-option value="curador">🔍 Curador (Validação)</mat-option>
           <mat-option value="admin">🛡️ Administrador Central</mat-option>
+          @if (usuarioLogadoRole === 'master') {
+          <mat-option value="master">👑 Master (Super Admin)</mat-option>
+          }
         </mat-select>
         <mat-icon matPrefix style="color: var(--text-muted); margin-right: 8px;">admin_panel_settings</mat-icon>
       </mat-form-field>
+
     </div>
 
     <!-- Card de Retorno do TOTVS Protheus -->
     @if (dadosProtheus) {
-    <div style="margin-top: 16px; background: var(--bg-active-link); border: 1px solid var(--border-color); border-left: 4px solid var(--text-brand); border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; animation: fadeIn 0.3s ease;">
+    <div
+      style="margin-top: 16px; background: var(--bg-active-link); border: 1px solid var(--border-color); border-left: 4px solid var(--text-brand); border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; animation: fadeIn 0.3s ease;">
       <div style="display: flex; flex-direction: column; gap: 4px;">
-        <span style="font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; letter-spacing: 0.4px;">
+        <span
+          style="font-size: 11px; font-weight: 700; color: var(--text-brand); text-transform: uppercase; letter-spacing: 0.4px;">
           Vínculo Localizado no Protheus • Matrícula {{ dadosProtheus.matricula }}
         </span>
         <span style="font-size: 13px; color: var(--text-primary); font-weight: 600;">
@@ -140,6 +144,8 @@
       <mat-icon matSuffix style="color: var(--text-muted);">search</mat-icon>
     </mat-form-field>
   </div>
+
+<!-- PARTE 2 -->
   <mat-card-content style="padding: 0 !important; box-sizing: border-box; width: 100%;">
     @if (isLoading) {
     <div
@@ -166,9 +172,16 @@
             Nome Completo </th>
           <td mat-cell *matCellDef="let user"
             style="font-weight: 600; color: var(--text-primary); padding: 14px 8px; padding-left: 24px; font-size: 13px;">
-            {{ user.name || 'Usuário Sem Nome' }}
+            {{ user.name || '—' }}
+            @if (user.id === usuarioLogadoId) {
+            <span
+              style="margin-left: 6px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--bg-active-link); color: var(--text-brand);">
+              Você
+            </span>
+            }
           </td>
         </ng-container>
+
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: var(--text-brand); font-size: 12px; background: var(--bg-subtle); text-transform: uppercase; letter-spacing: 0.3px;">
@@ -177,53 +190,70 @@
             {{ user.email }}
           </td>
         </ng-container>
+
         <ng-container matColumnDef="lotacao">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: var(--text-brand); font-size: 12px; background: var(--bg-subtle); text-transform: uppercase; letter-spacing: 0.3px;">
-            Lotação (Unidade) </th>
+            Lotação (Empresa / Setor) </th>
           <td mat-cell *matCellDef="let user"
             style="color: var(--text-secondary); font-size: 13px; line-height: 1.4; padding: 14px 8px;">
-            <span style="font-weight: 600; color: var(--text-primary);">{{ user.unidade?.nome || 'Fundação ABC'
-              }}</span>
+            <span style="font-weight: 600; color: var(--text-primary);">{{ user.unidade?.nome || '—' }}</span>
             <br>
-            <small style="color: var(--text-muted); font-weight: 500;">{{ user.departamento?.nome || 'Geral / RH'
-              }}</small>
+            <small style="color: var(--text-muted); font-weight: 500;">{{ user.departamento?.nome || '—' }}</small>
           </td>
         </ng-container>
+
         <ng-container matColumnDef="cargo">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: var(--text-brand); font-size: 12px; background: var(--bg-subtle); text-transform: uppercase; letter-spacing: 0.3px;">
             Cargo </th>
           <td mat-cell *matCellDef="let user" style="color: var(--text-secondary); font-size: 13px; padding: 14px 8px;">
-            {{ user.cargo?.nome || 'Não Configurado' }}
+            {{ user.cargo?.nome || '—' }}
           </td>
         </ng-container>
+
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: var(--text-brand); font-size: 12px; background: var(--bg-subtle); text-transform: uppercase; letter-spacing: 0.3px;">
             Perfil </th>
-          <td mat-cell *matCellDef="let user" style="padding: 14px 8px;">
+          <td mat-cell *matCellDef="let user" style="padding: 10px 8px;">
+            @if (podeEditarUsuario(user)) {
+            <mat-form-field appearance="outline" class="compact-form" style="width: 175px; margin-bottom: -18px;">
+              <mat-select [value]="user.role" (selectionChange)="alterarPerfil(user, $event.value)">
+                <mat-option value="user">Colaborador</mat-option>
+                <mat-option value="manager">Gestor / Líder</mat-option>
+                <mat-option value="conteudista">Conteudista</mat-option>
+                <mat-option value="curador">Curador</mat-option>
+                <mat-option value="admin">Administrador</mat-option>
+                @if (usuarioLogadoRole === 'master') {
+                <mat-option value="master">Master</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            } @else {
             <span
-              [style.background-color]="user.role === 'admin' ? 'rgba(239, 68, 68, 0.14)' : user.role === 'manager' ? 'rgba(245, 158, 11, 0.14)' : 'var(--bg-subtle)'"
-              [style.color]="user.role === 'admin' ? '#f87171' : user.role === 'manager' ? '#fbbf24' : 'var(--text-secondary)'"
-              [style.border]="user.role === 'admin' ? '1px solid rgba(239, 68, 68, 0.35)' : user.role === 'manager' ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid var(--border-color)'"
-              style="padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: inline-block;">
-              {{ user.role === 'admin' ? 'Administrador' : user.role === 'manager' ? 'Gestor / Líder' : 'Colaborador' }}
+              style="padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; display: inline-flex; align-items: center; gap: 4px; background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.35);">
+              🔒 {{ user.role === 'master' ? 'Master' : (user.role === 'admin' ? 'Administrador' : user.role) }}
             </span>
+            }
           </td>
         </ng-container>
+
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef
             style="font-weight: 700; color: var(--text-brand); font-size: 12px; text-align: center; background: var(--bg-subtle); text-transform: uppercase; letter-spacing: 0.3px;">
             Status Acesso </th>
           <td mat-cell *matCellDef="let user" style="text-align: center; padding: 14px 8px;">
-            <mat-slide-toggle [checked]="user.ativo" color="primary" (change)="mudarStatus(user)"></mat-slide-toggle>
+            <mat-slide-toggle [checked]="user.ativo" [disabled]="!podeEditarUsuario(user)" color="primary"
+              (change)="mudarStatus(user)">
+            </mat-slide-toggle>
           </td>
         </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="colunasTabela"
           style="background: var(--bg-subtle); border-bottom: 1px solid var(--border-color);"></tr>
         <tr mat-row *matRowDef="let row; columns: colunasTabela;"
-          style="height: 56px; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;"
+          style="height: 62px; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;"
           class="linha-tabela-usuario"></tr>
       </table>
     </div>

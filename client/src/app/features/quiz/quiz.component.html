@@ -21,9 +21,12 @@
 <div class="quiz-container"
   style="max-width: 840px; margin: 0 auto; padding: 8px 4px 48px 4px; box-sizing: border-box; width: 100%; animation: fadeIn 0.3s ease;">
 
-  <!-- FLUXO DE RESPOSTA DA PROVA -->
-  <div [style.display]="(!isLoading && quiz && !foiEnviado) ? 'block' : 'none'">
-    
+  <!-- FLUXO DE RESPOSTA DA PROVA (BLINDADO CONTRA CÓPIA E SELEÇÃO) -->
+  <div [style.display]="(!isLoading && quiz && !foiEnviado) ? 'block' : 'none'" (copy)="bloquearCopiaTexto($event)"
+    (cut)="bloquearCopiaTexto($event)" (selectstart)="bloquearCopiaTexto($event)"
+    (contextmenu)="bloquearCopiaTexto($event)"
+    style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none;">
+
     <!-- Cabeçalho Premium da Avaliação -->
     <div
       style="background: var(--bg-card); border: 1px solid var(--border-color); border-top: 4px solid var(--text-brand); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; box-shadow: var(--card-shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
@@ -33,7 +36,8 @@
           <mat-icon style="font-size: 24px; width: 24px; height: 24px;">quiz</mat-icon>
         </div>
         <div>
-          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
+          <span
+            style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
             Avaliação de Conformidade
           </span>
           <h2
@@ -46,7 +50,8 @@
       <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
         <span
           style="background: var(--bg-subtle); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-          <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: var(--text-brand);">format_list_numbered</mat-icon>
+          <mat-icon
+            style="font-size: 16px; width: 16px; height: 16px; color: var(--text-brand);">format_list_numbered</mat-icon>
           {{ quiz?.perguntas?.length || 0 }} Questões
         </span>
         <span
@@ -56,14 +61,16 @@
         </span>
       </div>
     </div>
+
     <!-- Lista de Questões -->
     <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; box-sizing: border-box;">
       @if (quiz && quiz.perguntas) {
       @for (pergunta of quiz.perguntas; track pergunta.id; let i = $index) {
       <mat-card
         style="border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow) !important; width: 100%; box-sizing: border-box; overflow: hidden; background: var(--bg-card);">
-        
-        <div style="padding: 18px 20px 12px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-subtle);">
+
+        <div
+          style="padding: 18px 20px 12px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-subtle);">
           <span
             style="display: inline-block; background: var(--bg-active-link); color: var(--text-brand); border: 1px solid var(--border-color); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px;">
             Questão {{ i + 1 }} de {{ quiz.perguntas.length }}
@@ -80,8 +87,8 @@
             (change)="selecionarAlternativa(pergunta.id, $event.value)">
             @for (alternativa of pergunta.alternativas; track alternativa.id; let altIdx = $index) {
             <div class="quiz-option-card">
-              <mat-radio-button class="quiz-option-row" style="font-size: 14px; color: var(--text-primary); width: 100%;"
-                [value]="alternativa.id">
+              <mat-radio-button class="quiz-option-row"
+                style="font-size: 14px; color: var(--text-primary); width: 100%;" [value]="alternativa.id">
                 <div style="display: flex; align-items: center; gap: 10px; padding: 2px 0;">
                   <span
                     style="width: 24px; height: 24px; border-radius: 6px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-brand); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -101,7 +108,6 @@
       }
       }
     </div>
-
     <!-- Rodapé de Envio -->
     <div
       style="margin-top: 24px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--card-shadow);">
@@ -119,6 +125,7 @@
       </button>
     </div>
   </div>
+
   <!-- TELA DE RESULTADO (APROVADO / REPROVADO) -->
   @if (!isLoading && foiEnviado && resultadoEnvio) {
   <mat-card [style.border]="aprovado ? '2px solid #10b981' : '2px solid #e11d48'"
@@ -168,7 +175,8 @@
           </span>
           <span
             style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 6px; line-height: 1; white-space: nowrap;">
-            {{ resultadoEnvio.totalAcertos }} <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">de {{
+            {{ resultadoEnvio.totalAcertos }} <span
+              style="font-size: 13px; color: var(--text-muted); font-weight: 500;">de {{
               resultadoEnvio.totalPerguntas || quiz?.perguntas?.length }}</span>
           </span>
         </div>

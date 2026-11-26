@@ -723,6 +723,19 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  podePublicarCurso(): boolean {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token && token.split('.').length === 3) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const role = String(payload.role || '').toLowerCase();
+        return role === 'curador' || role === 'master';
+      }
+    } catch { }
+    return false;
+  }
+
+
   finalizarEsteiraTreinamento(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum identificador de curso localizado para publicação.');
@@ -730,25 +743,53 @@ export class AdminDashboardComponent implements OnInit {
     }
 
     this.isLoadingCursos = true;
+    const cursoId = Number(this.idCursoCriado);
 
-    this.treinamentoService.publicarTreinamentoComKanban(Number(this.idCursoCriado)).subscribe({
+    const requisicao$ = this.podePublicarCurso()
+      ? this.treinamentoService.publicarTreinamentoComKanban(cursoId)
+      : this.treinamentoService.enviarTreinamentoParaRevisao(cursoId);
+
+    requisicao$.subscribe({
       next: (resposta) => {
-        this.alerts.sucesso('Parabéns! Esteira de treinamento publicada, ativada e inserida no Kanban Admin com sucesso!');
+        const msg = resposta?.message || (this.podePublicarCurso()
+          ? 'Parabéns! Treinamento aprovado, publicado e inserido no Kanban!'
+          : 'Treinamento enviado para análise da Curadoria! Ele será publicado após aprovação.');
 
+        this.alerts.sucesso(msg);
         this.carregarCatalogoGerencial();
 
-        this.passoAtual = 1;
+        this.passoAtual = 0;
         this.idCursoCriado = null;
         this.listaVinculosAtivos = [];
         this.isLoadingCursos = false;
       },
       error: (err) => {
         this.isLoadingCursos = false;
-        console.error('Erro crítico na publicação da esteira com Kanban:', err);
-        this.alerts.erro('Falha de comunicação ao publicar e integrar o treinamento com o Kanban.');
+        console.error('Erro na finalização da esteira de treinamento:', err);
+        const msgErro = err.error?.message || 'Falha de comunicação ao processar o treinamento.';
+        this.alerts.erro(msgErro);
       }
     });
   }
+
+  aprovarEPublicarCurso(curso: any): void {
+    if (!curso?.id) return;
+
+    this.isLoadingCursos = true;
+    this.treinamentoService.publicarTreinamentoComKanban(Number(curso.id)).subscribe({
+      next: (res) => {
+        this.alerts.sucesso(res?.message || `Curso "${curso.titulo}" aprovado e publicado com sucesso! 🚀`);
+        this.carregarCatalogoGerencial();
+      },
+      error: (err) => {
+        this.isLoadingCursos = false;
+        const msg = err.error?.message || 'Erro ao aprovar e publicar o treinamento.';
+        this.alerts.erro(msg);
+      },
+    });
+  }
+
+
 
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
     this.dialog.open(ModalMateriaisComponent, {

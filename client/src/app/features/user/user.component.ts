@@ -52,6 +52,18 @@ export class ControleUsuariosComponent implements OnInit {
   dadosProtheus: any = null;
   cpfJaConsultado = '';
 
+  usuarioLogadoId: number = 0;
+  usuarioLogadoRole: string = '';
+
+  perfisDisponiveis = [
+    { valor: 'user', label: 'Colaborador (User)' },
+    { valor: 'manager', label: 'Gestor (Manager)' },
+    { valor: 'conteudista', label: 'Conteudista' },
+    { valor: 'curador', label: 'Curador' },
+    { valor: 'admin', label: 'Administrador (Admin)' },
+    { valor: 'master', label: 'Master (Super Admin)' },
+  ];
+
   colunasTabela: string[] = ['nome', 'email', 'lotacao', 'cargo', 'role', 'status'];
 
   novoUsuario = {
@@ -63,7 +75,29 @@ export class ControleUsuariosComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.carregarSessaoLogada();
     this.carregarColaboradores();
+  }
+
+  private carregarSessaoLogada(): void {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token && token.split('.').length === 3) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.usuarioLogadoId = Number(payload.id || payload.sub || 0);
+        this.usuarioLogadoRole = payload.role || '';
+      }
+    } catch {
+      this.usuarioLogadoId = 0;
+      this.usuarioLogadoRole = '';
+    }
+  }
+
+  podeEditarUsuario(usuario: any): boolean {
+    if (!usuario) return false;
+    if (Number(usuario.id) === this.usuarioLogadoId) return false;
+    if (usuario.role === 'master' && this.usuarioLogadoRole !== 'master') return false;
+    return true;
   }
 
   carregarColaboradores(): void {
@@ -156,15 +190,34 @@ export class ControleUsuariosComponent implements OnInit {
     });
   }
 
+  alterarPerfil(usuario: any, novoPerfil: string): void {
+    const perfilAnterior = usuario.role;
+    if (perfilAnterior === novoPerfil) return;
+
+    this.userService.alterarPerfilAcesso(usuario.id, novoPerfil).subscribe({
+      next: () => {
+        usuario.role = novoPerfil;
+        this.alerts.sucesso(`Perfil de ${usuario.name} atualizado para ${novoPerfil.toUpperCase()}!`);
+      },
+      error: (err) => {
+        usuario.role = perfilAnterior;
+        const msg = err.error?.message || 'Não foi possível alterar o perfil de acesso.';
+        this.alerts.erro(msg);
+      }
+    });
+  }
+
   mudarStatus(usuario: any): void {
+    const statusAnterior = usuario.ativo;
     this.userService.alternarStatusAcesso(usuario.id).subscribe({
       next: () => {
-        usuario.ativo = !usuario.ativo;
+        usuario.ativo = !statusAnterior;
         this.alerts.sucesso(`Status de ${usuario.name} alterado com sucesso!`);
       },
       error: (err) => {
-        console.error('Erro ao mudar status do usuário:', err);
-        this.alerts.erro('Não foi possível alterar o status de acesso.');
+        usuario.ativo = statusAnterior;
+        const msg = err.error?.message || 'Não foi possível alterar o status de acesso.';
+        this.alerts.erro(msg);
       }
     });
   }

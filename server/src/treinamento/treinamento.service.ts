@@ -26,7 +26,7 @@ export class TreinamentoService {
 
     return this.prisma.treinamento.findMany({
       where: {
-        ativo: true, 
+        ativo: true,
         OR: [
           {
             publicos: {
@@ -68,7 +68,7 @@ export class TreinamentoService {
         descricao: data.descricao || null,
         carga_horaria: Number(data.carga_horaria),
         obrigatorio: data.obrigatorio,
-        ativo: false, 
+        ativo: false,
         certificado: true
       }
     });
@@ -227,7 +227,7 @@ export class TreinamentoService {
 
     matriculasAnoCorrente.forEach(mat => {
       if (mat.iniciado_em) {
-        const mes = new Date(mat.iniciado_em).getMonth(); 
+        const mes = new Date(mat.iniciado_em).getMonth();
         if (mes >= 0 && mes <= 11) {
           contagemPorMes[mes]++;
         }
@@ -286,7 +286,7 @@ export class TreinamentoService {
         labels: ['Concluídos', 'Em Andamento', 'Reprovados']
       },
       graficoBarras: { labels: rankingsCursos.map(c => c.titulo), dados: rankingsCursos.map(c => c._count.matriculas) },
-      graficoLinhaMatriculas: dadosHistoricoAcumulado, 
+      graficoLinhaMatriculas: dadosHistoricoAcumulado,
       graficoBarrasUnidades: {
         labels: hospitaisFuabc.map(h => h.nome),
         valores: valoresConformidade
@@ -328,59 +328,87 @@ export class TreinamentoService {
   async listarTreinamentosGerencial() {
     const treinamentos = await this.prisma.treinamento.findMany({
       orderBy: { id: 'desc' },
-      include: { modulos: { select: { id: true } } }
+      include: {
+        modulos: { select: { id: true } },
+        kanban_cards: {
+          include: { coluna: true },
+          orderBy: { id: 'desc' },
+          take: 1,
+        },
+      },
     });
-    return treinamentos.map(t => ({ ...t, totalModulos: t.modulos.length }));
+
+    return treinamentos.map((t) => {
+      const cardAtual = t.kanban_cards?.[0];
+      const tituloColuna = (cardAtual?.coluna?.titulo || '').toLowerCase();
+      const emHomologacao =
+        !t.ativo &&
+        (tituloColuna.includes('revis') ||
+          tituloColuna.includes('curadoria') ||
+          tituloColuna.includes('homolog') ||
+          cardAtual?.coluna?.ordem === 2);
+
+      return {
+        ...t,
+        totalModulos: t.modulos.length,
+        statusCiclo: t.ativo
+          ? 'PUBLICADO'
+          : emHomologacao
+            ? 'EM_HOMOLOGACAO'
+            : 'RASCUNHO',
+      };
+    });
   }
 
-async obterConteudoCurso(id: number, usuarioId?: number) {
-  const curso = await this.prisma.treinamento.findUnique({
-    where: { id: id },
-    include: {
-      modulos: {
-        orderBy: { ordem: 'asc' },
-        include: {
-          aulas: {
-            orderBy: { ordem: 'asc' },
-            include: {
-              materiais: {
-                include: usuarioId
-                  ? {
+
+  async obterConteudoCurso(id: number, usuarioId?: number) {
+    const curso = await this.prisma.treinamento.findUnique({
+      where: { id: id },
+      include: {
+        modulos: {
+          orderBy: { ordem: 'asc' },
+          include: {
+            aulas: {
+              orderBy: { ordem: 'asc' },
+              include: {
+                materiais: {
+                  include: usuarioId
+                    ? {
                       leituras: {
                         where: { usuario_id: usuarioId },
                         select: { id: true, lido_em: true },
                       },
                     }
-                  : undefined,
+                    : undefined,
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  if (!curso) return null;
+    if (!curso) return null;
 
-  return {
-    ...curso,
-    modulos: curso.modulos.map((mod: any) => ({
-      ...mod,
-      aulas: mod.aulas.map((aula: any) => ({
-        ...aula,
-        materiais: (aula.materiais || []).map((mat: any) => {
-          const leitura = mat.leituras?.[0] || null;
-          const { leituras, ...dadosMat } = mat;
-          return {
-            ...dadosMat,
-            lido: !!leitura,
-            lido_em: leitura?.lido_em || null,
-          };
-        }),
+    return {
+      ...curso,
+      modulos: curso.modulos.map((mod: any) => ({
+        ...mod,
+        aulas: mod.aulas.map((aula: any) => ({
+          ...aula,
+          materiais: (aula.materiais || []).map((mat: any) => {
+            const leitura = mat.leituras?.[0] || null;
+            const { leituras, ...dadosMat } = mat;
+            return {
+              ...dadosMat,
+              lido: !!leitura,
+              lido_em: leitura?.lido_em || null,
+            };
+          }),
+        })),
       })),
-    })),
-  };
-}
+    };
+  }
 
 
   async listarProjetosAdmin() {
@@ -421,10 +449,76 @@ async obterConteudoCurso(id: number, usuarioId?: number) {
     return { success: true, message: 'Vínculo removido com sucesso!' };
   }
 
+  async enviarParaCuradoria(treinamentoId: number, usuarioId: number) {
+    const curso = await this.prisma.treinamento.findUnique({
+      where: { id: Number(treinamentoId) },
+    });
+
+    if (!curso) {
+      throw new NotFoundException('Treinamento não localizado para envio à curadoria.');
+    }
+
+    let colunaRevisao = await this.prisma.kanbanColuna.findFirst({
+      where: {
+        OR: [
+          { ordem: 2 },
+          { titulo: { contains: 'Revisão', mode: 'insensitive' } },
+          { titulo: { contains: 'Curadoria', mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { id: 'asc' },
+    });
+
+    if (!colunaRevisao) {
+      colunaRevisao = await this.prisma.kanbanColuna.create({
+        data: {
+          usuario_id: Number(usuarioId),
+          titulo: '🔍 Em Revisão / Curadoria',
+          ordem: 2,
+          cor: '#f59e0b',
+        },
+      });
+    }
+
+    const cardExistente = await this.prisma.kanbanCard.findFirst({
+      where: { treinamento_id: curso.id },
+    });
+
+    if (cardExistente) {
+      await this.prisma.kanbanCard.update({
+        where: { id: cardExistente.id },
+        data: { coluna_id: colunaRevisao.id },
+      });
+    } else {
+      const maiorOrdem = await this.prisma.kanbanCard.aggregate({
+        where: { coluna_id: colunaRevisao.id },
+        _max: { ordem: true },
+      });
+
+      await this.prisma.kanbanCard.create({
+        data: {
+          coluna_id: colunaRevisao.id,
+          treinamento_id: curso.id,
+          titulo: curso.titulo,
+          descricao: curso.descricao || 'Aguardando validação e aprovação da Curadoria/RH.',
+          ordem: (maiorOrdem._max.ordem || 0) + 1,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      treinamentoId: curso.id,
+      status: 'AGUARDANDO_CURADORIA',
+      message: 'Treinamento enviado para análise da Curadoria! Ele ficará visível aos colaboradores após a aprovação.',
+    };
+  }
+
+
   async finalizarEPublicarTreinamento(treinamentoId: number, usuarioId: number) {
     const curso = await this.prisma.treinamento.findUnique({
       where: { id: Number(treinamentoId) },
-      include: { publicos: true } 
+      include: { publicos: true }
     });
 
     if (!curso) throw new NotFoundException('Treinamento não localizado para fechamento.');
@@ -502,7 +596,7 @@ async obterConteudoCurso(id: number, usuarioId?: number) {
           });
         }
       }
-      
+
       return {
         success: true,
         treinamentoId: cursoAtualizado.id,

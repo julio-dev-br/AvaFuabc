@@ -2,9 +2,9 @@ import { Controller, Get, Post, Param, Body, ParseIntPipe, UseGuards, BadRequest
 import { QuizzesService } from './quizzes.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
-import type { ResponderQuizDTO } from './dtos/responder-quiz.dto';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { Role } from '../auth/roles.enum';
 
 @Controller('quizzes')
 @UseGuards(AuthGuard)
@@ -27,7 +27,7 @@ export class QuizzesController {
 
   @Post('admin/criar')
   @UseGuards(RolesGuard)
-  @Roles('admin', 'manager')
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN, Role.MANAGER)
   async criarQuizCompleto(
     @Body() body: {
       aulaId: number;
@@ -45,7 +45,7 @@ export class QuizzesController {
   @Post('admin/criar-gerado-ia')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(RolesGuard)
-  @Roles('admin', 'manager')
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN, Role.MANAGER)
   async salvarQuizPorIA(
     @Body() payload: {
       aulaId: number;

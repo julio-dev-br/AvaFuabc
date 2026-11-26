@@ -38,7 +38,17 @@ export const routes: Routes = [
       { path: 'admin/usuarios', component: AdminDashboardComponent, data: { breadcrumb: 'Perfis de Acesso', scope: 'admin', aba: 'usuarios' } },
       { path: 'admin/projetos', component: AdminDashboardComponent, data: { breadcrumb: 'Projetos Kanban', scope: 'admin', aba: 'projetos' } },
 
-      { path: 'admin/chat', component: AdminDashboardComponent, data: { breadcrumb: 'Chat Central (RH)', scope: 'admin', aba: 'chat' } }
+      { path: 'admin/chat', component: AdminDashboardComponent, data: { breadcrumb: 'Chat Central (RH)', scope: 'admin', aba: 'chat' } },
+
+      {
+        path: 'admin/homologar/:id',
+        loadComponent: () =>
+          import('./features/homologacao-curso/homologacao-curso.component').then(
+            (c) => c.HomologacaoCursoComponent
+          ),
+        data: { breadcrumb: 'Homologação de Curso', scope: 'admin' },
+      },
+
     ]
   },
   { path: '**', redirectTo: 'login' }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -14,7 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 // Importação dos serviços
 import { QuizService } from '../../core/services/quiz.service';
-import { AlertsService } from '../../core/services/alerts.service'; 
+import { AlertsService } from '../../core/services/alerts.service';
 
 @Component({
   selector: 'app-quiz',
@@ -46,7 +46,7 @@ export class QuizComponent implements OnInit {
   respostasSelecionadas: { [key: number]: number } = {};
   resultadoEnvio: any = null;
   foiEnviado = false;
-  
+
   aprovado = false;
   notaFinal = 0;
   notaMinimaExigida = 7;
@@ -62,6 +62,43 @@ export class QuizComponent implements OnInit {
     }
   }
 
+  // Bloqueia atalhos de cópia/inspeção (Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+S) durante a avaliação
+  @HostListener('document:keydown', ['$event'])
+  bloquearAtalhosCopia(event: KeyboardEvent): void {
+    if (this.foiEnviado) return;
+    if ((event.ctrlKey || event.metaKey) && ['c', 'x', 'u', 's', 'a'].includes(event.key.toLowerCase())) {
+      event.preventDefault();
+    }
+  }
+
+  // Bloqueia eventos nativos de copy, cut, selectstart e menu de contexto ("Copy text")
+  bloquearCopiaTexto(event: Event): void {
+    if (!this.foiEnviado) {
+      event.preventDefault();
+    }
+  }
+
+  // Embaralha aleatoriamente um array (Algoritmo Fisher-Yates) sem alterar os IDs
+  private embaralharArray<T>(itens: T[]): T[] {
+    const copia = [...itens];
+    for (let i = copia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+  }
+
+  private randomizarAlternativasDoQuiz(): void {
+    if (!this.quiz || !Array.isArray(this.quiz.perguntas)) return;
+
+    this.quiz.perguntas = this.quiz.perguntas.map((pergunta: any) => ({
+      ...pergunta,
+      alternativas: Array.isArray(pergunta.alternativas)
+        ? this.embaralharArray(pergunta.alternativas)
+        : [],
+    }));
+  }
+
   carregarQuiz(): void {
     this.isLoading = true;
     this.quizService.obterQuizPorAula(this.aulaId).subscribe({
@@ -71,13 +108,13 @@ export class QuizComponent implements OnInit {
         } else {
           this.quiz = dados;
         }
-        
+
         if (this.quiz) {
           this.notaMinimaExigida = this.quiz.notaMinima !== undefined ? Number(this.quiz.notaMinima) : 7;
+          this.randomizarAlternativasDoQuiz();
         }
-        
+
         this.isLoading = false;
-        console.log('Quiz carregado com sucesso:', this.quiz);
       },
       error: (err: HttpErrorResponse) => {
         console.error('Erro detalhado ao buscar o quiz:', err);
@@ -116,8 +153,6 @@ export class QuizComponent implements OnInit {
       respostas: listaRespostas
     };
 
-    console.log('=== ENVIANDO PROVA PARA CORREÇÃO DO BACKEND ===', payloadCompleto);
-
     this.quizService.enviarRespostas(this.quiz.id, payloadCompleto).subscribe({
       next: (respostaServidor) => {
         this.resultadoEnvio = respostaServidor;
@@ -148,6 +183,7 @@ export class QuizComponent implements OnInit {
     this.foiEnviado = false;
     this.aprovado = false;
     this.notaFinal = 0;
+    this.randomizarAlternativasDoQuiz();
   }
 
   voltarParaAula(): void {

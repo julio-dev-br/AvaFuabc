@@ -102,6 +102,7 @@
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Treinamentos</span> }
             </a>
+            @if (podeGerenciarUsuarios()) {
             <a mat-button routerLink="/admin/usuarios" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Usuários' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">
@@ -109,6 +110,7 @@
                 @if (!sidebarColapsada) { <span
                     style="font-weight: 600; font-size: 14px; animation: fadeIn 0.2s ease-out;">Usuários</span> }
             </a>
+            }
             <a mat-button routerLink="/admin/comunicados" routerLinkActive="active-saas-link"
                 [matTooltip]="sidebarColapsada ? 'Comunicados' : ''" matTooltipPosition="right"
                 style="width: 100%; padding: 12px 16px; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 12px; border-radius: 8px; border: none; cursor: pointer; text-align: left; color: var(--text-muted); background: transparent; text-decoration: none; overflow: hidden; box-sizing: border-box;">

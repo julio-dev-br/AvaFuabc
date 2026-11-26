@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as QRCode from 'qrcode';
 import PDFDocument = require('pdfkit');
 import { Response } from 'express';
 
@@ -119,10 +120,36 @@ export class CertificadosService {
 
     doc.text(`Validável em: ${certificado.qr_code}`, { align: 'center' });
 
+    const urlValidacao =
+      certificado.qr_code ||
+      `${process.env.APP_URL || process.env.API_BASE_URL || 'http://localhost:3000'}/certificados/publico/validar/${certificado.codigo}`;
+
+    const qrBuffer = await QRCode.toBuffer(urlValidacao, {
+      width: 110,
+      margin: 1,
+      color: {
+        dark: '#003366',
+        light: '#FFFFFF',
+      },
+    });
+
+    const qrX = doc.page.width - 165;
+    const qrY = doc.page.height - 165;
+
+    doc.image(qrBuffer, qrX, qrY, { width: 95, height: 95 });
+
+    doc.fillColor('#003366')
+      .fontSize(8)
+      .text('Valide a autenticidade', qrX - 10, qrY + 98, { width: 115, align: 'center' });
+
+    doc.fillColor('#64748b')
+      .fontSize(7)
+      .text(certificado.codigo || '', qrX - 10, qrY + 109, { width: 115, align: 'center' });
+
 
     doc.end();
   }
-  
+
   async validarTokenCertificado(codigoToken: string) {
     const certificado = await this.prisma.certificado.findFirst({
       where: { codigo: codigoToken },
@@ -130,10 +157,10 @@ export class CertificadosService {
         matricula: {
           include: {
             user: {
-              select: { name: true, matricula: true } 
+              select: { name: true, matricula: true }
             },
             treinamento: {
-              select: { titulo: true, carga_horaria: true } 
+              select: { titulo: true, carga_horaria: true }
             }
           }
         }

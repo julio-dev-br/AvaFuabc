@@ -38,4 +38,10 @@ export class UserService {
     const headers = this.obterHeadersAutenticacao();
     return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {}, { headers });
   }
+
+    alterarPerfilAcesso(id: number, role: string): Observable<any> {
+    const headers = this.obterHeadersAutenticacao();
+    return this.http.patch<any>(`${this.apiUrl}/${id}/role`, { role }, { headers });
+  }
+
 }

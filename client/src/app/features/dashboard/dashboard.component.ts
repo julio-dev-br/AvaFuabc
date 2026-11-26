@@ -246,9 +246,16 @@ export class DashboardComponent implements OnInit {
 
 
   isAdmin(): boolean {
-    const role = this.authService.getUserRole();
-    return role === 'admin' || role === 'manager';
+    const role = (this.authService.getUserRole() || '').toLowerCase();
+    return ['master', 'curador', 'conteudista', 'admin', 'manager'].includes(role);
   }
+
+  podeGerenciarUsuarios(): boolean {
+    const role = (this.authService.getUserRole() || '').toLowerCase();
+    return role === 'master' || role === 'admin';
+  }
+
+
 
   carregarCursos(): void {
     this.treinamentoService.obterTreinamentosDisponiveis().subscribe({

@@ -14,10 +14,16 @@ export class AuthService {
     return this.http.post<{ accessToken: string; role: string }>(`${this.apiUrl}/signin`, credentials).pipe(
       tap((response) => {
         localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('userRole', response.role); 
+        localStorage.setItem('userRole', response.role);
       })
     );
   }
+
+  hasRole(rolesPermitidas: string[]): boolean {
+    const roleAtual = (this.getUserRole() || '').toLowerCase();
+    return rolesPermitidas.map(r => r.toLowerCase()).includes(roleAtual);
+  }
+
 
   getUserRole(): string | null {
     return localStorage.getItem('userRole');
@@ -33,7 +39,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('userRole'); 
+    localStorage.removeItem('userRole');
   }
 
   isLoggedIn(): boolean {

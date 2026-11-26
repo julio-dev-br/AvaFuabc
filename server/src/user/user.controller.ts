@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Post, Patch, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Param, Post, Patch, Body, Req, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import type { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProtheusService } from '../integracao/protheus/protheus.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -29,7 +30,7 @@ export class UserController {
   ) { }
 
   @Get()
-  @Roles(Role.ADMIN, Role.MANAGER)
+  @Roles(Role.MASTER, Role.ADMIN, Role.MANAGER)
   async findAll() {
     const usuarios = await this.prisma.user.findMany({
       orderBy: { name: 'asc' },
@@ -37,27 +38,27 @@ export class UserController {
 
     return usuarios.map(u => ({
       id: u.id,
-      name: u.name || 'Usuário Sem Nome',
+      name: u.name || '—',
       email: u.email,
-      cpf: u.cpf,
-      matricula: u.matricula,
+      cpf: u.cpf || '—',
+      matricula: u.matricula || '—',
       role: u.role,
       ativo: u.ativo,
       unidade: {
-        nome: u.empresa_nome || (u.unidade_id ? `Unidade ${u.unidade_id.toString()}` : 'Fundação ABC')
+        nome: u.empresa_nome || '—'
       },
       departamento: {
-        nome: u.centro_custo_descricao || (u.departamento_id ? `Depto ${u.departamento_id.toString()}` : 'Geral / RH')
+        nome: u.centro_custo_descricao || '—'
       },
       cargo: {
-        nome: u.cargo_nome || (u.cargo_id ? `Cargo ${u.cargo_id.toString()}` : 'Colaborador')
+        nome: u.cargo_nome || '—'
       }
     }));
   }
 
   @Post()
-  @Roles(Role.ADMIN)
-  async create(@Body() body: CriarUsuarioInput) {
+  @Roles(Role.MASTER, Role.ADMIN)
+  async create(@Body() body: CriarUsuarioInput, @CurrentUser() userLogado: any) {
     if (!body.name || body.name.trim() === '') {
       throw new BadRequestException('O nome do colaborador é obrigatório.');
     }
@@ -68,13 +69,17 @@ export class UserController {
       throw new BadRequestException('O CPF do colaborador é obrigatório para validação no Protheus.');
     }
 
+    if (body.role === Role.MASTER && userLogado?.role !== Role.MASTER) {
+      throw new BadRequestException('Apenas um usuário Master pode criar outro perfil Master.');
+    }
+
     const cpfLimpo = body.cpf.replace(/\D/g, '');
     if (cpfLimpo.length !== 11) {
       throw new BadRequestException('O CPF informado deve conter 11 dígitos.');
     }
 
     const emailExiste = await this.prisma.user.findUnique({
-      where: { email: body.email.trim() },
+      where: { email: body.email.trim().toLowerCase() },
     });
 
     if (emailExiste) {
@@ -89,7 +94,6 @@ export class UserController {
       throw new BadRequestException('Este CPF já possui uma conta cadastrada no sistema.');
     }
 
-    // Consulta oficial no TOTVS Protheus via ProtheusService
     const funcionarioErp = await this.protheusService.buscarColaboradorPorCpf(cpfLimpo);
 
     const toBigIntSafe = (valor?: string | null): bigint | null => {
@@ -139,26 +143,102 @@ export class UserController {
 
     return novoUsuario;
   }
-
   @Patch(':id/status')
-  @Roles(Role.ADMIN)
-  async mudarStatus(@Param('id') id: string) {
+  @Roles(Role.MASTER, Role.ADMIN)
+  async mudarStatus(@Param('id') id: string, @CurrentUser() userLogado: any) {
     if (!id || isNaN(Number(id))) {
       throw new BadRequestException('ID inválido.');
     }
 
-    const usuario = await this.prisma.user.findUnique({ where: { id: Number(id) } });
+    const alvoId = Number(id);
+    if (alvoId === Number(userLogado?.id)) {
+      throw new BadRequestException('Por segurança, você não pode desativar seu próprio acesso.');
+    }
+
+    const usuario = await this.prisma.user.findUnique({ where: { id: alvoId } });
     if (!usuario) throw new BadRequestException('Usuário não localizado.');
 
+    if (usuario.role === Role.MASTER && userLogado?.role !== Role.MASTER) {
+      throw new BadRequestException('Apenas um usuário Master pode alterar o status de outro Master.');
+    }
+
+    if (usuario.ativo && (usuario.role === Role.ADMIN || usuario.role === Role.MASTER)) {
+      const totalAdminsAtivos = await this.prisma.user.count({
+        where: {
+          ativo: true,
+          role: { in: [Role.ADMIN, Role.MASTER] },
+        },
+      });
+
+      if (totalAdminsAtivos <= 1) {
+        throw new BadRequestException('Não é possível desativar o único administrador ativo do sistema.');
+      }
+    }
+
     return this.prisma.user.update({
-      where: { id: Number(id) },
+      where: { id: alvoId },
       data: { ativo: !usuario.ativo },
       select: { id: true, name: true, ativo: true }
     });
   }
 
+  @Patch(':id/role')
+  @Roles(Role.MASTER, Role.ADMIN)
+  async alterarPerfil(
+    @Param('id') id: string,
+    @Body('role') novoPerfil: Role,
+    @CurrentUser() userLogado: any,
+  ) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException('ID inválido.');
+    }
+
+    const perfisValidos = Object.values(Role);
+    if (!perfisValidos.includes(novoPerfil)) {
+      throw new BadRequestException('Perfil de acesso inválido.');
+    }
+
+    const alvoId = Number(id);
+    if (alvoId === Number(userLogado?.id)) {
+      throw new BadRequestException('Por segurança, você não pode alterar o seu próprio perfil.');
+    }
+
+    const usuario = await this.prisma.user.findUnique({ where: { id: alvoId } });
+    if (!usuario) throw new BadRequestException('Usuário não localizado.');
+
+    if (usuario.role === Role.MASTER && userLogado?.role !== Role.MASTER) {
+      throw new BadRequestException('Apenas um usuário Master pode alterar o perfil de outro Master.');
+    }
+
+    if (novoPerfil === Role.MASTER && userLogado?.role !== Role.MASTER) {
+      throw new BadRequestException('Apenas um usuário Master pode promover alguém a Master.');
+    }
+
+    const estavaComoAdmin = usuario.role === Role.ADMIN || usuario.role === Role.MASTER;
+    const vaiContinuarAdmin = novoPerfil === Role.ADMIN || novoPerfil === Role.MASTER;
+
+    if (estavaComoAdmin && !vaiContinuarAdmin && usuario.ativo) {
+      const totalAdminsAtivos = await this.prisma.user.count({
+        where: {
+          ativo: true,
+          role: { in: [Role.ADMIN, Role.MASTER] },
+        },
+      });
+
+      if (totalAdminsAtivos <= 1) {
+        throw new BadRequestException('O sistema exige pelo menos um Administrador ou Master ativo.');
+      }
+    }
+
+    return this.prisma.user.update({
+      where: { id: alvoId },
+      data: { role: novoPerfil },
+      select: { id: true, name: true, role: true },
+    });
+  }
+
   @Patch('perfil/avatar')
-  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN, Role.CONTEUDISTA, Role.CURADOR, Role.MASTER)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -179,9 +259,18 @@ export class UserController {
       limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
-  async uploadAvatar(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
+  async uploadAvatar(
+    @CurrentUser() user: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
     if (!file) throw new BadRequestException('Arquivo não enviado.');
-    const linkPublico = `http://localhost:3000/uploads/avatars/${file.filename}`;
+
+    const appUrlEnv = process.env.APP_URL?.replace(/\/$/, '');
+    const protocolo = (req.headers['x-forwarded-proto'] as string) || req.protocol;
+    const host = (req.headers['x-forwarded-host'] as string) || req.get('host');
+    const baseUrl = appUrlEnv || `${protocolo}://${host}`;
+    const linkPublico = `${baseUrl}/uploads/avatars/${file.filename}`;
 
     const usuarioAtualizado = await this.prisma.user.update({
       where: { id: user.id },
@@ -196,12 +285,10 @@ export class UserController {
   }
 
   @Get('perfil/me')
-  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN, Role.CONTEUDISTA, Role.CURADOR, Role.MASTER)
   async obterPerfilLogado(@CurrentUser() user: any) {
     const usuario = await this.prisma.user.findUnique({
-      where: {
-        id: user.id
-      }
+      where: { id: user.id }
     });
 
     if (!usuario) {
@@ -210,19 +297,19 @@ export class UserController {
 
     return {
       id: usuario.id,
-      nome: usuario.name || 'Colaborador',
+      nome: usuario.name || '—',
       email: usuario.email,
-      cpf: usuario.cpf,
-      matricula: usuario.matricula,
+      cpf: usuario.cpf || '—',
+      matricula: usuario.matricula || '—',
       avatarUrl: usuario.avatar_url || 'assets/default-avatar.jpg',
-      empresa: usuario.empresa_nome || (usuario.empresa_id ? `Empresa ${usuario.empresa_id.toString()}` : 'Fundação ABC'),
-      unidade: usuario.centro_custo_descricao || (usuario.unidade_id ? `Unidade ${usuario.unidade_id.toString()}` : 'Hospital Mário Covas'),
-      cargo: usuario.cargo_nome || (usuario.cargo_id ? `Cargo ${usuario.cargo_id.toString()}` : 'Colaborador')
+      empresa: usuario.empresa_nome || '—',
+      unidade: usuario.centro_custo_descricao || '—',
+      cargo: usuario.cargo_nome || '—',
     };
   }
 
   @Patch('perfil/senha')
-  @Roles(Role.USER, Role.MANAGER, Role.ADMIN)
+  @Roles(Role.USER, Role.MANAGER, Role.ADMIN, Role.CONTEUDISTA, Role.CURADOR, Role.MASTER)
   async atualizarSenha(@CurrentUser() user: any, @Body() body: any) {
     const { senhaAtual, novaSenha } = body;
 

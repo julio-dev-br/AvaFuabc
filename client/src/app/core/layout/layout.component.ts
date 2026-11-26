@@ -103,6 +103,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
           if (parte === 'usuarios') textoTraduzido = 'Perfis de Acesso';
           if (parte === 'projetos') textoTraduzido = 'Projetos Kanban';
           if (parte === 'chat') textoTraduzido = 'Chat Central (RH)';
+          if (parte === 'homologar') textoTraduzido = 'Homologação de Curso';
 
           this.breadcrumbs.push({ texto: textoTraduzido, url: urlAcumulada });
         }
@@ -145,6 +146,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   marcarLida(id: number): void {
     this.notificationService.marcarComoLida(id).subscribe({
@@ -212,9 +214,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   isAdmin(): boolean {
-    const role = this.authService.getUserRole();
-    return role === 'admin' || role === 'manager';
+    const role = (this.authService.getUserRole() || '').toLowerCase();
+    return ['master', 'curador', 'conteudista', 'admin', 'manager'].includes(role);
   }
+
+  podeGerenciarUsuarios(): boolean {
+    const role = (this.authService.getUserRole() || '').toLowerCase();
+    return role === 'master' || role === 'admin';
+  }
+
 
   logout(): void {
     localStorage.removeItem('accessToken');

@@ -1,0 +1,231 @@
+<div
+    style="max-width: 1080px; margin: 0 auto; padding: 8px 4px 48px 4px; width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
+
+    <!-- Barra Superior de Navegação e Status -->
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+        <button mat-stroked-button routerLink="/admin/cadastro"
+            style="color: var(--text-brand); border-color: var(--text-brand); font-weight: 700; height: 40px; border-radius: 8px; padding: 0 16px;">
+            <mat-icon style="margin-right: 6px; font-size: 18px; width: 18px; height: 18px;">arrow_back</mat-icon>
+            Voltar ao Catálogo
+        </button>
+
+        <span
+            style="background: rgba(245, 158, 11, 0.16); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">fact_check</mat-icon>
+            Auditoria de Curadoria & Homologação
+        </span>
+    </div>
+
+    @if (isLoading) {
+    <mat-card
+        style="padding: 40px; text-align: center; border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-card);">
+        <mat-progress-bar mode="indeterminate"
+            style="border-radius: 4px; height: 6px; margin-bottom: 16px;"></mat-progress-bar>
+        <h3 style="margin: 0 0 4px 0; color: var(--text-brand); font-size: 16px; font-weight: 700;">Carregando Estrutura
+            Completa</h3>
+        <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Consolidando módulos, videoaulas, materiais e
+            questões para revisão...</p>
+    </mat-card>
+    }
+
+    @if (!isLoading && curso) {
+    <!-- Cabeçalho Executivo do Treinamento -->
+    <mat-card
+        style="border-radius: 14px; border: 1px solid var(--border-color); border-top: 4px solid #f59e0b; background: var(--bg-card); box-shadow: var(--card-shadow); padding: 24px; margin-bottom: 24px;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 260px;">
+                <span
+                    style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
+                    Treinamento Submetido à Aprovação
+                </span>
+                <h1
+                    style="margin: 4px 0 8px 0; font-size: 22px; font-weight: 700; color: var(--text-brand); line-height: 1.3;">
+                    {{ curso.titulo }}
+                </h1>
+                <p style="margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5;">
+                    {{ curso.descricao || 'Nenhuma descrição detalhada informada pelo conteudista.' }}
+                </p>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <span [style.background-color]="curso.obrigatorio ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-subtle)'"
+                    [style.color]="curso.obrigatorio ? '#f87171' : 'var(--text-secondary)'"
+                    [style.border]="curso.obrigatorio ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid var(--border-color)'"
+                    style="padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                    {{ curso.obrigatorio ? 'Obrigatório' : 'Eletivo' }}
+                </span>
+
+                <span
+                    style="background: var(--bg-subtle); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                    ⏱ {{ curso.carga_horaria || 0 }}h
+                </span>
+
+                <span
+                    style="background: var(--bg-subtle); border: 1px solid var(--border-color); color: var(--text-primary); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                    📂 {{ curso.modulos?.length || 0 }} Módulo(s) • 🎬 {{ contarTotalAulas() }} Aula(s)
+                </span>
+            </div>
+        </div>
+    </mat-card>
+
+    <!-- Grade Completa de Módulos, Aulas, Materiais e Quizzes -->
+    <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 28px;">
+        @for (modulo of curso.modulos; track modulo.id; let mIdx = $index) {
+        <mat-card
+            style="border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--card-shadow); overflow: hidden;">
+            <div
+                style="padding: 14px 20px; background: var(--bg-subtle); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-brand);">
+                    Módulo {{ mIdx + 1 }}: {{ modulo.titulo }}
+                </h3>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">
+                    {{ modulo.aulas?.length || 0 }} aula(s)
+                </span>
+            </div>
+
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 24px;">
+                @for (aula of modulo.aulas; track aula.id; let aIdx = $index) {
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 10px; padding: 18px; background: var(--bg-subtle);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">
+                            Aula {{ mIdx + 1 }}.{{ aIdx + 1 }} — {{ aula.titulo }}
+                        </h4>
+                        <span
+                            style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--bg-active-link); color: var(--text-brand); border: 1px solid var(--border-color);">
+                            Ordem #{{ aula.ordem }}
+                        </span>
+                    </div>
+
+                    <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                        {{ aula.descricao || 'Sem diretrizes de estudo cadastradas.' }}
+                    </p>
+
+                    <!-- Preview da Videoaula -->
+                    @if (aula.video_url) {
+                    <div
+                        style="position: relative; width: 100%; max-width: 640px; padding-top: 36%; min-height: 240px; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-color);">
+                        <iframe [src]="obterVideoUrlSegura(aula.video_url)"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    }
+
+                    <!-- Materiais de Apoio da Aula -->
+                    @if (aula.materiais && aula.materiais.length > 0) {
+                    <div
+                        style="margin-bottom: 16px; padding: 12px 14px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div
+                            style="font-size: 12px; font-weight: 700; color: var(--text-brand); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attach_file</mat-icon>
+                            Materiais de Apoio Anexados ({{ aula.materiais.length }})
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            @for (mat of aula.materiais; track mat.id) {
+                            <a mat-stroked-button [href]="configurarUrlMaterial(mat.url)" target="_blank"
+                                style="font-size: 12px; height: 34px; color: var(--text-brand); border-color: var(--text-brand);">
+                                <mat-icon style="margin-right: 4px; font-size: 16px; width: 16px; height: 16px;">
+                                    {{ mat.tipo === 'LINK' ? 'link' : 'file_download' }}
+                                </mat-icon>
+                                {{ mat.nome }}
+                            </a>
+                            }
+                        </div>
+                    </div>
+                    }
+                    <!-- Auditoria do Quiz e Gabarito Oficial -->
+                    @if (quizzesPorAula[aula.id]; as quizAula) {
+                    <div
+                        style="padding: 14px 16px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid #10b981;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                            <span
+                                style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px;">
+                                <mat-icon
+                                    style="color: #10b981; font-size: 18px; width: 18px; height: 18px;">quiz</mat-icon>
+                                Avaliação: {{ quizAula.titulo }}
+                            </span>
+                            <span
+                                style="font-size: 11px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.14); padding: 3px 10px; border-radius: 999px;">
+                                Nota Mínima: {{ quizAula.notaMinima || quizAula.nota_minima || 7 }} • {{
+                                quizAula.perguntas?.length || 0 }} Questões
+                            </span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            @for (perg of quizAula.perguntas; track perg.id; let pIdx = $index) {
+                            <div
+                                style="padding: 10px 12px; background: var(--bg-subtle); border-radius: 6px; border: 1px solid var(--border-color);">
+                                <div
+                                    style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                                    {{ pIdx + 1 }}. {{ perg.pergunta }}
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    @for (alt of perg.alternativas; track alt.id; let aAltIdx = $index) {
+                                    <div style="font-size: 12px; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px;"
+                                        [style.background-color]="alt.correta || alt.isCorreta || alt.is_correta ? 'rgba(16, 185, 129, 0.16)' : 'transparent'"
+                                        [style.color]="alt.correta || alt.isCorreta || alt.is_correta ? '#10b981' : 'var(--text-secondary)'"
+                                        [style.font-weight]="alt.correta || alt.isCorreta || alt.is_correta ? '700' : '400'">
+                                        <span>{{ ['A', 'B', 'C', 'D', 'E'][aAltIdx] }}) {{ alt.descricao }}</span>
+                                        @if (alt.correta || alt.isCorreta || alt.is_correta) {
+                                        <span style="margin-left: auto; font-size: 10px; text-transform: uppercase;">✔️
+                                            Gabarito</span>
+                                        }
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @empty {
+                <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Nenhuma aula vinculada a este módulo.
+                </p>
+                }
+            </div>
+        </mat-card>
+        } @empty {
+        <mat-card
+            style="padding: 32px; text-align: center; border-radius: 12px; border: 1px dashed var(--border-color); background: var(--bg-card); color: var(--text-muted);">
+            Este treinamento ainda não possui módulos cadastrados.
+        </mat-card>
+        }
+    </div>
+
+    <!-- Card Final de Decisão da Curadoria -->
+    <mat-card
+        style="border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--card-shadow); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h4 style="margin: 0 0 2px 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">
+                Parecer Final da Curadoria
+            </h4>
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+                Ao homologar, o treinamento será publicado imediatamente no portal e os colaboradores vinculados serão
+                matriculados.
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <button mat-stroked-button routerLink="/admin/cadastro"
+                style="height: 42px; padding: 0 18px; font-weight: 600; color: var(--text-secondary); border-color: var(--border-color); border-radius: 8px;">
+                Cancelar
+            </button>
+
+            @if (!curso.ativo) {
+            <button mat-flat-button [disabled]="isPublicando" (click)="aprovarEPublicar()"
+                style="background-color: #10b981 !important; color: #ffffff !important; height: 42px; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px;">verified</mat-icon>
+                {{ isPublicando ? 'Homologando e Matriculando...' : 'Aprovar e Publicar Treinamento' }}
+            </button>
+            }
+        </div>
+    </mat-card>
+    }
+</div>
