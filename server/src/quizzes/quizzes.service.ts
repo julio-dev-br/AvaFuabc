@@ -170,6 +170,30 @@ export class QuizzesService {
     };
   }
 
+  async obterQuizParaEdicao(aulaId: number) {
+    const quiz = await this.prisma.quiz.findFirst({
+      where: { aula_id: Number(aulaId) },
+      orderBy: { id: 'desc' },
+      include: {
+        perguntas: {
+          orderBy: [{ ordem: 'asc' }, { id: 'asc' }],
+          include: {
+            alternativas: {
+              orderBy: { id: 'asc' },
+              select: {
+                id: true,
+                descricao: true,
+                correta: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return quiz || null;
+  }
+
   async criarQuizCompleto(data: {
     aulaId: number;
     titulo: string;
@@ -179,26 +203,33 @@ export class QuizzesService {
       alternativas: { descricao: string; isCorreta: boolean }[];
     }[];
   }) {
-    return this.prisma.quiz.create({
-      data: {
-        aula_id: Number(data.aulaId),
-        titulo: data.titulo,
-        nota_minima: Number(data.notaMinima),
-        perguntas: {
-          create: data.perguntas.map((p) => ({
-            pergunta: p.pergunta,
-            alternativas: {
-              create: p.alternativas.map((a) => ({
-                descricao: a.descricao,
-                correta: Boolean(a.isCorreta),
-              })),
-            },
-          })),
+    const aulaIdNum = Number(data.aulaId);
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.quiz.deleteMany({ where: { aula_id: aulaIdNum } });
+
+      return tx.quiz.create({
+        data: {
+          aula_id: aulaIdNum,
+          titulo: data.titulo,
+          nota_minima: Number(data.notaMinima),
+          perguntas: {
+            create: data.perguntas.map((p, idx) => ({
+              pergunta: p.pergunta,
+              ordem: idx + 1,
+              alternativas: {
+                create: p.alternativas.map((a) => ({
+                  descricao: a.descricao,
+                  correta: Boolean(a.isCorreta),
+                })),
+              },
+            })),
+          },
         },
-      },
-      include: {
-        perguntas: { include: { alternativas: true } },
-      },
+        include: {
+          perguntas: { include: { alternativas: true } },
+        },
+      });
     });
   }
 
@@ -209,34 +240,40 @@ export class QuizzesService {
     tentativas?: number;
     perguntas: any[];
   }) {
+    const aulaIdNum = Number(data.aulaId);
+
     try {
-      return await this.prisma.quiz.create({
-        data: {
-          aula_id: Number(data.aulaId),
-          titulo: data.titulo || 'Avaliação de Conformidade Regulamentar',
-          nota_minima: data.notaMinima ? Number(data.notaMinima) : 7.0,
-          tentativas: data.tentativas ? Number(data.tentativas) : 3,
-          perguntas: {
-            create: data.perguntas.map((p) => ({
-              pergunta: p.enunciado,
-              ordem: p.ordem || undefined,
-              alternativas: {
-                create: [
-                  { descricao: p.alternativaA, correta: p.respostaCorreta === 'A' },
-                  { descricao: p.alternativaB, correta: p.respostaCorreta === 'B' },
-                  { descricao: p.alternativaC, correta: p.respostaCorreta === 'C' },
-                  { descricao: p.alternativaD, correta: p.respostaCorreta === 'D' },
-                ],
-              },
-            })),
+      return await this.prisma.$transaction(async (tx) => {
+        await tx.quiz.deleteMany({ where: { aula_id: aulaIdNum } });
+
+        return tx.quiz.create({
+          data: {
+            aula_id: aulaIdNum,
+            titulo: data.titulo || 'Avaliação de Conformidade Regulamentar',
+            nota_minima: data.notaMinima ? Number(data.notaMinima) : 7.0,
+            tentativas: data.tentativas ? Number(data.tentativas) : 3,
+            perguntas: {
+              create: data.perguntas.map((p, idx) => ({
+                pergunta: p.enunciado,
+                ordem: p.ordem || idx + 1,
+                alternativas: {
+                  create: [
+                    { descricao: p.alternativaA, correta: p.respostaCorreta === 'A' },
+                    { descricao: p.alternativaB, correta: p.respostaCorreta === 'B' },
+                    { descricao: p.alternativaC, correta: p.respostaCorreta === 'C' },
+                    { descricao: p.alternativaD, correta: p.respostaCorreta === 'D' },
+                  ],
+                },
+              })),
+            },
           },
-        },
-        include: {
-          perguntas: { include: { alternativas: true } },
-        },
+          include: {
+            perguntas: { include: { alternativas: true } },
+          },
+        });
       });
     } catch (error: any) {
-      throw new BadRequestException('Falha interna ao persistir o banco relacional de perguntas de IA.');
+      throw new BadRequestException('Falha interna ao persistir o banco relacional de perguntas.');
     }
   }
 }

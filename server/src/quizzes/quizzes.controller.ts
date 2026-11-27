@@ -11,6 +11,14 @@ import { Role } from '../auth/roles.enum';
 export class QuizzesController {
   constructor(private readonly quizzesService: QuizzesService) { }
 
+  @Get('admin/aula/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN, Role.MANAGER)
+  async obterParaEdicao(@Param('id', ParseIntPipe) aulaId: number) {
+    return this.quizzesService.obterQuizParaEdicao(aulaId);
+  }
+
+
   @Get('aula/:id')
   async obterPorAula(@Param('id', ParseIntPipe) aulaId: number) {
     return this.quizzesService.obterQuizPorAula(aulaId);

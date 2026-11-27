@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Param, Delete, Req, Patch } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { TreinamentoService } from './treinamento.service';
@@ -24,8 +24,11 @@ export class TreinamentoController {
   @Post('admin/criar')
   @UseGuards(RolesGuard)
   @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN)
-  async criarTreinamento(@Body() body: { titulo: string; descricao?: string; carga_horaria: number; obrigatorio: boolean }) {
-    return this.treinamentosService.criar(body);
+  async criarTreinamento(
+    @Body() body: { titulo: string; descricao?: string; carga_horaria: number; obrigatorio: boolean },
+    @CurrentUser() user: any,
+  ) {
+    return this.treinamentosService.criar(body, Number(user?.id));
   }
 
   @Post('admin/modulos')
@@ -96,6 +99,17 @@ export class TreinamentoController {
     return this.treinamentosService.enviarParaCuradoria(Number(id), Number(req.user.id));
   }
 
+  @Post('admin/devolver-ajustes/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.MASTER, Role.CURADOR)
+  async devolverTreinamentoParaAjustes(
+    @Param('id') id: string,
+    @Body('parecer') parecer: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.treinamentosService.devolverParaAjustes(Number(id), parecer, Number(user?.id));
+  }
+
   @Post('admin/publicar/:id')
   @UseGuards(RolesGuard)
   @Roles(Role.MASTER, Role.CURADOR)
@@ -103,4 +117,35 @@ export class TreinamentoController {
     const usuarioId = req.user.id;
     return this.treinamentosService.finalizarEPublicarTreinamento(Number(id), usuarioId);
   }
+
+    @Patch('admin/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN)
+  async atualizarTreinamento(
+    @Param('id') id: string,
+    @Body() body: { titulo?: string; descricao?: string; carga_horaria?: number; obrigatorio?: boolean },
+  ) {
+    return this.treinamentosService.atualizarCurso(Number(id), body);
+  }
+
+  @Patch('admin/modulos/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN)
+  async atualizarModulo(
+    @Param('id') id: string,
+    @Body() body: { titulo?: string; ordem?: number },
+  ) {
+    return this.treinamentosService.atualizarModulo(Number(id), body);
+  }
+
+  @Patch('admin/aulas/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.MASTER, Role.CURADOR, Role.CONTEUDISTA, Role.ADMIN)
+  async atualizarAula(
+    @Param('id') id: string,
+    @Body() body: { titulo?: string; descricao?: string; videoUrl?: string; ordem?: number },
+  ) {
+    return this.treinamentosService.atualizarAula(Number(id), body);
+  }
+
 }
