@@ -123,9 +123,10 @@
       @if (passoAtual === 0) {
       <button mat-raised-button
         style="background-color: var(--text-brand); color: #ffffff; font-weight: 700; height: 40px; border-radius: 6px; padding: 0 16px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer;"
-        (click)="passoAtual = 1; cursoSelecionadoParaGerenciar = null">
+        (click)="iniciarNovoCadastroCurso()">
         <mat-icon style="font-size: 20px; width: 20px; height: 20px;">add_to_photos</mat-icon> Criar Novo Treinamento
       </button>
+
       } @else {
       <button mat-stroked-button
         style="color: var(--text-brand); border-color: var(--text-brand); font-weight: 700; height: 40px; border-radius: 6px; padding: 0 16px; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; background: transparent;"
@@ -179,11 +180,10 @@
         </div>
       </div>
 
-
       @if (modoVisualizacaoCatalogo === 'cards') {
       <div
         style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; width: 100%; padding: 4px; box-sizing: border-box;">
-        @for (curso of cursosGerenciaisExibidos; track curso.id || $index) {
+        @for (curso of cursosGerenciaisExibidos; track curso) {
         <mat-card
           style="border-radius: 8px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow) !important; display: flex; flex-direction: column; justify-content: space-between; background: var(--bg-card); min-height: 240px; box-sizing: border-box; overflow: hidden;">
 
@@ -191,14 +191,16 @@
           <div
             style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-subtle);">
             <span
-              [style.background-color]="curso?.statusCiclo === 'PUBLICADO' ? 'rgba(16, 185, 129, 0.15)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'rgba(245, 158, 11, 0.16)' : 'rgba(100, 116, 139, 0.15)')"
-              [style.color]="curso?.statusCiclo === 'PUBLICADO' ? '#10b981' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '#f59e0b' : 'var(--text-muted)')"
-              [style.border]="curso?.statusCiclo === 'PUBLICADO' ? '1px solid rgba(16, 185, 129, 0.35)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)')"
+              [style.background-color]="curso?.statusCiclo === 'PUBLICADO' ? 'rgba(16, 185, 129, 0.15)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'rgba(245, 158, 11, 0.16)' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.15)'))"
+              [style.color]="curso?.statusCiclo === 'PUBLICADO' ? '#10b981' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '#f59e0b' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? '#ef4444' : 'var(--text-muted)'))"
+              [style.border]="curso?.statusCiclo === 'PUBLICADO' ? '1px solid rgba(16, 185, 129, 0.35)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '1px solid rgba(245, 158, 11, 0.4)' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)'))"
               style="padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0.2px;">
               <mat-icon style="font-size: 14px; width: 14px; height: 14px;">
-                {{ curso?.statusCiclo === 'PUBLICADO' ? 'verified' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'hourglass_top' : 'edit_note') }}
+                {{ curso?.statusCiclo === 'PUBLICADO' ? 'verified' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ?
+                'hourglass_top' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'warning_amber' : 'edit_note')) }}
               </mat-icon>
-              {{ curso?.statusCiclo === 'PUBLICADO' ? 'Publicado' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'Em Homologação' : 'Rascunho') }}
+              {{ curso?.statusCiclo === 'PUBLICADO' ? 'Publicado' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'Em
+              Homologação' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'Ajustes Solicitados' : 'Rascunho')) }}
             </span>
 
             <span [style.background-color]="curso?.obrigatorio ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-card)'"
@@ -218,14 +220,26 @@
 
           <mat-card-content
             style="padding: 12px 16px !important; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-            <p
-              style="color: var(--text-muted); font-size: 13px; line-height: 1.4; margin: 0 0 16px 0; word-break: break-word;">
-              {{ curso?.descricao || 'Nenhuma descrição detalhada inserida para este treinamento corporativo.' }}
-            </p>
+            <div>
+              <p
+                style="color: var(--text-muted); font-size: 13px; line-height: 1.4; margin: 0 0 12px 0; word-break: break-word;">
+                {{ curso?.descricao || 'Nenhuma descrição detalhada inserida para este treinamento corporativo.' }}
+              </p>
+
+              @if (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' && curso?.parecer_curadoria) {
+              <div
+                style="margin-bottom: 12px; padding: 10px 12px; border-radius: 6px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 12px; line-height: 1.4; word-break: break-word;">
+                <strong>⚠️ Parecer da Curadoria:</strong> {{ curso.parecer_curadoria }}
+              </div>
+              }
+            </div>
+
             <div
               style="display: flex; justify-content: space-between; background: var(--bg-subtle); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 12px; color: var(--text-secondary); font-weight: 600; gap: 8px; flex-wrap: wrap;">
-              <span>📂 Módulos: <strong style="color: var(--text-primary);">{{ curso?.totalModulos || 0 }}</strong></span>
-              <span>⏱ CH: <strong style="color: var(--text-primary);">{{ curso?.carga_horaria || curso?.cargaHoraria || 0 }}h</strong></span>
+              <span>📂 Módulos: <strong style="color: var(--text-primary);">{{ curso?.totalModulos || 0
+                  }}</strong></span>
+              <span>⏱ CH: <strong style="color: var(--text-primary);">{{ curso?.carga_horaria || curso?.cargaHoraria ||
+                  0 }}h</strong></span>
             </div>
           </mat-card-content>
 
@@ -240,16 +254,15 @@
             </button>
 
             <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                  @if (curso?.statusCiclo === 'EM_HOMOLOGACAO' && podePublicarCurso()) {
-                  <button mat-flat-button
-                    style="background-color: #f59e0b !important; color: #ffffff; font-size: 12px; height: 34px; padding: 0 12px; border-radius: 4px; font-weight: 700;"
-                    [routerLink]="['/admin/homologar', curso.id]">
-                    <mat-icon
-                      style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">fact_check</mat-icon>
-                    Analisar & Homologar
-                  </button>
-                  }
-
+              @if (curso?.statusCiclo === 'EM_HOMOLOGACAO' && podePublicarCurso()) {
+              <button mat-flat-button
+                style="background-color: #f59e0b !important; color: #ffffff; font-size: 12px; height: 34px; padding: 0 12px; border-radius: 4px; font-weight: 700;"
+                [routerLink]="['/admin/homologar', curso.id]">
+                <mat-icon
+                  style="margin-right: 4px; font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">fact_check</mat-icon>
+                Analisar & Homologar
+              </button>
+              }
 
               <button mat-flat-button
                 style="background-color: var(--brand-primary) !important; color: #ffffff; font-size: 12px; height: 34px; padding: 0 12px; border-radius: 4px; font-weight: 600;"
@@ -292,7 +305,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (curso of cursosGerenciaisExibidos; track curso.id || $index) {
+            @for (curso of cursosGerenciaisExibidos; track curso) {
             <tr style="border-bottom: 1px solid var(--border-color);">
               <td style="padding: 14px 16px; max-width: 340px;">
                 <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">
@@ -302,17 +315,25 @@
                   style="font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                   {{ curso?.descricao || 'Sem descrição detalhada.' }}
                 </div>
+                @if (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' && curso?.parecer_curadoria) {
+                <div
+                  style="margin-top: 6px; padding: 6px 8px; border-radius: 4px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 11px; line-height: 1.35; white-space: normal;">
+                  <strong>⚠️ Parecer:</strong> {{ curso.parecer_curadoria }}
+                </div>
+                }
               </td>
               <td style="padding: 14px 12px; white-space: nowrap;">
                 <span
-                  [style.background-color]="curso?.statusCiclo === 'PUBLICADO' ? 'rgba(16, 185, 129, 0.15)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'rgba(245, 158, 11, 0.16)' : 'rgba(100, 116, 139, 0.15)')"
-                  [style.color]="curso?.statusCiclo === 'PUBLICADO' ? '#10b981' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '#f59e0b' : 'var(--text-muted)')"
-                  [style.border]="curso?.statusCiclo === 'PUBLICADO' ? '1px solid rgba(16, 185, 129, 0.35)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-color)')"
+                  [style.background-color]="curso?.statusCiclo === 'PUBLICADO' ? 'rgba(16, 185, 129, 0.15)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'rgba(245, 158, 11, 0.16)' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 116, 139, 0.15)'))"
+                  [style.color]="curso?.statusCiclo === 'PUBLICADO' ? '#10b981' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '#f59e0b' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? '#ef4444' : 'var(--text-muted)'))"
+                  [style.border]="curso?.statusCiclo === 'PUBLICADO' ? '1px solid rgba(16, 185, 129, 0.35)' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? '1px solid rgba(245, 158, 11, 0.4)' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)'))"
                   style="padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                   <mat-icon style="font-size: 14px; width: 14px; height: 14px;">
-                    {{ curso?.statusCiclo === 'PUBLICADO' ? 'verified' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'hourglass_top' : 'edit_note') }}
+                    {{ curso?.statusCiclo === 'PUBLICADO' ? 'verified' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ?
+                    'hourglass_top' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'warning_amber' : 'edit_note')) }}
                   </mat-icon>
-                  {{ curso?.statusCiclo === 'PUBLICADO' ? 'Publicado' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'Em Homologação' : 'Rascunho') }}
+                  {{ curso?.statusCiclo === 'PUBLICADO' ? 'Publicado' : (curso?.statusCiclo === 'EM_HOMOLOGACAO' ? 'Em
+                  Homologação' : (curso?.statusCiclo === 'AJUSTES_SOLICITADOS' ? 'Ajustes Solicitados' : 'Rascunho')) }}
                 </span>
               </td>
               <td style="padding: 14px 12px; white-space: nowrap;">
@@ -351,7 +372,6 @@
                   </button>
                   }
 
-
                   <button mat-flat-button
                     style="background-color: var(--brand-primary) !important; color: #ffffff; font-size: 12px; height: 32px; padding: 0 12px; border-radius: 4px; font-weight: 600;"
                     (click)="selecionarCursoParaGerenciar(curso)">
@@ -366,11 +386,6 @@
         </table>
       </div>
       }
-
-
-
-
-      
 
       @if (totalPaginasAdmin > 1) {
       <div
@@ -395,6 +410,15 @@
     }
 
     @if (passoAtual > 0) {
+
+    @if (cursoSelecionadoParaGerenciar?.statusCiclo === 'AJUSTES_SOLICITADOS' &&
+    cursoSelecionadoParaGerenciar?.parecer_curadoria) {
+    <div
+      style="margin-bottom: 20px; padding: 14px 16px; border-radius: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 13px; line-height: 1.45;">
+      <strong>⚠️ Apontamentos da Curadoria:</strong> {{ cursoSelecionadoParaGerenciar.parecer_curadoria }}
+    </div>
+    }
+
     <mat-card
       style="border-radius: 16px; border: 1px solid var(--border-color); padding: 28px; background: var(--bg-card); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02) !important; box-sizing: border-box; width: 100%; transition: all 0.3s ease;">
       <div
@@ -466,11 +490,11 @@
       @if (passoAtual === 1) {
       <div style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease;">
         <div>
-          <h3 style="color: var(--text-brand); font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Dados Básicos do
-            Treinamento
+          <h3 style="color: var(--text-brand); font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">
+            {{ idCursoCriado ? 'Editar Dados Básicos do Treinamento' : 'Dados Básicos do Treinamento' }}
           </h3>
-          <p style="margin: 0; color: #64748b; font-size: 13px;">Insira as informações de cabeçalho corporativo
-            regulamentar.</p>
+          <p style="margin: 0; color: #64748b; font-size: 13px;">Insira ou atualize as informações de cabeçalho
+            corporativo regulamentar.</p>
         </div>
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
           <mat-label>Título do Curso</mat-label>
@@ -491,51 +515,92 @@
             style="font-weight: 600; color: var(--text-primary);">
             Treinamento Obrigatório (Ativa auditoria compulsória de conformidade)
           </mat-checkbox>
-
         </div>
-        <div style="text-align: right; margin-top: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+        <div style="text-align: right; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 16px;">
           <button mat-flat-button
             style="background-color: var(--text-brand) !important; color: white; height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;"
             [disabled]="!curso.titulo.trim()" (click)="salvarCursoBase()">
-            Salvar e Configurar Módulos
+            {{ idCursoCriado ? 'Atualizar e Ir para Módulos' : 'Salvar e Configurar Módulos' }}
           </button>
         </div>
       </div>
       }
+
+
       @if (passoAtual === 2) {
       <div style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease;">
         <div>
           <h3 style="color: var(--text-brand); font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Estruturação de
-            Capítulos /
-            Módulos</h3>
-          <p style="margin: 0; color: #64748b; font-size: 13px;">Crie os blocos temáticos de ensino para organizar o
-            conteúdo programático.</p>
+            Capítulos / Módulos</h3>
+          <p style="margin: 0; color: #64748b; font-size: 13px;">Selecione um módulo existente para editar ou crie um
+            novo bloco temático.</p>
         </div>
+
+        @if (modulosDoCursoEdicao.length > 0) {
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px; background: var(--bg-subtle); border-radius: 8px; border: 1px solid var(--border-color);">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Módulos:</span>
+          @for (mod of modulosDoCursoEdicao; track mod.id) {
+          <button type="button" (click)="selecionarModuloParaEditar(mod)"
+            [style.background-color]="idModuloCriado === mod.id && editandoModuloExistente ? 'var(--brand-primary)' : 'var(--bg-card)'"
+            [style.color]="idModuloCriado === mod.id && editandoModuloExistente ? '#ffffff' : 'var(--text-primary)'"
+            style="border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;">
+            {{ mod.ordem }}. {{ mod.titulo }}
+          </button>
+          }
+          <button type="button" (click)="prepararNovoModuloNoCurso()"
+            style="border: 1px dashed var(--text-brand); color: var(--text-brand); background: transparent; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer;">
+            + Novo Módulo
+          </button>
+        </div>
+        }
+
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
           <mat-label>Nome do Módulo</mat-label>
           <input matInput [(ngModel)]="modulo.titulo" placeholder="Ex: Módulo 1 - Riscos Biológicos e Biossegurança">
         </mat-form-field>
+
         <div
-          style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+          style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px;">
           <button mat-button style="color: #64748b; font-weight: 600; height: 40px;"
             (click)="passoAtual = 1">Voltar</button>
           <button mat-flat-button
             style="background-color: var(--text-brand) !important; color: white; height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;"
             [disabled]="!modulo.titulo.trim()" (click)="salvarModulo()">
-            Salvar e Adicionar Aulas
+            {{ editandoModuloExistente ? 'Atualizar Módulo e Ir para Aulas' : 'Salvar e Adicionar Aulas' }}
           </button>
         </div>
       </div>
       }
+
+
       @if (passoAtual === 3) {
       <div style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease;">
         <div>
           <h3 style="color: var(--text-brand); font-weight: 700; margin: 0 0 4px 0; font-size: 16px;">Injeção de Aulas &
             Conteúdo Digital</h3>
           <p style="margin: 0; color: var(--text-muted); font-size: 13px;">Anexe os vídeos e as diretrizes técnicas das
-            aulas que
-            compõem este módulo.</p>
+            aulas que compõem este módulo.</p>
         </div>
+
+        @if (aulasDoModuloEdicao.length > 0) {
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px; background: var(--bg-subtle); border-radius: 8px; border: 1px solid var(--border-color);">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Aulas:</span>
+          @for (itemAula of aulasDoModuloEdicao; track itemAula.id) {
+          <button type="button" (click)="selecionarAulaParaEditar(itemAula)"
+            [style.background-color]="idAulaCriada === itemAula.id && editandoAulaExistente ? 'var(--brand-primary)' : 'var(--bg-card)'"
+            [style.color]="idAulaCriada === itemAula.id && editandoAulaExistente ? '#ffffff' : 'var(--text-primary)'"
+            style="border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;">
+            Aula {{ itemAula.ordem }}: {{ itemAula.titulo }}
+          </button>
+          }
+          <button type="button" (click)="prepararNovaAulaNoModulo()"
+            style="border: 1px dashed var(--text-brand); color: var(--text-brand); background: transparent; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer;">
+            + Nova Aula
+          </button>
+        </div>
+        }
 
         <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
           <mat-label>Título da Aula</mat-label>
@@ -560,15 +625,16 @@
             <mat-icon
               style="color: var(--text-brand); font-size: 20px; width: 20px; height: 20px;">format_list_numbered</mat-icon>
             <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">
-              Esta videoaula será registrada na posição de ordem número <strong style="color: var(--text-brand);">{{
+              Esta videoaula está na posição de ordem número <strong style="color: var(--text-brand);">{{
                 aula.ordem }}</strong>.
             </span>
           </div>
 
           <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;"
-            [style.background-color]="aula.ordem > 1 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'"
-            [style.color]="aula.ordem > 1 ? '#10b981' : '#f59e0b'">
-            {{ aula.ordem > 1 ? (aula.ordem - 1) + ' aula(s) gravada(s)' : 'Nenhuma aula gravada ainda' }}
+            [style.background-color]="aulasDoModuloEdicao.length > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)'"
+            [style.color]="aulasDoModuloEdicao.length > 0 ? '#10b981' : '#f59e0b'">
+            {{ aulasDoModuloEdicao.length > 0 ? aulasDoModuloEdicao.length + ' aula(s) gravada(s)' : 'Nenhuma aula
+            gravada ainda' }}
           </span>
         </div>
 
@@ -578,26 +644,42 @@
             (click)="passoAtual = 2">Voltar</button>
 
           <button mat-stroked-button
-            [style.color]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim() ? 'var(--text-muted)' : 'var(--text-brand)'"
-            [style.border-color]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim() ? 'var(--border-color)' : 'var(--text-brand)'"
+            [style.color]="!aula.titulo.trim() || !aula.videoUrl.trim() ? 'var(--text-muted)' : 'var(--text-brand)'"
+            [style.border-color]="!aula.titulo.trim() || !aula.videoUrl.trim() ? 'var(--border-color)' : 'var(--text-brand)'"
             style="height: 40px; font-weight: 600; padding: 0 16px; border-radius: 6px;"
-            [disabled]="!aula.titulo.trim() || !aula.videoUrl.trim() || !aula.descricao.trim()" (click)="salvarAula()">
-            + Gravar e Add Outra Aula
+            [disabled]="!aula.titulo.trim() || !aula.videoUrl.trim()" (click)="salvarAula()">
+            {{ editandoAulaExistente ? 'Salvar Alterações da Aula' : '+ Gravar e Add Outra Aula' }}
           </button>
 
           <button mat-flat-button
-            [style.background-color]="aula.ordem <= 1 ? 'var(--bg-subtle)' : 'var(--brand-primary)'"
-            [style.color]="aula.ordem <= 1 ? 'var(--text-muted)' : '#ffffff'"
-            [style.border]="aula.ordem <= 1 ? '1px solid var(--border-color)' : 'none'"
-            style="height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;" [disabled]="aula.ordem <= 1"
-            (click)="passoAtual = 4">
+            [style.background-color]="aulasDoModuloEdicao.length === 0 && !idAulaCriada ? 'var(--bg-subtle)' : 'var(--brand-primary)'"
+            [style.color]="aulasDoModuloEdicao.length === 0 && !idAulaCriada ? 'var(--text-muted)' : '#ffffff'"
+            style="height: 40px; font-weight: 600; padding: 0 20px; border-radius: 6px;"
+            [disabled]="aulasDoModuloEdicao.length === 0 && !idAulaCriada" (click)="irParaPassoAvaliacao()">
             Avançar para Avaliação
           </button>
+
         </div>
       </div>
       }
 
       @if (passoAtual === 4) {
+
+      @if (aulasDoModuloEdicao.length > 0) {
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; padding: 12px; background: var(--bg-subtle); border-radius: 8px; border: 1px solid var(--border-color);">
+        <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Avaliação da Aula:</span>
+        @for (itemAula of aulasDoModuloEdicao; track itemAula.id) {
+        <button type="button" (click)="selecionarAulaParaEditar(itemAula)"
+          [style.background-color]="idAulaCriada === itemAula.id ? 'var(--brand-primary)' : 'var(--bg-card)'"
+          [style.color]="idAulaCriada === itemAula.id ? '#ffffff' : 'var(--text-primary)'"
+          style="border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;">
+          Aula {{ itemAula.ordem }}: {{ itemAula.titulo }}
+        </button>
+        }
+      </div>
+      }
+
       <div
         style="display: flex; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; width: 100%; box-sizing: border-box;">
         <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%; box-sizing: border-box; margin-top: 4px;">
@@ -617,7 +699,9 @@
           style="background: var(--bg-subtle); border: 1px dashed var(--border-color); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box;">
           <h4
             style="color: var(--text-brand); font-weight: 700; margin: 0 0 2px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
-            Injetar Nova Questão Manualmente</h4>
+            {{ indiceQuestaoEmEdicao !== null ? 'Editando Questão #' + (indiceQuestaoEmEdicao + 1) : 'Injetar Nova
+            Questão Manualmente' }}
+          </h4>
           <mat-form-field appearance="outline" style="width: 100%;" class="compact-form">
             <mat-label>Enunciado da Pergunta</mat-label>
             <input matInput [(ngModel)]="novaQuestao.enunciado"
@@ -662,9 +746,11 @@
               style="color: var(--text-brand); border-color: var(--text-brand); height: 36px; font-weight: 600; border-radius: 6px;"
               [disabled]="!novaQuestao.enunciado.trim() || !novaQuestao.respostaCorreta"
               (click)="adicionarQuestaoMemoria()">
-              <mat-icon
-                style="font-size: 18px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;">add</mat-icon>
-              Inserir na Esteira
+              <mat-icon style="font-size: 18px; width: 18px; height: 18px; vertical-align: middle;">
+                {{ indiceQuestaoEmEdicao !== null ? 'check' : 'add' }}
+              </mat-icon>
+              {{ indiceQuestaoEmEdicao !== null ? 'Atualizar Questão #' + (indiceQuestaoEmEdicao + 1) : 'Inserir na
+              Esteira' }}
             </button>
           </div>
         </div>
@@ -675,6 +761,36 @@
           <span style="font-size: 13px; color: #10b981; font-weight: 600;">Questões prontas para gravação na esteira:
             <strong>{{ perguntasQuiz.length }}</strong> pergunta(s).</span>
         </div>
+
+
+        @if (perguntasQuiz.length > 0) {
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+          @for (q of perguntasQuiz; track q; let idx = $index) {
+          <div
+            style="padding: 12px 16px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                Questão {{ idx + 1 }}: {{ q.enunciado }}
+              </div>
+              <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                A) {{ q.alternativaA }} • B) {{ q.alternativaB }} • C) {{ q.alternativaC }} • D) {{ q.alternativaD }}
+                <strong style="color: #10b981; margin-left: 8px;">(Gabarito: {{ q.respostaCorreta }})</strong>
+              </div>
+            </div>
+            <div style="display: inline-flex; gap: 4px; flex-shrink: 0;">
+              <button mat-icon-button type="button" (click)="editarQuestaoExistente(idx)" title="Editar esta questão"
+                style="color: var(--text-brand);">
+                <mat-icon style="font-size: 19px; width: 19px; height: 19px;">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="removerQuestaoMemoria(idx)" title="Remover esta questão"
+                style="color: #ef4444;">
+                <mat-icon style="font-size: 19px; width: 19px; height: 19px;">delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+        }
 
         <div
           style="text-align: right; margin-top: 12px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px; width: 100%; box-sizing: border-box;">
@@ -688,6 +804,7 @@
         </div>
       </div>
       }
+
 
       @if (passoAtual === 5) {
       <div style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
@@ -780,6 +897,7 @@
           </button>
         </div>
 
+
         <div style="margin-top: 12px; width: 100%;">
           <h4
             style="color: var(--text-brand); font-weight: 700; margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.3px;">
@@ -787,7 +905,8 @@
           </h4>
 
           <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-            @for (vinculo of listaVinculosAtivos; track vinculo.id || $index) {
+
+            @for (vinculo of listaVinculosAtivos; track vinculo) {
             <div
               style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid var(--text-brand); border-radius: 8px; box-sizing: border-box; width: 100%; gap: 12px; box-shadow: var(--card-shadow); animation: fadeIn 0.2s ease;">
               <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
@@ -826,8 +945,7 @@
           style="text-align: right; margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px; width: 100%;">
           <button mat-button style="color: var(--text-muted); font-weight: 600; height: 38px;"
             (click)="passoAtual = 4">Voltar</button>
-          <button mat-flat-button
-            [style.background-color]="podePublicarCurso() ? '#10b981' : '#f59e0b'"
+          <button mat-flat-button [style.background-color]="podePublicarCurso() ? '#10b981' : '#f59e0b'"
             style="color: white; font-weight: 700; height: 38px; padding: 0 20px; border-radius: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);"
             (click)="finalizarEsteiraTreinamento()">
             {{ podePublicarCurso() ? 'Aprovar e Publicar Curso' : 'Enviar para Análise da Curadoria' }}
@@ -839,9 +957,12 @@
 
     </mat-card>
     }
+
+
+
   </div>
   }
-  
+
   @if (abaAtiva === 'comunicados') {
   <div style="width: 100%; box-sizing: border-box; animation: fadeIn 0.3s ease;">
     <app-comunicados></app-comunicados>

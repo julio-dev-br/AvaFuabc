@@ -54,4 +54,9 @@ export class QuizService {
     return this.http.post<any>(urlComToken, payload, { headers: this.getHeaders() });
   }
 
+    obterQuizParaEdicao(aulaId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/aula/${aulaId}`, { headers: this.getHeaders() });
+  }
+
+
 }

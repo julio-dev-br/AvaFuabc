@@ -173,6 +173,13 @@ export class AdminDashboardComponent implements OnInit {
   isLoadingCursos = false;
   cursoSelecionadoParaGerenciar: any = null;
 
+  modulosDoCursoEdicao: any[] = [];
+  aulasDoModuloEdicao: any[] = [];
+  editandoModuloExistente = false;
+  editandoAulaExistente = false;
+  indiceQuestaoEmEdicao: number | null = null;
+
+
   filtroTextoAdmin: string = '';
   paginaAtualAdmin: number = 1;
   itensPorPaginaAdmin: number = 5;
@@ -360,6 +367,7 @@ export class AdminDashboardComponent implements OnInit {
 
     return filtrados.slice(inicio, fim);
   }
+  
   get totalPaginasAdmin(): number {
     const busca = this.filtroTextoAdmin.toLowerCase().trim();
     const filtrados = this.listaCursosGerencial.filter(curso =>
@@ -412,13 +420,6 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  selecionarCursoParaGerenciar(curso: any): void {
-    this.cursoSelecionadoParaGerenciar = curso;
-    this.idCursoCriado = Number(curso.id);
-    this.curso.titulo = curso.titulo;
-    this.passoAtual = 2;
-  }
-
   carregarDadosBI(): void {
     this.isLoadingMetrics = true;
 
@@ -461,39 +462,7 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  salvarCursoBase(): void {
-    if (!this.curso.titulo.trim()) return;
-    const payload = { titulo: this.curso.titulo, descricao: this.curso.descricao, carga_horaria: this.curso.cargaHoraria, obrigatorio: this.curso.obrigatorio };
-    this.treinamentoService.criarTreinamento(payload).subscribe({
-      next: (res) => {
-        this.idCursoCriado = res.id;
-        this.alerts.sucesso('Treinamento base criado com sucesso!');
-        this.passoAtual = 2;
-      },
-      error: (err: HttpErrorResponse) => this.tratarErro(err)
-    });
-  }
-
-  salvarModulo(): void {
-    if (!this.modulo.titulo.trim() || !this.idCursoCriado) return;
-
-    const payload = {
-      treinamentoId: Number(this.idCursoCriado),
-      titulo: this.modulo.titulo,
-      ordem: Number(this.modulo.ordem)
-    };
-
-    this.treinamentoService.adicionarModulo(payload).subscribe({
-      next: (res) => {
-        this.idModuloCriado = res.id;
-        this.alerts.sucesso('Módulo de ensino registrado com sucesso!');
-        this.passoAtual = 3;
-      },
-      error: (err: HttpErrorResponse) => this.tratarErro(err)
-    });
-  }
-
-  formatarLinkYouTube(url: string): string {
+ formatarLinkYouTube(url: string): string {
     if (!url || !url.trim()) return '';
     const urlCrua = url.trim();
 
@@ -505,6 +474,66 @@ export class AdminDashboardComponent implements OnInit {
       console.error('Erro na conversão automática da URL do YouTube:', error);
     }
     return urlCrua;
+  }
+
+  salvarAula(): void {
+    if (!this.aula.titulo.trim() || !this.aula.videoUrl.trim() || !this.idModuloCriado) return;
+    const urlPadronizada = this.formatarLinkYouTube(this.aula.videoUrl);
+
+    if (this.editandoAulaExistente && this.idAulaCriada) {
+      this.treinamentoService
+        .atualizarAula(this.idAulaCriada, {
+          titulo: this.aula.titulo,
+          videoUrl: urlPadronizada,
+          descricao: this.aula.descricao || '',
+          ordem: Number(this.aula.ordem),
+        })
+        .subscribe({
+          next: (res) => {
+            const aulaAtualizada = res?.data || res;
+            const idx = this.aulasDoModuloEdicao.findIndex((a) => Number(a.id) === Number(this.idAulaCriada));
+            if (idx >= 0) {
+              this.aulasDoModuloEdicao = this.aulasDoModuloEdicao.map((item, i) =>
+                i === idx ? { ...item, ...aulaAtualizada } : item
+              );
+            }
+            this.alerts.sucesso('Videoaula atualizada com sucesso!');
+          },
+          error: (err: HttpErrorResponse) => {
+            this.tratarErro(err);
+            this.alerts.erro(err.error?.message || 'Erro ao atualizar a videoaula.');
+          },
+        });
+      return;
+    }
+
+    const payload = {
+      moduloId: Number(this.idModuloCriado),
+      titulo: this.aula.titulo,
+      videoUrl: urlPadronizada,
+      descricao: this.aula.descricao || '',
+      ordem: Number(this.aula.ordem),
+    };
+
+    this.treinamentoService.adicionarAula(payload).subscribe({
+      next: (res) => {
+        const aulaCriada = res?.data || res;
+        this.idAulaCriada = Number(aulaCriada.id);
+        this.aulasDoModuloEdicao = [...this.aulasDoModuloEdicao, aulaCriada];
+        this.editandoAulaExistente = false;
+        this.aula = {
+          titulo: '',
+          videoUrl: '',
+          descricao: '',
+          ordem: this.aulasDoModuloEdicao.length + 1,
+        };
+        this.alerts.sucesso('Videoaula adicionada com sucesso na esteira do módulo!');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.tratarErro(err);
+        this.alerts.erro(err.error?.message || 'Erro ao gravar a videoaula.');
+      },
+    });
   }
 
   private chatDadosSub: any;
@@ -531,38 +560,264 @@ export class AdminDashboardComponent implements OnInit {
     return Number(localStorage.getItem('userId') || 0);
   }
 
+  iniciarNovoCadastroCurso(): void {
+    this.cursoSelecionadoParaGerenciar = null;
+    this.idCursoCriado = null;
+    this.idModuloCriado = null;
+    this.idAulaCriada = null;
+    this.modulosDoCursoEdicao = [];
+    this.aulasDoModuloEdicao = [];
+    this.editandoModuloExistente = false;
+    this.editandoAulaExistente = false;
+    this.indiceQuestaoEmEdicao = null;
+    this.curso = { titulo: '', descricao: '', cargaHoraria: 4, obrigatorio: false };
+    this.modulo = { titulo: '', ordem: 1 };
+    this.aula = { titulo: '', descricao: '', videoUrl: '', ordem: 1 };
+    this.quizTitulo = '';
+    this.quizNotaMinima = 7;
+    this.perguntasQuiz = [];
+    this.listaVinculosAtivos = [];
+    this.passoAtual = 1;
+  }
 
-  salvarAula(): void {
-    if (!this.aula.titulo.trim() || !this.aula.videoUrl.trim() || !this.idModuloCriado) return;
-    const urlPadronizada = this.formatarLinkYouTube(this.aula.videoUrl);
+  selecionarCursoParaGerenciar(cursoItem: any): void {
+    this.isLoadingCursos = true;
+    this.treinamentoService.obterConteudoCurso(Number(cursoItem.id)).subscribe({
+      next: (cursoCompleto) => {
+        this.cursoSelecionadoParaGerenciar = cursoCompleto;
+        this.idCursoCriado = Number(cursoCompleto.id);
+        this.curso = {
+          titulo: cursoCompleto.titulo || '',
+          descricao: cursoCompleto.descricao || '',
+          cargaHoraria: Number(cursoCompleto.carga_horaria || 4),
+          obrigatorio: Boolean(cursoCompleto.obrigatorio),
+        };
+
+        this.modulosDoCursoEdicao = cursoCompleto.modulos || [];
+        if (this.modulosDoCursoEdicao.length > 0) {
+          this.selecionarModuloParaEditar(this.modulosDoCursoEdicao[0]);
+        } else {
+          this.idModuloCriado = null;
+          this.editandoModuloExistente = false;
+          this.modulo = { titulo: '', ordem: 1 };
+          this.aulasDoModuloEdicao = [];
+          this.idAulaCriada = null;
+          this.editandoAulaExistente = false;
+          this.aula = { titulo: '', descricao: '', videoUrl: '', ordem: 1 };
+          this.perguntasQuiz = [];
+        }
+
+        this.carregarDadosOrigemProtheus();
+        this.listaVinculosAtivos = (cursoCompleto.publicos || []).map((v: any) => ({
+          id: v.id,
+          tipo: v.tipo,
+          referenciaId: v.referencia_id,
+          nome: this.obterNomeMock(v.tipo, v.referencia_id),
+        }));
+
+        this.passoAtual = 1;
+        this.isLoadingCursos = false;
+      },
+      error: (err) => {
+        this.isLoadingCursos = false;
+        this.tratarErro(err);
+        this.alerts.erro('Não foi possível carregar os dados completos deste curso para edição.');
+      },
+    });
+  }
+
+  selecionarModuloParaEditar(mod: any): void {
+    this.idModuloCriado = Number(mod.id);
+    this.editandoModuloExistente = true;
+    this.modulo = {
+      titulo: mod.titulo || '',
+      ordem: Number(mod.ordem || 1),
+    };
+    this.aulasDoModuloEdicao = mod.aulas || [];
+    if (this.aulasDoModuloEdicao.length > 0) {
+      this.selecionarAulaParaEditar(this.aulasDoModuloEdicao[0]);
+    } else {
+      this.prepararNovaAulaNoModulo();
+    }
+  }
+
+  prepararNovoModuloNoCurso(): void {
+    this.idModuloCriado = null;
+    this.editandoModuloExistente = false;
+    this.modulo = { titulo: '', ordem: this.modulosDoCursoEdicao.length + 1 };
+    this.aulasDoModuloEdicao = [];
+    this.prepararNovaAulaNoModulo();
+  }
+
+  selecionarAulaParaEditar(aulaItem: any): void {
+    this.idAulaCriada = Number(aulaItem.id);
+    this.editandoAulaExistente = true;
+    const urlLimpa = String(aulaItem.video_url || '').split('?')[0];
+    this.aula = {
+      titulo: aulaItem.titulo || '',
+      descricao: aulaItem.descricao || '',
+      videoUrl: urlLimpa,
+      ordem: Number(aulaItem.ordem || 1),
+    };
+    this.carregarQuizDaAulaParaEdicao(Number(aulaItem.id));
+  }
+
+
+  prepararNovaAulaNoModulo(): void {
+    this.idAulaCriada = null;
+    this.editandoAulaExistente = false;
+    this.aula = { titulo: '', descricao: '', videoUrl: '', ordem: this.aulasDoModuloEdicao.length + 1 };
+    this.quizTitulo = '';
+    this.quizNotaMinima = 7;
+    this.perguntasQuiz = [];
+    this.indiceQuestaoEmEdicao = null;
+  }
+
+  carregarQuizDaAulaParaEdicao(aulaId: number): void {
+    if (!aulaId) return;
+    this.quizService.obterQuizParaEdicao(Number(aulaId)).subscribe({
+      next: (res) => {
+        const quiz = Array.isArray(res) ? res : res;
+        if (quiz && Array.isArray(quiz.perguntas) && quiz.perguntas.length > 0) {
+          this.quizTitulo = quiz.titulo || '';
+          this.quizNotaMinima = Number(quiz.nota_minima || 7);
+          const letras = ['A', 'B', 'C', 'D'];
+          this.perguntasQuiz = quiz.perguntas.map((p: any) => {
+            const alts = p.alternativas || [];
+            const idxCorreta = alts.findIndex((a: any) => Boolean(a.correta));
+            return {
+              enunciado: p.pergunta || '',
+              alternativaA: alts?.descricao || '',
+              alternativaB: alts?.descricao || '',
+              alternativaC: alts?.descricao || '',
+              alternativaD: alts?.descricao || '',
+              respostaCorreta: idxCorreta >= 0 ? letras[idxCorreta] : 'A',
+            };
+          });
+        } else {
+          this.quizTitulo = '';
+          this.quizNotaMinima = 7;
+          this.perguntasQuiz = [];
+        }
+        this.indiceQuestaoEmEdicao = null;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar quiz da aula para edição:', err);
+        this.quizTitulo = '';
+        this.perguntasQuiz = [];
+      },
+    });
+  }
+
+
+  editarQuestaoExistente(index: number): void {
+    const q = this.perguntasQuiz[index];
+    if (!q) return;
+    this.indiceQuestaoEmEdicao = index;
+    this.novaQuestao = { ...q };
+  }
+
+  removerQuestaoMemoria(index: number): void {
+    this.perguntasQuiz.splice(index, 1);
+    if (this.indiceQuestaoEmEdicao === index) {
+      this.indiceQuestaoEmEdicao = null;
+      this.novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
+    }
+  }
+
+  salvarCursoBase(): void {
+    if (!this.curso.titulo.trim()) return;
     const payload = {
-      moduloId: Number(this.idModuloCriado),
-      titulo: this.aula.titulo,
-      videoUrl: urlPadronizada,
-      descricao: this.aula.descricao || '',
-      ordem: Number(this.aula.ordem)
+      titulo: this.curso.titulo,
+      descricao: this.curso.descricao,
+      carga_horaria: this.curso.cargaHoraria,
+      obrigatorio: this.curso.obrigatorio,
     };
 
-    this.treinamentoService.adicionarAula(payload).subscribe({
+    if (this.idCursoCriado) {
+      this.treinamentoService.atualizarTreinamento(this.idCursoCriado, payload).subscribe({
+        next: () => {
+          this.alerts.sucesso('Dados gerais do treinamento atualizados com sucesso!');
+          this.passoAtual = 2;
+        },
+        error: (err: HttpErrorResponse) => this.tratarErro(err),
+      });
+      return;
+    }
+
+    this.treinamentoService.criarTreinamento(payload).subscribe({
       next: (res) => {
-        this.idAulaCriada = res.id;
-        this.aula = {
-          titulo: '',
-          videoUrl: '',
-          descricao: '',
-          ordem: Number(payload.ordem) + 1
-        };
-        this.alerts.sucesso('Videoaula adicionada com sucesso na esteira do módulo!');
+        this.idCursoCriado = res.id;
+        this.alerts.sucesso('Treinamento base criado com sucesso!');
+        this.passoAtual = 2;
       },
-      error: (err: HttpErrorResponse) => this.tratarErro(err)
+      error: (err: HttpErrorResponse) => this.tratarErro(err),
     });
+  }
+
+  salvarModulo(): void {
+    if (!this.modulo.titulo.trim() || !this.idCursoCriado) return;
+
+    if (this.editandoModuloExistente && this.idModuloCriado) {
+      this.treinamentoService
+        .atualizarModulo(this.idModuloCriado, { titulo: this.modulo.titulo, ordem: Number(this.modulo.ordem) })
+        .subscribe({
+          next: (res) => {
+            const idx = this.modulosDoCursoEdicao.findIndex((m) => Number(m.id) === Number(this.idModuloCriado));
+            if (idx >= 0) this.modulosDoCursoEdicao[idx] = { ...this.modulosDoCursoEdicao[idx], ...res };
+            this.alerts.sucesso('Módulo atualizado com sucesso!');
+            this.passoAtual = 3;
+          },
+          error: (err: HttpErrorResponse) => this.tratarErro(err),
+        });
+      return;
+    }
+
+    const payload = {
+      treinamentoId: Number(this.idCursoCriado),
+      titulo: this.modulo.titulo,
+      ordem: Number(this.modulo.ordem),
+    };
+
+    this.treinamentoService.adicionarModulo(payload).subscribe({
+      next: (res) => {
+        this.idModuloCriado = Number(res.id);
+        this.editandoModuloExistente = true;
+        this.modulosDoCursoEdicao = [...this.modulosDoCursoEdicao, { ...res, aulas: [] }];
+        this.aulasDoModuloEdicao = [];
+        this.idAulaCriada = null;
+        this.editandoAulaExistente = false;
+        this.aula = { titulo: '', descricao: '', videoUrl: '', ordem: 1 };
+        this.alerts.sucesso('Módulo de ensino registrado com sucesso!');
+        this.passoAtual = 3;
+      },
+      error: (err: HttpErrorResponse) => this.tratarErro(err),
+    });
+
+
+
+  }
+
+  irParaPassoAvaliacao(): void {
+    if (!this.idAulaCriada && this.aulasDoModuloEdicao.length > 0) {
+      this.selecionarAulaParaEditar(this.aulasDoModuloEdicao);
+    } else if (this.idAulaCriada && this.perguntasQuiz.length === 0) {
+      this.carregarQuizDaAulaParaEdicao(this.idAulaCriada);
+    }
+    this.passoAtual = 4;
   }
 
   adicionarQuestaoMemoria(): void {
     if (!this.novaQuestao.enunciado.trim() || !this.novaQuestao.respostaCorreta) return;
-    this.perguntasQuiz.push({ ...this.novaQuestao });
+    if (this.indiceQuestaoEmEdicao !== null) {
+      this.perguntasQuiz[this.indiceQuestaoEmEdicao] = { ...this.novaQuestao };
+      this.indiceQuestaoEmEdicao = null;
+      this.alerts.sucesso('Questão atualizada com sucesso!');
+    } else {
+      this.perguntasQuiz.push({ ...this.novaQuestao });
+      this.alerts.sucesso('Questão adicionada ao banco temporário!');
+    }
     this.novaQuestao = { enunciado: '', alternativaA: '', alternativaB: '', alternativaC: '', alternativaD: '', respostaCorreta: '' };
-    this.alerts.sucesso('Questão adicionada ao banco temporário!');
   }
 
   salvarQuizCompleto(): void {
@@ -596,8 +851,6 @@ export class AdminDashboardComponent implements OnInit {
 
         this.quizTitulo = '';
         this.perguntasQuiz = [];
-
-        this.idAulaCriada = null;
 
         this.passoAtual = 5;
 
@@ -735,7 +988,6 @@ export class AdminDashboardComponent implements OnInit {
     return false;
   }
 
-
   finalizarEsteiraTreinamento(): void {
     if (!this.idCursoCriado) {
       this.alerts.erro('Erro: Nenhum identificador de curso localizado para publicação.');
@@ -756,12 +1008,11 @@ export class AdminDashboardComponent implements OnInit {
           : 'Treinamento enviado para análise da Curadoria! Ele será publicado após aprovação.');
 
         this.alerts.sucesso(msg);
-        this.carregarCatalogoGerencial();
-
-        this.passoAtual = 0;
+        this.cursoSelecionadoParaGerenciar = null;
         this.idCursoCriado = null;
         this.listaVinculosAtivos = [];
-        this.isLoadingCursos = false;
+        this.passoAtual = 0;
+        this.carregarCatalogoGerencial();
       },
       error: (err) => {
         this.isLoadingCursos = false;
@@ -788,8 +1039,6 @@ export class AdminDashboardComponent implements OnInit {
       },
     });
   }
-
-
 
   abrirModalMateriais(cursoId: number, cursoTitulo: string): void {
     this.dialog.open(ModalMateriaisComponent, {
@@ -918,7 +1167,6 @@ export class AdminDashboardComponent implements OnInit {
 
     this.novaMensagemTutorText = '';
   }
-
 
   private rolarChatParaOFinal(): void {
     setTimeout(() => {

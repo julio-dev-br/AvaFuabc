@@ -141,7 +141,29 @@ export class TreinamentoService {
   enviarTreinamentoParaRevisao(treinamentoId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admin/enviar-revisao/${treinamentoId}`, {}, { headers: this.obterHeaders() });
   }
-  
+
+  devolverTreinamentoParaAjustes(treinamentoId: number, parecer: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/admin/devolver-ajustes/${treinamentoId}`,
+      { parecer },
+      { headers: this.obterHeaders() }
+    );
+  }
+
+  atualizarTreinamento(id: number, payload: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/admin/${id}`, payload, { headers: this.obterHeaders() });
+  }
+
+  atualizarModulo(id: number, payload: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/admin/modulos/${id}`, payload, { headers: this.obterHeaders() });
+  }
+
+  atualizarAula(id: number, payload: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/admin/aulas/${id}`, payload, { headers: this.obterHeaders() });
+  }
+
+
+
   publicarTreinamentoComKanban(treinamentoId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/admin/publicar/${treinamentoId}`, {}, { headers: this.obterHeaders() });
   }

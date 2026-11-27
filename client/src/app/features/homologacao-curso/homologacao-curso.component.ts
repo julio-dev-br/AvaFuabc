@@ -15,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-homologacao-curso',
@@ -27,6 +28,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatIconModule,
     MatProgressBarModule,
     MatExpansionModule,
+    FormsModule
   ],
   templateUrl: './homologacao-curso.component.html',
 })
@@ -43,6 +45,10 @@ export class HomologacaoCursoComponent implements OnInit {
   quizzesPorAula: { [aulaId: number]: any } = {};
   isLoading = true;
   isPublicando = false;
+
+  exibirFormularioDevolucao = false;
+  parecerDevolucao = '';
+  isDevolvendo = false;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -116,6 +122,27 @@ export class HomologacaoCursoComponent implements OnInit {
   contarTotalAulas(): number {
     if (!this.curso?.modulos) return 0;
     return this.curso.modulos.reduce((total: number, m: any) => total + (m.aulas?.length || 0), 0);
+  }
+
+  devolverParaAjustes(): void {
+    if (!this.parecerDevolucao || this.parecerDevolucao.trim().length < 5) {
+      this.alerts.erro('Descreva o parecer técnico (mínimo 5 caracteres) para orientar os ajustes.');
+      return;
+    }
+
+    this.isDevolvendo = true;
+    this.treinamentoService.devolverTreinamentoParaAjustes(this.cursoId, this.parecerDevolucao.trim()).subscribe({
+      next: (res) => {
+        this.alerts.sucesso(res?.message || 'Treinamento devolvido ao Conteudista com parecer técnico!');
+        this.isDevolvendo = false;
+        this.router.navigate(['/admin/cadastro']);
+      },
+      error: (err) => {
+        this.isDevolvendo = false;
+        const msg = err.error?.message || 'Não foi possível devolver o treinamento para ajustes.';
+        this.alerts.erro(msg);
+      },
+    });
   }
 
   aprovarEPublicar(): void {

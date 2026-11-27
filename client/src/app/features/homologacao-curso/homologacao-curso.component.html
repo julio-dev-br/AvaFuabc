@@ -117,27 +117,58 @@
                     }
 
                     <!-- Materiais de Apoio da Aula -->
-                    @if (aula.materiais && aula.materiais.length > 0) {
+                    <!-- Materiais de Apoio da Aula (PDF / Link SharePoint) -->
                     <div
                         style="margin-bottom: 16px; padding: 12px 14px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color);">
                         <div
-                            style="font-size: 12px; font-weight: 700; color: var(--text-brand); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attach_file</mat-icon>
-                            Materiais de Apoio Anexados ({{ aula.materiais.length }})
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span
+                                style="font-size: 12px; font-weight: 700; color: var(--text-brand); display: inline-flex; align-items: center; gap: 6px;">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">attach_file</mat-icon>
+                                Materiais de Apoio & Referências ({{ aula.materiais?.length || 0 }})
+                            </span>
                         </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+
+                        @if (aula.materiais && aula.materiais.length > 0) {
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
                             @for (mat of aula.materiais; track mat.id) {
-                            <a mat-stroked-button [href]="configurarUrlMaterial(mat.url)" target="_blank"
-                                style="font-size: 12px; height: 34px; color: var(--text-brand); border-color: var(--text-brand);">
-                                <mat-icon style="margin-right: 4px; font-size: 16px; width: 16px; height: 16px;">
-                                    {{ mat.tipo === 'LINK' ? 'link' : 'file_download' }}
-                                </mat-icon>
-                                {{ mat.nome }}
-                            </a>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 12px; border-radius: 6px; background: var(--bg-subtle); border: 1px solid var(--border-color);">
+                                <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                    <span
+                                        [style.background-color]="mat.tipo === 'LINK' ? 'rgba(2, 132, 199, 0.14)' : 'rgba(239, 68, 68, 0.14)'"
+                                        [style.color]="mat.tipo === 'LINK' ? '#0284c7' : '#ef4444'"
+                                        style="padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">
+                                        {{ mat.tipo === 'LINK' ? '🔗 Link / SharePoint' : '📄 Arquivo PDF / Doc' }}
+                                    </span>
+                                    <span
+                                        style="font-size: 13px; font-weight: 600; color: var(--text-primary); word-break: break-word;">
+                                        {{ mat.nome }}
+                                    </span>
+                                </div>
+
+                                <a mat-stroked-button [href]="configurarUrlMaterial(mat.url)" target="_blank"
+                                    style="font-size: 12px; height: 32px; color: var(--text-brand); border-color: var(--text-brand); flex-shrink: 0;">
+                                    <mat-icon style="margin-right: 4px; font-size: 16px; width: 16px; height: 16px;">
+                                        {{ mat.tipo === 'LINK' ? 'open_in_new' : 'visibility' }}
+                                    </mat-icon>
+                                    {{ mat.tipo === 'LINK' ? 'Abrir Link' : 'Visualizar Arquivo' }}
+                                </a>
+                            </div>
                             }
                         </div>
+                        } @else {
+                        <div
+                            style="font-size: 12px; color: var(--text-muted); font-style: italic; display: flex; align-items: center; gap: 6px;">
+                            <mat-icon style="font-size: 15px; width: 15px; height: 15px;">info_outline</mat-icon>
+                            Nenhum PDF ou link externo (SharePoint) anexado a esta aula.
+                        </div>
+                        }
                     </div>
-                    }
+
+
+
+
                     <!-- Auditoria do Quiz e Gabarito Oficial -->
                     @if (quizzesPorAula[aula.id]; as quizAula) {
                     <div
@@ -201,31 +232,66 @@
 
     <!-- Card Final de Decisão da Curadoria -->
     <mat-card
-        style="border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--card-shadow); padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div>
-            <h4 style="margin: 0 0 2px 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">
-                Parecer Final da Curadoria
-            </h4>
-            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
-                Ao homologar, o treinamento será publicado imediatamente no portal e os colaboradores vinculados serão
-                matriculados.
-            </p>
+        style="border-radius: 14px; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: var(--card-shadow); padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h4 style="margin: 0 0 2px 0; font-size: 15px; font-weight: 700; color: var(--text-primary);">
+                    Parecer Final da Curadoria
+                </h4>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+                    Aprove para publicar imediatamente ou devolva ao Conteudista caso encontre pontos de melhoria.
+                </p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button mat-stroked-button routerLink="/admin/cadastro"
+                    style="height: 42px; padding: 0 18px; font-weight: 600; color: var(--text-secondary); border-color: var(--border-color); border-radius: 8px;">
+                    Cancelar
+                </button>
+
+                @if (!curso.ativo) {
+                <button mat-stroked-button (click)="exibirFormularioDevolucao = !exibirFormularioDevolucao"
+                    style="height: 42px; padding: 0 18px; font-weight: 700; color: #ef4444; border-color: rgba(239, 68, 68, 0.5); border-radius: 8px;">
+                    <mat-icon
+                        style="margin-right: 6px; font-size: 18px; width: 18px; height: 18px;">assignment_return</mat-icon>
+                    Devolver para Ajustes
+                </button>
+
+                <button mat-flat-button [disabled]="isPublicando || isDevolvendo" (click)="aprovarEPublicar()"
+                    style="background-color: #10b981 !important; color: #ffffff !important; height: 42px; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
+                    <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px;">verified</mat-icon>
+                    {{ isPublicando ? 'Homologando e Matriculando...' : 'Aprovar e Publicar Treinamento' }}
+                </button>
+                }
+            </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <button mat-stroked-button routerLink="/admin/cadastro"
-                style="height: 42px; padding: 0 18px; font-weight: 600; color: var(--text-secondary); border-color: var(--border-color); border-radius: 8px;">
-                Cancelar
-            </button>
-
-            @if (!curso.ativo) {
-            <button mat-flat-button [disabled]="isPublicando" (click)="aprovarEPublicar()"
-                style="background-color: #10b981 !important; color: #ffffff !important; height: 42px; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">
-                <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px;">verified</mat-icon>
-                {{ isPublicando ? 'Homologando e Matriculando...' : 'Aprovar e Publicar Treinamento' }}
-            </button>
-            }
+        <!-- Caixa de Parecer Técnico para Devolução -->
+        @if (exibirFormularioDevolucao) {
+        <div
+            style="padding: 16px; background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.2s ease;">
+            <label style="font-size: 13px; font-weight: 700; color: #ef4444;">
+                Apontamentos / Motivo da Devolução para o Conteudista:
+            </label>
+            <textarea rows="3" [(ngModel)]="parecerDevolucao"
+                placeholder="Ex: Revisar o vídeo da Aula 2 e ajustar o enunciado da Questão 3..."
+                style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: inherit; font-size: 13px; resize: vertical;">
+      </textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button mat-button (click)="exibirFormularioDevolucao = false"
+                    style="color: var(--text-muted); font-weight: 600;">
+                    Fechar
+                </button>
+                <button mat-flat-button [disabled]="isDevolvendo || parecerDevolucao.trim().length < 5"
+                    (click)="devolverParaAjustes()"
+                    style="background-color: #ef4444 !important; color: #ffffff !important; font-weight: 700; border-radius: 8px; padding: 0 20px; height: 38px;">
+                    <mat-icon style="margin-right: 6px; font-size: 18px; width: 18px; height: 18px;">send</mat-icon>
+                    {{ isDevolvendo ? 'Registrando Parecer...' : 'Confirmar Devolução' }}
+                </button>
+            </div>
         </div>
+        }
     </mat-card>
+
     }
 </div>
